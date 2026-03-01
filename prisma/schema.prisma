@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserType {
+  STUDENT
+  STAFF
+  PUBLIC
+}
+
+model User {
+  user_id      String    @id @default(uuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  identifier   String?   // NIM/NIP - nullable for PUBLIC users
+  userType     UserType
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  reservations Reservation[]
+}
+
+model Room {
+  room_id        String  @id @default(cuid())
+  room_name      String
+  room_building  String
+  room_locDetail String
+  room_capacity  Int
+  room_imageUrl  String?
+  room_isActive  Boolean @default(true)
+
+  // Relasi: Satu ruangan bisa ada di banyak reservasi
+  reservations Reservation[]
+}
+
+model Facility {
+  fac_id   String @id @default(cuid())
+  fac_name String
+  fac_qty  Int
+
+  // Relasi: Satu fasilitas bisa dipesan di banyak item reservasi
+  reservation_items ReservationItem[]
+}
+
+model Reservation {
+  res_id          String   @id @default(cuid())
+  res_date        DateTime @default(now())
+  res_startTime   DateTime
+  res_endTime     DateTime
+  res_purpose     String
+  res_status      String   @default("PENDING") // e.g., "PENDING", "APPROVED", "REJECTED"
+  res_documentUrl String?
+
+  // Tracking Admin/System processing
+  res_processedBy String?
+  res_processedAt DateTime?
+
+  // Foreign Keys
+  user_id String
+  user    User   @relation(fields: [user_id], references: [user_id])
+
+  room_id String
+  room    Room   @relation(fields: [room_id], references: [room_id])
+
+  // Relasi: Satu reservasi bisa meminjam banyak fasilitas tambahan
+  reservation_items ReservationItem[]
+}
+
+model ReservationItem {
+  // Primary key gabungan atau ID unik
+  id String @id @default(cuid())
+
+  res_id      String
+  reservation Reservation @relation(fields: [res_id], references: [res_id])
+
+  fac_id   String
+  facility Facility @relation(fields: [fac_id], references: [fac_id])
+
+  resItem_qty Int
+}
