@@ -18,57 +18,59 @@ function AuthContent() {
   };
 
   return (
-      <div className="min-h-screen w-full bg-[radial-gradient(1200px_circle_at_20%_10%,#dbeafe_0%,transparent_55%),radial-gradient(900px_circle_at_80%_30%,#bfdbfe_0%,transparent_60%),linear-gradient(135deg,#c7d2fe_0%,#93c5fd_40%,#60a5fa_100%)] px-4 py-10 flex items-center justify-center font-sans">      <div className="w-full max-w-6xl overflow-hidden rounded-[40px] bg-white/20 backdrop-blur-md ring-1 ring-white/20 shadow-[0_40px_120px_rgba(0,0,0,0.35)]">
-        <div className="w-full max-w-6xl overflow-hidden rounded-[44px] bg-white/25 backdrop-blur-xl ring-1 ring-white/40 shadow-[0_30px_100px_rgba(2,6,23,0.20)]">
-          <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* LEFT COLUMN */}
-            <div className="relative p-10 lg:p-14 text-slate-900 bg-white/10">
+      <div className="min-h-screen flex flex-col w-full bg-[radial-gradient(1200px_circle_at_20%_10%,#dbeafe_0%,transparent_55%),radial-gradient(900px_circle_at_80%_30%,#bfdbfe_0%,transparent_60%),linear-gradient(135deg,#c7d2fe_0%,#93c5fd_40%,#60a5fa_100%)] font-sans">
+        <div className="flex-1 flex items-center justify-center px-4 py-10">
+          <div className="w-full max-w-6xl overflow-hidden rounded-[44px] bg-white/25 backdrop-blur-xl ring-1 ring-white/40 shadow-[0_30px_100px_rgba(2,6,23,0.20)]">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              {/* LEFT COLUMN */}
+              <div className="relative p-10 lg:p-14 text-slate-900 bg-white/10">
 
-              <h1 className="mt-6 text-[40px] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900">
-                Bergabung dengan
-                <br />
-                Ekosistem Digital
-              </h1>
-              
-              <p className="mt-4 max-w-md text-slate-600 leading-relaxed">
-                Mulai perjalanan akademik Anda dengan akses terintegrasi ke seluruh layanan
-                digital Universitas Sam Ratulangi.
-              </p>
+                <h1 className="mt-6 text-[40px] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900">
+                  Bergabung dengan
+                  <br />
+                  Ekosistem Digital
+                </h1>
+                
+                <p className="mt-4 max-w-md text-slate-600 leading-relaxed">
+                  Mulai perjalanan akademik Anda dengan akses terintegrasi ke seluruh layanan
+                  digital Universitas Sam Ratulangi.
+                </p>
 
-            </div>
-
-            {/* RIGHT COLUMN */}
-            <div className="p-8 lg:p-12">
-              <div className="flex justify-center">
-                <div className="flex w-full items-center rounded-full bg-white/40 p-1 ring-1 ring-white/30">
-                  <button
-                    onClick={() => setTab("login")}
-                    className={[
-                      "flex-1 py-2 rounded-full text-sm font-semibold transition text-center",
-                      tab === "login"
-                        ? "bg-white text-slate-900 shadow"
-                        : "text-slate-700 hover:text-slate-900",
-                    ].join(" ")}
-                  >
-                    Masuk
-                  </button>
-
-                  <button
-                    onClick={() => setTab("register")}
-                    className={[
-                      "flex-1 py-2 rounded-full text-sm font-semibold transition text-center",
-                      tab === "register"
-                        ? "bg-white text-slate-900 shadow"
-                        : "text-slate-700 hover:text-slate-900",
-                    ].join(" ")}
-                    >
-                    Daftar
-                  </button>
-                </div>
               </div>
 
-              <div className="mt-8">
-                {tab === "login" ? <LoginView /> : <RegisterView />}
+              {/* RIGHT COLUMN */}
+              <div className="p-8 lg:p-12">
+                <div className="flex justify-center">
+                  <div className="flex w-full items-center rounded-full bg-white/40 p-1 ring-1 ring-white/30">
+                    <button
+                      onClick={() => setTab("login")}
+                      className={[
+                        "flex-1 py-2 rounded-full text-sm font-semibold transition text-center",
+                        tab === "login"
+                          ? "bg-white text-slate-900 shadow"
+                          : "text-slate-700 hover:text-slate-900",
+                      ].join(" ")}
+                    >
+                      Masuk
+                    </button>
+
+                    <button
+                      onClick={() => setTab("register")}
+                      className={[
+                        "flex-1 py-2 rounded-full text-sm font-semibold transition text-center",
+                        tab === "register"
+                          ? "bg-white text-slate-900 shadow"
+                          : "text-slate-700 hover:text-slate-900",
+                      ].join(" ")}
+                      >
+                      Daftar
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  {tab === "login" ? <LoginView /> : <RegisterView />}
+                </div>
               </div>
             </div>
           </div>
@@ -90,7 +92,6 @@ function AuthContent() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
