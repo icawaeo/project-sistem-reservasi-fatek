@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import LoginView from "./loginView";
 import RegisterView from "./registerView";
+import { motion, AnimatePresence } from "framer-motion";
 
 function AuthContent() {
   const params = useSearchParams();
@@ -24,71 +25,77 @@ function AuthContent() {
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* LEFT COLUMN */}
               <div className="relative p-10 lg:p-14 text-slate-900 bg-white/10">
-
                 <h1 className="mt-6 text-[40px] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900">
                   Bergabung dengan
                   <br />
                   Ekosistem Digital
                 </h1>
-                
                 <p className="mt-4 max-w-md text-slate-600 leading-relaxed">
                   Mulai perjalanan akademik Anda dengan akses terintegrasi ke seluruh layanan
                   digital Universitas Sam Ratulangi.
                 </p>
-
               </div>
 
               {/* RIGHT COLUMN */}
               <div className="p-8 lg:p-12">
                 <div className="flex justify-center">
-                  <div className="flex w-full items-center rounded-full bg-white/40 p-1 ring-1 ring-white/30">
+                  <div className="relative flex w-full items-center rounded-full bg-white/40 p-1 ring-1 ring-white/30">
+                    
+                    {/* Efek Slider Masuk/Daftar */}
+                    <motion.div
+                      className="absolute inset-y-1 left-1 rounded-full bg-white shadow-sm"
+                      initial={false}
+                      animate={{
+                        width: "calc(50% - 4px)",
+                        x: tab === "login" ? 0 : "100%",
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+
                     <button
                       onClick={() => setTab("login")}
-                      className={[
-                        "flex-1 py-2 rounded-full text-sm font-semibold transition text-center",
-                        tab === "login"
-                          ? "bg-white text-slate-900 shadow"
-                          : "text-slate-700 hover:text-slate-900",
-                      ].join(" ")}
+                      className={`relative z-10 flex-1 py-2 text-sm font-semibold transition-colors duration-300 text-center ${
+                        tab === "login" ? "text-slate-900" : "text-slate-600"
+                      }`}
                     >
                       Masuk
                     </button>
 
                     <button
                       onClick={() => setTab("register")}
-                      className={[
-                        "flex-1 py-2 rounded-full text-sm font-semibold transition text-center",
-                        tab === "register"
-                          ? "bg-white text-slate-900 shadow"
-                          : "text-slate-700 hover:text-slate-900",
-                      ].join(" ")}
-                      >
+                      className={`relative z-10 flex-1 py-2 text-sm font-semibold transition-colors duration-300 text-center ${
+                        tab === "register" ? "text-slate-900" : "text-slate-600"
+                      }`}
+                    >
                       Daftar
                     </button>
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  {tab === "login" ? <LoginView /> : <RegisterView />}
+                <div className="mt-8 relative overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={tab}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {tab === "login" ? <LoginView /> : <RegisterView />}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* footer */}
         <div className="px-8 py-6 text-center text-xs text-slate-700/80">
           © {new Date().getFullYear()} PUSAT TEKNOLOGI INFORMASI - UNIVERSITAS SAM RATULANGI MANADO
           <div className="mt-2 flex items-center justify-center gap-6">
-            <a className="hover:underline" href="#">
-              Syarat & Ketentuan
-            </a>
-            <a className="hover:underline" href="#">
-              Pusat Bantuan
-            </a>
-            <a className="hover:underline" href="#">
-              Kontak
-            </a>
+            <a className="hover:underline" href="#">Syarat & Ketentuan</a>
+            <a className="hover:underline" href="#">Pusat Bantuan</a>
+            <a className="hover:underline" href="#">Kontak</a>
           </div>
         </div>
       </div>
