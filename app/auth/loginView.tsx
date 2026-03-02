@@ -19,7 +19,7 @@ export default function LoginView() {
             <input
               type="email"
               placeholder="nama@student.unsrat.ac.id / nama@unsrat.ac.id"
-              className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+              className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
             />
           </div>
 
@@ -33,7 +33,7 @@ export default function LoginView() {
             <input
               type="password"
               placeholder="••••••••"
-              className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+              className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
             />
             <div className="mt-2 text-right">
               <button

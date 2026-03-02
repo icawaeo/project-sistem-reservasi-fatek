@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type AccountType = "CIVITAS" | "UMUM";
 
@@ -18,22 +19,24 @@ function AccordionHeader(props: {
       onClick={props.onClick}
       className="w-full flex items-center justify-between rounded-2xl bg-white/35 px-5 py-4 ring-1 ring-white/25"
     >
-      <div className="flex items-center gap-4 text-left">
-        <div className="h-10 w-10 rounded-full bg-slate-900/10 grid place-items-center ring-1 ring-white/25">
-            <span className="text-slate-900">{props.icon}</span>
+        <div className="flex items-center gap-4 text-left">
+            <div className="h-10 w-10 rounded-full bg-slate-900/10 grid place-items-center ring-1 ring-white/25">
+                <span className="text-slate-900">{props.icon}</span>
+            </div>
+            <div>
+                <div className="font-extrabold text-slate-900">{props.title}</div>
+                <div className="text-xs text-slate-700/80">{props.subtitle}</div>
+            </div>
         </div>
-        <div>
-          <div className="font-extrabold text-slate-900">{props.title}</div>
-          <div className="text-xs text-slate-700/80">{props.subtitle}</div>
+        <div className="text-slate-500 transition-transform duration-300">
+            {props.open ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </div>
-      </div>
-      <div className="text-slate-700/80">{props.open ? "˄" : "˅"}</div>
     </button>
   );
 }
 
 export default function RegisterView() {
-  const [accountType, setAccountType] = useState<AccountType>("CIVITAS");
+  const [accountType, setAccountType] = useState<AccountType | null>(null);
 
   const isCivitas = accountType === "CIVITAS";
 
@@ -55,12 +58,14 @@ export default function RegisterView() {
                 icon="🎓"
                 title="Civitas UNSRAT"
                 subtitle="Mahasiswa, Dosen, & Staf"
-                open={isCivitas}
-                onClick={() => setAccountType("CIVITAS")}
+                open={accountType === "CIVITAS"}
+                onClick={() => 
+                    setAccountType(accountType === "CIVITAS" ? null : "CIVITAS")
+                }
             />
 
-            {isCivitas && (
-                <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20">
+            {accountType === "CIVITAS" && (
+                <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20 transition-all duration-300 ease-in-out animate-[fadeIn_0.3s_ease-in-out]">
                 <form className="space-y-4">
                     <div>
                     <label className="text-xs font-bold tracking-wider text-slate-700">
@@ -68,7 +73,7 @@ export default function RegisterView() {
                     </label>
                     <input
                         placeholder="Nama lengkap sesuai identitas"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                     />
                     </div>
 
@@ -78,7 +83,7 @@ export default function RegisterView() {
                     </label>
                     <input
                         placeholder="Nomor Induk"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                     />
                     </div>
 
@@ -89,7 +94,7 @@ export default function RegisterView() {
                     <input
                         type="email"
                         placeholder="nama@student.unsrat.ac.id / nama@unsrat.ac.id"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900  "
                     />
                     </div>
 
@@ -101,7 +106,7 @@ export default function RegisterView() {
                         <input
                         type="password"
                         placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                         />
                     </div>
                     <div>
@@ -111,7 +116,7 @@ export default function RegisterView() {
                         <input
                         type="password"
                         placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                         />
                     </div>
                     </div>
@@ -142,12 +147,14 @@ export default function RegisterView() {
                 icon="🌐"
                 title="Umum"
                 subtitle="Alumni & Pengunjung Luar"
-                open={!isCivitas}
-                onClick={() => setAccountType("UMUM")}
+                open={accountType === "UMUM"}
+                onClick={() => 
+                    setAccountType(accountType === "UMUM" ? null : "UMUM")
+                }
             />
 
-            {!isCivitas && (
-                <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20">
+            {accountType === "UMUM" && (
+                <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20 transition-all duration-300 ease-in-out animate-[fadeIn_0.3s_ease-in-out]">
                 <form className="space-y-4">
                     <div>
                     <label className="text-xs font-bold tracking-wider text-slate-700">
@@ -155,7 +162,7 @@ export default function RegisterView() {
                     </label>
                     <input
                         placeholder="Nama lengkap"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                     />
                     </div>
 
@@ -166,7 +173,7 @@ export default function RegisterView() {
                     <input
                         type="email"
                         placeholder="nama@email.com"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                     />
                     </div>
 
@@ -178,7 +185,7 @@ export default function RegisterView() {
                         <input
                         type="password"
                         placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                         />
                     </div>
                     <div>
@@ -188,7 +195,7 @@ export default function RegisterView() {
                         <input
                         type="password"
                         placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
                         />
                     </div>
                     </div>
