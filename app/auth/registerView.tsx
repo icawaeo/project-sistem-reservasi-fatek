@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 
 type AccountType = "CIVITAS" | "UMUM";
 
@@ -41,8 +41,11 @@ export default function RegisterView() {
   const isCivitas = accountType === "CIVITAS";
 
   const emailLabel = useMemo(() => {
-    return isCivitas ? "EMAIL UNSRAT" : "EMAIL";
+    return isCivitas ? "ALAMAT EMAIL UNSRAT" : "ALAMAT EMAIL";
   }, [isCivitas]);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <div>
@@ -72,8 +75,8 @@ export default function RegisterView() {
                         NAMA LENGKAP
                     </label>
                     <input
-                        placeholder="Nama lengkap sesuai identitas"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
+                        placeholder="Masukkan nama lengkap Anda"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
                     </div>
 
@@ -82,8 +85,8 @@ export default function RegisterView() {
                         NIM / NIP
                     </label>
                     <input
-                        placeholder="Nomor Induk"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
+                        placeholder="Masukkan NIM/NIP Anda"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
                     </div>
 
@@ -93,8 +96,8 @@ export default function RegisterView() {
                     </label>
                     <input
                         type="email"
-                        placeholder="nama@student.unsrat.ac.id / nama@unsrat.ac.id"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900  "
+                        placeholder="Masukkan alamat email Anda"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
                     </div>
 
@@ -103,21 +106,39 @@ export default function RegisterView() {
                         <label className="text-xs font-bold tracking-wider text-slate-700">
                         KATA SANDI
                         </label>
-                        <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
-                        />
+                        <div className="relative mt-2">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Masukkan kata sandi"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-slate-500 hover:text-slate-900"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label className="text-xs font-bold tracking-wider text-slate-700">
                         KONFIRMASI
                         </label>
-                        <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
-                        />
+                        <div className="relative mt-2">
+                            <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Konfirmasi kata sandi"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-slate-500 hover:text-slate-900"
+                            >
+                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
                     </div>
 
@@ -161,19 +182,19 @@ export default function RegisterView() {
                         NAMA LENGKAP
                     </label>
                     <input
-                        placeholder="Nama lengkap"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
+                        placeholder="Masukkan nama lengkap Anda"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
                     </div>
 
                     <div>
                     <label className="text-xs font-bold tracking-wider text-slate-700">
-                        EMAIL
+                        ALAMAT EMAIL
                     </label>
                     <input
                         type="email"
-                        placeholder="nama@email.com"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
+                        placeholder="Masukkan alamat email Anda"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
                     </div>
 
@@ -182,21 +203,39 @@ export default function RegisterView() {
                         <label className="text-xs font-bold tracking-wider text-slate-700">
                         KATA SANDI
                         </label>
-                        <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
-                        />
+                        <div className="relative mt-2">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Masukkan kata sandi"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-slate-500 hover:text-slate-900"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label className="text-xs font-bold tracking-wider text-slate-700">
                         KONFIRMASI
                         </label>
-                        <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
-                        />
+                        <div className="relative mt-2">
+                            <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Konfirmasi kata sandi"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-slate-500 hover:text-slate-900"
+                            >
+                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
                     </div>
 

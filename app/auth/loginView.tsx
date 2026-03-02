@@ -14,11 +14,11 @@ export default function LoginView() {
         <form className="space-y-4">
           <div>
             <label className="text-xs font-bold tracking-wider text-slate-700">
-              EMAIL
+              ALAMAT EMAIL
             </label>
             <input
               type="email"
-              placeholder="nama@student.unsrat.ac.id / nama@unsrat.ac.id"
+              placeholder="Masukkan alamat email Anda"
               className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
             />
           </div>
@@ -32,7 +32,7 @@ export default function LoginView() {
             </div>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="Masukkan kata sandi Anda"
               className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900"
             />
             <div className="mt-2 text-right">
