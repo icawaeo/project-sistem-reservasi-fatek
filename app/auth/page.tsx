@@ -2,8 +2,8 @@
 
 import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import LoginView from "./loginView";
-import RegisterView from "./registerView";
+import LoginView from "../../components/auth/loginView";
+import RegisterView from "../../components/auth/registerView";
 import { motion, AnimatePresence } from "framer-motion";
 
 function AuthContent() {
