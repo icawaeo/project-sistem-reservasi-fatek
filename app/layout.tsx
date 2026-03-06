@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Assistant, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import NextAuthProvider from "@/components/providers/NextAuthProvider";
 
 const assistant = Assistant({
   variable: "--font-assistant",
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${assistant.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NextAuthProvider>
+          {children}
+        </NextAuthProvider>
       </body>
     </html>
   );

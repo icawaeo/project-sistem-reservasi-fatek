@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
+import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
@@ -17,10 +17,11 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email.toLowerCase() },
         });
 
         if (!user) {
+          console.log("LOGIN_DEBUG: User tidak ditemukan untuk email:", credentials.email);
           throw new Error("Email atau password salah");
         }
 
@@ -28,6 +29,8 @@ export const authOptions: NextAuthOptions = {
           credentials.password,
           user.passwordHash
         );
+
+        console.log("LOGIN_DEBUG: Apakah password valid?", isPasswordValid);
 
         if (!isPasswordValid) {
           throw new Error("Email atau password salah");

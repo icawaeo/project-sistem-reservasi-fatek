@@ -24,15 +24,15 @@ function AuthContent() {
           <div className="w-full max-w-6xl overflow-hidden rounded-[44px] bg-white/25 backdrop-blur-xl ring-1 ring-white/40 shadow-[0_30px_100px_rgba(2,6,23,0.20)]">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* LEFT COLUMN */}
-              <div className="relative p-10 lg:p-14 text-slate-900 bg-white/10">
+              <div className="relative p-10 lg:p-14 text-slate-900 bg-white/10 flex flex-col justify-center">
                 <h1 className="mt-6 text-[40px] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900">
-                  Bergabung dengan
+                  Reservasi Ruangan Fakultas Teknik
                   <br />
-                  Ekosistem Digital
+                  UNSRAT
                 </h1>
                 <p className="mt-4 max-w-md text-slate-600 leading-relaxed">
-                  Mulai perjalanan akademik Anda dengan akses terintegrasi ke seluruh layanan
-                  digital Universitas Sam Ratulangi.
+                  Lakukan pemesanan ruangan, cek ketersediaan jadwal, dan kelola penggunaan ruangan 
+                  Fakultas Teknik Universitas Sam Ratulangi secara online.
                 </p>
               </div>
 

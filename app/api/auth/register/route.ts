@@ -8,6 +8,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, password, confirmPassword, identifier } = body;
 
+    console.log("Registration attempt:", { name, email, userTypeIdentifier: identifier ? "provided" : "not provided" });
+
     // Validasi input
     if (!name || !email || !password || !confirmPassword) {
       return NextResponse.json(
@@ -78,7 +80,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: email.toLowerCase(),
         passwordHash,
         identifier: identifier || null,
         userType,
@@ -98,9 +100,17 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Register error:", errorMessage);
+    console.error("Full error:", error);
+    
     if (process.env.NODE_ENV === "development") {
-      console.error("Register error:", error instanceof Error ? error.message : "Unknown error");
+      return NextResponse.json(
+        { error: `Error: ${errorMessage}` },
+        { status: 500 }
+      );
     }
+    
     return NextResponse.json(
       { error: "Terjadi kesalahan saat registrasi" },
       { status: 500 }

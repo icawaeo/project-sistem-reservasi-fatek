@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type AccountType = "CIVITAS" | "UMUM";
 
@@ -38,6 +39,32 @@ function AccordionHeader(props: {
 export default function RegisterView() {
   const [accountType, setAccountType] = useState<AccountType | null>(null);
 
+    const router = useRouter();
+    
+    const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    identifier: "",
+    password: "",
+    confirmPassword: ""
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+  const handleAccountTypeChange = (type: AccountType | null) => {
+    setAccountType(type);
+    // Reset form saat mengganti tipe akun
+    setFormData({
+      name: "",
+      email: "",
+      identifier: "",
+      password: "",
+      confirmPassword: ""
+    });
+    setError("");
+  };
+
   const isCivitas = accountType === "CIVITAS";
 
   const emailLabel = useMemo(() => {
@@ -47,12 +74,53 @@ export default function RegisterView() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+        const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Gagal mendaftar");
+        
+        // Reset form jika berhasil
+        setFormData({
+          name: "",
+          email: "",
+          identifier: "",
+          password: "",
+          confirmPassword: ""
+        });
+        
+        router.push("/auth?tab=login");
+    } catch (err: any) {
+        setError(err.message);
+        console.error("Registration error:", err);
+    } finally {
+        setLoading(false);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-3xl font-extrabold text-slate-900">Buat Akun Baru</h2>
       <p className="mt-2 text-sm text-slate-700/80">
         Pilih tipe akun Anda untuk melanjutkan pendaftaran.
       </p>
+
+      {error && (
+        <div className="mt-4 rounded-2xl bg-red-100/80 border border-red-300 p-4">
+          <p className="text-sm font-semibold text-red-800">{error}</p>
+        </div>
+      )}
 
       <div className="mt-6 space-y-5">
         {/* Civitas */}
@@ -63,51 +131,67 @@ export default function RegisterView() {
                 subtitle="Mahasiswa, Dosen, & Staf"
                 open={accountType === "CIVITAS"}
                 onClick={() => 
-                    setAccountType(accountType === "CIVITAS" ? null : "CIVITAS")
+                    handleAccountTypeChange(accountType === "CIVITAS" ? null : "CIVITAS")
                 }
             />
 
             {accountType === "CIVITAS" && (
                 <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20 transition-all duration-300 ease-in-out animate-[fadeIn_0.3s_ease-in-out]">
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
-                    <label className="text-xs font-bold tracking-wider text-slate-700">
-                        NAMA LENGKAP
-                    </label>
-                    <input
-                        placeholder="Masukkan nama lengkap Anda"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
-                    />
+                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                            NAMA LENGKAP
+                        </label>
+                        <input
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            placeholder="Masukkan nama lengkap Anda"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                        />
                     </div>
 
                     <div>
-                    <label className="text-xs font-bold tracking-wider text-slate-700">
-                        NIM / NIP
-                    </label>
-                    <input
-                        placeholder="Masukkan NIM/NIP Anda"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
-                    />
+                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                            NIM / NIP
+                        </label>
+                        <input
+                            name="identifier" 
+                            value={formData.identifier} 
+                            onChange={handleChange}
+                            required 
+                            placeholder="Masukkan NIM/NIP Anda"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                        />
                     </div>
 
                     <div>
-                    <label className="text-xs font-bold tracking-wider text-slate-700">
-                        {emailLabel}
-                    </label>
-                    <input
-                        type="email"
-                        placeholder="Masukkan alamat email Anda"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
-                    />
+                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                            {emailLabel}
+                        </label>
+                        <input
+                            name="email"
+                            type="email"
+                            value={formData.email} 
+                            onChange={handleChange} 
+                            required
+                            placeholder="Masukkan alamat email Anda"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="text-xs font-bold tracking-wider text-slate-700">
-                        KATA SANDI
+                            KATA SANDI
                         </label>
                         <div className="relative mt-2">
                             <input
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Masukkan kata sandi"
                                 className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
@@ -123,13 +207,17 @@ export default function RegisterView() {
                     </div>
                     <div>
                         <label className="text-xs font-bold tracking-wider text-slate-700">
-                        KONFIRMASI
+                            KONFIRMASI
                         </label>
                         <div className="relative mt-2">
                             <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            placeholder="Konfirmasi kata sandi"
-                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                name="confirmPassword" 
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Konfirmasi kata sandi"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                             />
                             <button
                                 type="button"
@@ -143,10 +231,11 @@ export default function RegisterView() {
                     </div>
 
                     <button
-                    type="submit"
-                    className="w-full rounded-2xl bg-slate-900 py-3 font-semibold text-white hover:bg-slate-800"
+                        type="submit"
+                        disabled={loading}
+                        className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 font-semibold text-white disabled:opacity-70"
                     >
-                    Daftar Sebagai Civitas
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : "Daftar Sebagai Civitas"}
                     </button>
                 </form>
                 </div>
@@ -170,18 +259,22 @@ export default function RegisterView() {
                 subtitle="Alumni & Pengunjung Luar"
                 open={accountType === "UMUM"}
                 onClick={() => 
-                    setAccountType(accountType === "UMUM" ? null : "UMUM")
+                    handleAccountTypeChange(accountType === "UMUM" ? null : "UMUM")
                 }
             />
 
             {accountType === "UMUM" && (
                 <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20 transition-all duration-300 ease-in-out animate-[fadeIn_0.3s_ease-in-out]">
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
                     <label className="text-xs font-bold tracking-wider text-slate-700">
                         NAMA LENGKAP
                     </label>
                     <input
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
                         placeholder="Masukkan nama lengkap Anda"
                         className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
@@ -192,7 +285,11 @@ export default function RegisterView() {
                         ALAMAT EMAIL
                     </label>
                     <input
+                        name="email"
                         type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
                         placeholder="Masukkan alamat email Anda"
                         className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                     />
@@ -205,6 +302,10 @@ export default function RegisterView() {
                         </label>
                         <div className="relative mt-2">
                             <input
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Masukkan kata sandi"
                                 className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
@@ -224,9 +325,13 @@ export default function RegisterView() {
                         </label>
                         <div className="relative mt-2">
                             <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            placeholder="Konfirmasi kata sandi"
-                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Konfirmasi kata sandi"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
                             />
                             <button
                                 type="button"
@@ -240,10 +345,11 @@ export default function RegisterView() {
                     </div>
 
                     <button
-                    type="submit"
-                    className="w-full rounded-2xl bg-slate-900 py-3 font-semibold text-white hover:bg-slate-800"
+                        type="submit"
+                        disabled={loading}
+                        className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 font-semibold text-white disabled:opacity-70"
                     >
-                    Daftar Sebagai Umum
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : "Daftar Sebagai Umum"}
                     </button>
                 </form>
                 </div>
