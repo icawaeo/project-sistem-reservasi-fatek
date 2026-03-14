@@ -30,7 +30,7 @@ export default function LoginView() {
       if (res?.error) {
         setError("Email atau password salah");
       } else {
-        router.push("/dashboard");
+        router.push("/landingpage");
         router.refresh();
       }
     } catch (err) {

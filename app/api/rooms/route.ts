@@ -1,11 +1,64 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+const parseDateTime = (date: string, time: string) => {
+  const parsed = new Date(`${date}T${time}:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+export async function GET(request: Request) {
   try {
-    const rooms = await prisma.room.findMany();
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate") || startDate;
+    const startTime = searchParams.get("startTime");
+    const endTime = searchParams.get("endTime");
+
+    const hasScheduleParams = !!(startDate && endDate && startTime && endTime);
+
+    if (hasScheduleParams) {
+      const requestStart = parseDateTime(startDate as string, startTime as string);
+      const requestEnd = parseDateTime(endDate as string, endTime as string);
+
+      if (!requestStart || !requestEnd) {
+        return NextResponse.json({ error: "Format tanggal/waktu tidak valid" }, { status: 400 });
+      }
+
+      if (requestEnd <= requestStart) {
+        return NextResponse.json({ error: "Rentang waktu tidak valid" }, { status: 400 });
+      }
+
+      const rooms = await prisma.room.findMany({
+        where: {
+          room_isActive: true,
+          reservations: {
+            none: {
+              res_startTime: { lt: requestEnd },
+              res_endTime: { gt: requestStart },
+            },
+          },
+        },
+        orderBy: [
+          { room_building: "asc" },
+          { room_name: "asc" },
+        ],
+      });
+
+      return NextResponse.json(rooms);
+    }
+
+    const rooms = await prisma.room.findMany({
+      where: {
+        room_isActive: true,
+      },
+      orderBy: [
+        { room_building: "asc" },
+        { room_name: "asc" },
+      ],
+    });
+
     return NextResponse.json(rooms);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Gagal mengambil data ruangan" }, { status: 500 });
   }
 }
