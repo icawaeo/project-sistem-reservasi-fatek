@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     const endDate = searchParams.get("endDate") || startDate;
     const startTime = searchParams.get("startTime");
     const endTime = searchParams.get("endTime");
+    const building = searchParams.get("building");
 
     const hasScheduleParams = !!(startDate && endDate && startTime && endTime);
 
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
       const rooms = await prisma.room.findMany({
         where: {
           room_isActive: true,
+          ...(building ? { room_building: building } : {}),
           reservations: {
             none: {
               res_startTime: { lt: requestEnd },
@@ -47,9 +49,20 @@ export async function GET(request: Request) {
       return NextResponse.json(rooms);
     }
 
+    const now = new Date();
     const rooms = await prisma.room.findMany({
       where: {
         room_isActive: true,
+        ...(building ? { room_building: building } : {}),
+      },
+      include: {
+        reservations: {
+          where: {
+            res_startTime: { lte: now },
+            res_endTime: { gte: now },
+          },
+          select: { res_id: true },
+        },
       },
       orderBy: [
         { room_building: "asc" },
@@ -57,7 +70,12 @@ export async function GET(request: Request) {
       ],
     });
 
-    return NextResponse.json(rooms);
+    const result = rooms.map(({ reservations, ...room }) => ({
+      ...room,
+      isCurrentlyOccupied: reservations.length > 0,
+    }));
+
+    return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: "Gagal mengambil data ruangan" }, { status: 500 });
   }

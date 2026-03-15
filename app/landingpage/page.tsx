@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Clock, Calendar, Search, CircleUserRound, X, ChevronDown, ChevronUp, Building2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Clock, Calendar, Search, CircleUserRound, X, ChevronDown, ChevronUp, Building2, MapPin, ExternalLink } from "lucide-react";
+import { motion, type PanInfo } from "framer-motion";
 import { useSession } from "next-auth/react";
 
 type RoomAvailability = {
@@ -27,12 +27,56 @@ const occupiedRooms = [
 ];
 
 const buildings = [
+  { name: "Gedung Dekanat Fakultas Teknik", color: "from-sky-900 to-sky-700" },
   { name: "Gedung Jurusan Teknik Sipil", color: "from-blue-900 to-blue-700" },
   { name: "Gedung Jurusan Teknik Arsitektur", color: "from-slate-800 to-slate-600" },
   { name: "Gedung Jurusan Teknik Elektro", color: "from-green-800 to-green-600" },
-  { name: "Gedung Dekanat Fakultas Teknik", color: "from-sky-900 to-sky-700" },
   { name: "Gedung Jurusan Teknik Mesin", color: "from-indigo-900 to-indigo-700" },
+  { name: "Gedung Laboratorium Fakultas Teknik", color: "from-lime-900 to-lime-700" },
 ];
+
+const mapPoints = [
+    {
+        name: "Gedung Jurusan Teknik Arsitektur",
+        shortUrl: "https://maps.app.goo.gl/8ASpjWXVgejtJDpp8",
+        embedUrl: "https://www.google.com/maps?q=1.4594425,124.8258652&z=20&output=embed",
+    },
+    {
+        name: "Gedung Jurusan Teknik Sipil",
+        shortUrl: "https://maps.app.goo.gl/Wy4THU5oW6AgfFYp6",
+        embedUrl: "https://www.google.com/maps?q=1.4579273,124.8263909&z=20&output=embed",
+    },
+    {
+        name: "Gedung Jurusan Teknik Elektro",
+        shortUrl: "https://maps.app.goo.gl/RvMEgxESAGU3VdaBA",
+        embedUrl: "https://www.google.com/maps?q=1.4597494,124.8260556&z=20&output=embed",
+    },
+    {
+        name: "Gedung Dekanat Fakultas Teknik",
+        shortUrl: "https://maps.app.goo.gl/bhCMCT9FgmDjqsrx9",
+        embedUrl: "https://www.google.com/maps?q=1.4590842,124.8255351&z=20&output=embed",
+    },
+    {
+        name: "Gedung Jurusan Teknik Mesin",
+        shortUrl: "https://maps.app.goo.gl/wVNVkJSfc59D7PSVA",
+        embedUrl: "https://www.google.com/maps?q=1.4585082,124.8256701&z=20&output=embed",
+    },
+    {
+        name: "Gedung Laboratorium Fakultas Teknik",
+        shortUrl: "https://maps.app.goo.gl/ucabMNHxz87jdxDP6",
+        embedUrl: "https://www.google.com/maps?q=1.4583367,124.8255388&z=20&output=embed",
+    },
+];
+
+const allMapView = {
+    name: "Lihat Semua",
+    shortUrl:
+        "https://www.google.com/maps/dir/?api=1&origin=1.4594425,124.8258652&destination=1.4583367,124.8255388&travelmode=walking&waypoints=1.4579273,124.8263909|1.4597494,124.8260556|1.4590842,124.8255351|1.4585082,124.8256701",
+    embedUrl: "https://www.google.com/maps?q=Fakultas+Teknik+Universitas+Sam+Ratulangi&z=18&output=embed",
+};
+
+const TOTAL = buildings.length;
+const tripled = [...buildings, ...buildings, ...buildings];
 
 export default function LandingPage() {
     const { data: session } = useSession();
@@ -47,7 +91,74 @@ export default function LandingPage() {
     const [availableBuildings, setAvailableBuildings] = useState<BuildingGroup[]>([]);
     const [expandedBuildings, setExpandedBuildings] = useState<Record<string, boolean>>({});
     const [selectedRoom, setSelectedRoom] = useState<RoomAvailability | null>(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
+    const [virtualIndex, setVirtualIndex] = useState(TOTAL);
+    const [instantSnap, setInstantSnap] = useState(false);
+    const [visibleCards, setVisibleCards] = useState(3);
+    const [activeMapPoint, setActiveMapPoint] = useState<number | "all">("all");
+    const instantSnapRef = useRef(false);
+
+    const activeIndex = ((virtualIndex % TOTAL) + TOTAL) % TOTAL;
+    const isAllMapView = activeMapPoint === "all";
+    const currentMap = isAllMapView ? allMapView : mapPoints[activeMapPoint];
+
+    useEffect(() => {
+        const updateVisibleCards = () => {
+            if (window.innerWidth >= 1024) {
+                setVisibleCards(3);
+                return;
+            }
+            if (window.innerWidth >= 640) {
+                setVisibleCards(2);
+                return;
+            }
+            setVisibleCards(1);
+        };
+
+        updateVisibleCards();
+        window.addEventListener("resize", updateVisibleCards);
+        return () => window.removeEventListener("resize", updateVisibleCards);
+    }, []);
+
+    const goToPrevSlide = () => {
+        instantSnapRef.current = false;
+        setInstantSnap(false);
+        setVirtualIndex(v => v - 1);
+    };
+
+    const goToNextSlide = () => {
+        instantSnapRef.current = false;
+        setInstantSnap(false);
+        setVirtualIndex(v => v + 1);
+    };
+
+    const handleCarouselDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        const swipe = info.offset.x;
+        const velocity = info.velocity.x;
+        if (swipe <= -65 || velocity <= -700) {
+            goToNextSlide();
+            return;
+        }
+        if (swipe >= 65 || velocity >= 700) {
+            goToPrevSlide();
+        }
+    };
+
+    const handleAnimComplete = () => {
+        if (instantSnapRef.current) {
+            instantSnapRef.current = false;
+            setInstantSnap(false);
+            return;
+        }
+        setVirtualIndex(current => {
+            if (current >= TOTAL * 2 || current < TOTAL) {
+                const snapped = ((current % TOTAL) + TOTAL) % TOTAL + TOTAL;
+                instantSnapRef.current = true;
+                setInstantSnap(true);
+                return snapped;
+            }
+            return current;
+        });
+    };
 
     const scheduleLabel =
         reservationMode === "date-range"
@@ -355,7 +466,7 @@ export default function LandingPage() {
             
             <div className="relative max-w-5xl mx-auto px-12">
                 <button
-                onClick={() => setCarouselIndex((i) => (i - 1 + buildings.length) % buildings.length)}
+                onClick={goToPrevSlide}
                 className="absolute left-0 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all active:scale-95"
                 >
                 <ChevronLeft size={20} className="text-slate-700" />
@@ -363,29 +474,43 @@ export default function LandingPage() {
 
                 <div className="overflow-hidden">
                 <motion.div
-                    className="flex gap-4 px-1 py-2"
+                    className="flex px-1 py-2"
                     initial={false}
-                    animate={{ 
-                    x: `-${carouselIndex * (100 / 3)}%` 
+                    animate={{
+                    x: `-${virtualIndex * (100 / visibleCards)}%`
                     }}
-                    transition={{ 
-                    type: "spring", 
-                    stiffness: 170,
-                    damping: 26,
-                    mass: 1
-                    }}
+                    transition={
+                    instantSnap
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 170, damping: 26, mass: 1 }
+                    }
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.14}
+                    dragMomentum={false}
+                    onDragEnd={handleCarouselDragEnd}
+                    onAnimationComplete={handleAnimComplete}
                 >
-                    {buildings.map((building, i) => (
+                    {tripled.map((building, i) => (
                     <div
                         key={i}
-                        className="relative rounded-2xl overflow-hidden h-48 min-w-[calc(33.333%-11px)] cursor-pointer group shadow-sm shrink-0 transition-transform duration-300 hover:scale-[1.02]"
+                        className="relative rounded-2xl overflow-hidden h-48 min-w-full sm:min-w-1/2 lg:min-w-1/3 cursor-grab active:cursor-grabbing group shadow-sm shrink-0 px-2 transition-transform duration-300 hover:scale-[1.02]"
                     >
-                        <div className={`absolute inset-0 bg-linear-to-b ${building.color}`} />
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                        <div className="absolute bottom-0 left-0 right-0 p-5 bg-linear-to-t from-black/80 via-black/40 to-transparent">
-                        <div className="text-white text-xs font-bold leading-tight drop-shadow-md">
-                            {building.name}
-                        </div>
+                        <div className="relative h-full rounded-2xl overflow-hidden">
+                            <div className={`absolute inset-0 bg-linear-to-b ${building.color}`} />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-black/80 via-black/40 to-transparent">
+                            <div className="text-white text-[11px] sm:text-xs font-bold leading-snug drop-shadow-md line-clamp-2 mb-2">
+                                {building.name}
+                            </div>
+                            <Link
+                                href={`/gedung/${encodeURIComponent(building.name)}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 rounded-full bg-white/20 hover:bg-white/35 border border-white/30 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-sm transition-all"
+                            >
+                                Lihat Ruangan <ChevronRight size={10} />
+                            </Link>
+                            </div>
                         </div>
                     </div>
                     ))}
@@ -393,11 +518,26 @@ export default function LandingPage() {
                 </div>
 
                 <button
-                onClick={() => setCarouselIndex((i) => (i + 1) % buildings.length)}
+                onClick={goToNextSlide}
                 className="absolute right-0 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all active:scale-95"
                 >
                 <ChevronRight size={20} className="text-slate-700" />
                 </button>
+            </div>
+
+            <div className="flex justify-center items-center gap-2 mt-5">
+                {buildings.map((_, i) => (
+                    <button
+                        key={i}
+                        onClick={() => { instantSnapRef.current = true; setInstantSnap(true); setVirtualIndex(TOTAL + i); }}
+                        aria-label={`Go to slide ${i + 1}`}
+                        className={`rounded-full transition-all duration-300 h-2 ${
+                            activeIndex === i
+                                ? "w-6 bg-slate-800"
+                                : "w-2 bg-slate-300 hover:bg-slate-500"
+                        }`}
+                    />
+                ))}
             </div>
         </section>
 
@@ -405,16 +545,60 @@ export default function LandingPage() {
             <h2 className="text-center text-sm font-bold tracking-[0.25em] text-slate-900 uppercase mb-8">
             Lokasi Gedung
             </h2>
-            <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-200 h-72">
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1993.7!2d124.8196!3d1.4720!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x328729f45d2a3f3f%3A0x68d9d05b6ad5e!2sFakultas%20Teknik%20Universitas%20Sam%20Ratulangi!5e0!3m2!1sid!2sid!4v1"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-            />
+            <div className="mb-4 md:mb-5">
+                <div className="-mx-2 overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-visible md:px-0">
+                <div className="flex w-max min-w-full items-center gap-2 md:mx-auto md:w-full md:max-w-5xl md:min-w-0 md:flex-wrap md:justify-center md:gap-3">
+                <button
+                    onClick={() => setActiveMapPoint("all")}
+                    className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all md:px-4 ${
+                        isAllMapView
+                            ? "border-slate-900 bg-slate-900 text-white"
+                            : "border-slate-300 bg-white text-slate-700 hover:border-slate-500"
+                    }`}
+                >
+                    <MapPin size={13} />
+                    {allMapView.name}
+                </button>
+                {mapPoints.map((point, index) => (
+                    <button
+                        key={point.name}
+                        onClick={() => setActiveMapPoint(index)}
+                        className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all md:px-4 ${
+                            !isAllMapView && activeMapPoint === index
+                                ? "border-slate-900 bg-slate-900 text-white"
+                                : "border-slate-300 bg-white text-slate-700 hover:border-slate-500"
+                        }`}
+                    >
+                        <MapPin size={13} />
+                        {point.name}
+                    </button>
+                ))}
+                </div>
+                </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-200 h-64 sm:h-72 bg-white">
+                <iframe
+                    key={currentMap.name}
+                    src={currentMap.embedUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={currentMap.name}
+                />
+            </div>
+            <div className="mt-3 flex justify-center">
+                <a
+                    href={currentMap.shortUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900"
+                >
+                    Buka di Google Maps
+                    <ExternalLink size={13} />
+                </a>
             </div>
         </section>
 
