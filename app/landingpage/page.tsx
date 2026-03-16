@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Clock, Calendar, Search, CircleUserRound, X, ChevronDown, ChevronUp, Building2, MapPin, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, Clock, Calendar, Search, X, ChevronDown, ChevronUp, Building2, MapPin, ExternalLink } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
 import { motion, type PanInfo } from "framer-motion";
 import { useSession } from "next-auth/react";
 
@@ -12,6 +14,7 @@ type RoomAvailability = {
     room_building: string;
     room_capacity: number;
     room_locDetail: string;
+    room_imageUrl?: string | null;
 };
 
 type BuildingGroup = {
@@ -80,6 +83,7 @@ const tripled = [...buildings, ...buildings, ...buildings];
 
 export default function LandingPage() {
     const { data: session } = useSession();
+    const router = useRouter();
     const [reservationMode, setReservationMode] = useState<"per-day" | "date-range">("per-day");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -173,8 +177,24 @@ export default function LandingPage() {
     };
 
     const handleRoomSelect = (room: RoomAvailability) => {
-        setSelectedRoom(room);
-        setIsModalOpen(false);
+        if (!session?.user) {
+            router.push("/auth?tab=login");
+            return;
+        }
+        const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
+        const qp = new URLSearchParams({
+            room_id: room.room_id,
+            room_name: room.room_name,
+            room_building: room.room_building,
+            room_capacity: String(room.room_capacity),
+            room_locDetail: room.room_locDetail,
+            room_imageUrl: room.room_imageUrl ?? "",
+            startDate,
+            endDate: effectiveEndDate,
+            startTime,
+            endTime,
+        });
+        router.push(`/reservasi?${qp.toString()}`);
     };
 
     const handleSearch = async () => {
@@ -245,36 +265,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f0] font-sans">
-        <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-5">
-            <div>
-            <div className="text-white font-bold text-base leading-tight">Fakultas Teknik</div>
-            <div className="text-white/80 text-xs leading-tight">Universitas Sam Ratulangi</div>
-            </div>
-            <nav className="flex items-center gap-6">
-            <Link href="/landingpage" className="text-white text-sm font-medium hover:text-white/80 transition-colors">
-                Beranda
-            </Link>
-            <Link href="#" className="text-white/80 text-sm font-medium hover:text-white transition-colors">
-                Riwayat
-            </Link>
-                        {session?.user ? (
-                            <Link
-                                href="/dashboard"
-                                className="flex items-center gap-2 rounded-full bg-white/20 border border-white/30 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-all"
-                            >
-                                <CircleUserRound size={16} />
-                                <span>Hi, {session.user.name ?? "Pengguna"}</span>
-                            </Link>
-                        ) : (
-                            <Link
-                                href="/auth?tab=login"
-                                className="flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-all"
-                            >
-                                Masuk
-                            </Link>
-                        )}
-            </nav>
-        </header>
+        <Navbar />
 
         <section className="relative h-[62vh] min-h-105">
             <div className="absolute inset-0 overflow-hidden">

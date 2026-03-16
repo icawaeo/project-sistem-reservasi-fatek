@@ -2,12 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
     Building2,
     Calendar,
-    CircleUserRound,
     Clock,
     FileText,
     Home,
@@ -18,6 +17,7 @@ import {
     Upload,
     Users,
 } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
 
 const buildingColorMap: Record<string, string> = {
     "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
@@ -30,7 +30,6 @@ const buildingColorMap: Record<string, string> = {
 
 export default function ReservasiPage() {
     const { data: session } = useSession();
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const roomId = searchParams.get("room_id") ?? "";
@@ -89,39 +88,7 @@ export default function ReservasiPage() {
 
     return (
         <div className="min-h-screen bg-[#f5f5f0] font-sans">
-            <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-5">
-                <div>
-                    <div className="text-white font-bold text-base leading-tight">Fakultas Teknik</div>
-                    <div className="text-white/80 text-xs leading-tight">Universitas Sam Ratulangi</div>
-                </div>
-                <nav className="flex items-center gap-6">
-                    <Link
-                        href="/landingpage"
-                        className="text-white text-sm font-medium hover:text-white/80 transition-colors"
-                    >
-                        Beranda
-                    </Link>
-                    <Link href="#" className="text-white/80 text-sm font-medium hover:text-white transition-colors">
-                        Riwayat
-                    </Link>
-                    {session?.user ? (
-                        <Link
-                            href="/dashboard"
-                            className="flex items-center gap-2 rounded-full bg-white/20 border border-white/30 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-all"
-                        >
-                            <CircleUserRound size={16} />
-                            <span>Hi, {session.user.name ?? "Pengguna"}</span>
-                        </Link>
-                    ) : (
-                        <button
-                            onClick={() => router.push("/auth?tab=login")}
-                            className="flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-all"
-                        >
-                            Masuk
-                        </button>
-                    )}
-                </nav>
-            </header>
+            <Navbar />
 
             <section className="relative flex flex-col justify-end pt-20 pb-10 min-h-56">
                 <div className="absolute inset-0 overflow-hidden">
