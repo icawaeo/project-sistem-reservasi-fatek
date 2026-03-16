@@ -179,6 +179,11 @@ export default function BuildingPage() {
         }
         const qp = new URLSearchParams({
             room_id: room.room_id,
+            room_name: room.room_name,
+            room_building: room.room_building,
+            room_capacity: String(room.room_capacity),
+            room_locDetail: room.room_locDetail,
+            room_imageUrl: room.room_imageUrl ?? "",
             startDate,
             endDate: reservationMode === "date-range" ? endDate : startDate,
             startTime,
@@ -524,7 +529,7 @@ export default function BuildingPage() {
                                             disabled={room.isCurrentlyOccupied}
                                             className="w-full sm:w-auto rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors uppercase tracking-wide disabled:bg-slate-300 disabled:cursor-not-allowed"
                                         >
-                                            Reservasi
+                                            Pilih Ruangan
                                         </button>
                                     </div>
                                 </div>
