@@ -27,12 +27,12 @@ const occupiedRooms = [
 ];
 
 const buildings = [
-  { name: "Gedung Dekanat Fakultas Teknik", color: "from-sky-900 to-sky-700" },
-  { name: "Gedung Jurusan Teknik Sipil", color: "from-blue-900 to-blue-700" },
-  { name: "Gedung Jurusan Teknik Arsitektur", color: "from-slate-800 to-slate-600" },
-  { name: "Gedung Jurusan Teknik Elektro", color: "from-green-800 to-green-600" },
-  { name: "Gedung Jurusan Teknik Mesin", color: "from-indigo-900 to-indigo-700" },
-  { name: "Gedung Laboratorium Fakultas Teknik", color: "from-lime-900 to-lime-700" },
+    { name: "Gedung Dekanat Fakultas Teknik", image: "/images/building/dekanat.jpeg" },
+    { name: "Gedung Jurusan Teknik Sipil", image: "/images/building/sipil.jpeg" },
+    { name: "Gedung Jurusan Teknik Arsitektur", image: "/images/building/jte.jpeg" },
+    { name: "Gedung Jurusan Teknik Elektro", image: "/images/building/jte.jpeg" },
+    { name: "Gedung Jurusan Teknik Mesin", image: "/images/building/dekanat.jpeg" },
+    { name: "Gedung Laboratorium Fakultas Teknik", image: "/images/building/lab.jpeg" },
 ];
 
 const mapPoints = [
@@ -497,7 +497,11 @@ export default function LandingPage() {
                         className="relative rounded-2xl overflow-hidden h-48 min-w-full sm:min-w-1/2 lg:min-w-1/3 cursor-grab active:cursor-grabbing group shadow-sm shrink-0 px-2 transition-transform duration-300 hover:scale-[1.02]"
                     >
                         <div className="relative h-full rounded-2xl overflow-hidden">
-                            <div className={`absolute inset-0 bg-linear-to-b ${building.color}`} />
+                            <div
+                                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                                style={{ backgroundImage: `url(${building.image})` }}
+                            />
+                            <div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/15 to-black/55" />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                             <div className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-black/80 via-black/40 to-transparent">
                             <div className="text-white text-[11px] sm:text-xs font-bold leading-snug drop-shadow-md line-clamp-2 mb-2">
