@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
     Building2,
@@ -30,6 +30,7 @@ const buildingColorMap: Record<string, string> = {
 
 export default function ReservasiPage() {
     const { data: session } = useSession();
+    const router = useRouter();
     const searchParams = useSearchParams();
 
     const roomId = searchParams.get("room_id") ?? "";
@@ -83,7 +84,31 @@ export default function ReservasiPage() {
             return;
         }
 
-        alert("Form reservasi tersimpan di sisi UI. Integrasi submit API bisa ditambahkan di langkah berikutnya.");
+        const draftPayload = {
+            room_id: roomId,
+            room_name: roomName,
+            room_building: roomBuilding,
+            room_capacity: roomCapacity,
+            room_locDetail: roomLocDetail,
+            room_imageUrl: roomImageUrl,
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            name: borrowerName,
+            identifier,
+            identifierLabel: session?.user?.userType === "STAFF" ? "NIP" : "NIM",
+            email,
+            phone,
+            purpose: purposeTitle,
+            reason: purposeDetail,
+            documentName: supportingFile?.name ?? "Belum ada dokumen",
+            documentSize: supportingFile?.size ?? null,
+            documentType: supportingFile?.type ?? null,
+        };
+
+        sessionStorage.setItem("reservationDraft", JSON.stringify(draftPayload));
+        router.push("/reservasi/konfirmasi");
     };
 
     return (
@@ -303,7 +328,7 @@ export default function ReservasiPage() {
                         <div>
                             <div className="flex items-center gap-2 mb-3">
                                 <FileText size={14} className="text-slate-700" />
-                                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-800">Dokumen Pendukung</h4>
+                                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-800">Surat Pengantar</h4>
                             </div>
 
                             <label className="block rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center cursor-pointer hover:bg-slate-100 transition-colors">

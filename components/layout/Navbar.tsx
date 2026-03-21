@@ -51,7 +51,7 @@ export default function Navbar() {
                         {isDropdownOpen && (
                             <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden">
                                 <Link
-                                    href="/dashboard"
+                                    href="/riwayat"
                                     onClick={() => setIsDropdownOpen(false)}
                                     className="flex items-center gap-2.5 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                                 >
