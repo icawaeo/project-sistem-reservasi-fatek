@@ -16,6 +16,7 @@ import {
   ArrowUpDown,
   FileCheck2,
   Building2,
+  Eye,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
@@ -38,6 +39,7 @@ type ReservationDraftSnapshot = {
   purpose?: string;
   reason?: string;
   documentName?: string;
+  documentDataUrl?: string | null;
 };
 
 type ReservationsResponse = {
@@ -121,6 +123,7 @@ export default function RiwayatPeminjamanPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | ReservationStatus>("ALL");
   const [reservations, setReservations] = useState<ReservationRecord[]>([]);
   const [latestDraftSnapshot, setLatestDraftSnapshot] = useState<ReservationDraftSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -178,21 +181,48 @@ export default function RiwayatPeminjamanPage() {
   }, [status, sortOrder]);
 
   const latestActiveSubmission = useMemo(
-    () => reservations.find((item) => item.res_status === "PENDING") ?? null,
+    () => {
+      const pending = reservations.filter((item) => item.res_status === "PENDING");
+      if (pending.length === 0) return null;
+      // Always get the most recent PENDING regardless of API sort order
+      return pending.reduce((latest, current) =>
+        new Date(current.res_startTime).getTime() > new Date(latest.res_startTime).getTime()
+          ? current
+          : latest
+      );
+    },
     [reservations]
   );
 
   const historyItems = useMemo(() => {
-    if (!latestActiveSubmission) {
-      return reservations;
+    let items = reservations;
+    
+    if (latestActiveSubmission) {
+      items = reservations.filter((item) => item.res_id !== latestActiveSubmission.res_id);
     }
 
-    return reservations.filter((item) => item.res_id !== latestActiveSubmission.res_id);
-  }, [reservations, latestActiveSubmission]);
+    if (filterStatus !== "ALL") {
+      items = items.filter((item) => item.res_status === filterStatus);
+    }
+
+    return items;
+  }, [reservations, latestActiveSubmission, filterStatus]);
 
   const latestPurpose = latestActiveSubmission?.res_purpose || latestDraftSnapshot?.purpose || "-";
   const latestReason = latestDraftSnapshot?.reason || "-";
   const latestDocumentName = latestDraftSnapshot?.documentName || "Belum ada surat pengantar";
+
+  const handlePreviewDocument = () => {
+    if (!latestDraftSnapshot?.documentDataUrl) return;
+    
+    // Store document data in sessionStorage so preview page can access it after refresh
+    sessionStorage.setItem("previewDocumentData", JSON.stringify({
+      dataUrl: latestDraftSnapshot.documentDataUrl,
+      name: latestDraftSnapshot.documentName,
+    }));
+
+    window.open("/reservasi/preview", "_blank");
+  };
 
   return (
     <div className="min-h-screen bg-[#f5f5f0] font-sans flex flex-col">
@@ -274,7 +304,25 @@ export default function RiwayatPeminjamanPage() {
 
                     <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 md:col-span-2">
                       <p className="text-[11px] text-slate-500 mb-2">Surat Pengantar</p>
-                      {latestActiveSubmission.res_documentUrl ? (
+                      {latestDraftSnapshot?.documentDataUrl ? (
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3">
+                          <FileText className="text-red-400" size={24} />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-slate-900 text-sm truncate">{latestDocumentName}</div>
+                            {latestDraftSnapshot.documentDataUrl ? (
+                              <div className="text-xs text-slate-500">Dokumen • Upload</div>
+                            ) : null}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handlePreviewDocument}
+                            className="text-slate-700 hover:text-slate-900 transition-colors"
+                            title="Preview dokumen"
+                          >
+                            <Eye size={18} />
+                          </button>
+                        </div>
+                      ) : latestActiveSubmission.res_documentUrl ? (
                         <a
                           href={latestActiveSubmission.res_documentUrl}
                           target="_blank"
@@ -304,18 +352,34 @@ export default function RiwayatPeminjamanPage() {
               Riwayat Peminjaman
             </h2>
 
-            <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 w-fit">
-              <ArrowUpDown size={14} className="text-slate-500" />
-              <span>Urutkan</span>
-              <select
-                value={sortOrder}
-                onChange={(event) => setSortOrder(event.target.value as "newest" | "oldest")}
-                className="bg-transparent text-sm font-semibold outline-none"
-              >
-                <option value="newest">Terbaru</option>
-                <option value="oldest">Terlama</option>
-              </select>
-            </label>
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 w-fit">
+                <ArrowUpDown size={14} className="text-slate-500" />
+                <span>Urutkan</span>
+                <select
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value as "newest" | "oldest")}
+                  className="bg-transparent text-sm font-semibold outline-none"
+                >
+                  <option value="newest">Terbaru</option>
+                  <option value="oldest">Terlama</option>
+                </select>
+              </label>
+
+              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 w-fit">
+                <span>Filter Status</span>
+                <select
+                  value={filterStatus}
+                  onChange={(event) => setFilterStatus(event.target.value as "ALL" | ReservationStatus)}
+                  className="bg-transparent text-sm font-semibold outline-none"
+                >
+                  <option value="ALL">Semua Status</option>
+                  <option value="PENDING">Menunggu</option>
+                  <option value="APPROVED">Disetujui</option>
+                  <option value="REJECTED">Ditolak</option>
+                </select>
+              </label>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
@@ -327,7 +391,8 @@ export default function RiwayatPeminjamanPage() {
               <div className="p-5 text-sm font-medium text-slate-500">Belum ada riwayat peminjaman</div>
             ) : (
               <>
-                <div className="hidden md:grid grid-cols-[2fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 bg-slate-50 border-b border-slate-200 px-5 py-3 text-[11px] uppercase tracking-widest font-bold text-slate-500">
+                <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 bg-slate-50 border-b border-slate-200 px-5 py-3 text-[11px] uppercase tracking-widest font-bold text-slate-500">
+                  <span>Nama Kegiatan</span>
                   <span>Ruangan</span>
                   <span>Tanggal</span>
                   <span>Waktu</span>
@@ -347,8 +412,10 @@ export default function RiwayatPeminjamanPage() {
 
                     return (
                       <article key={item.res_id} className="px-4 md:px-5 py-4">
-                        <div className="hidden md:grid grid-cols-[2fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 items-center">
-                          <div>
+                        <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 items-center">
+                          <p className="text-sm font-bold text-slate-900 text-left">{item.res_purpose}</p>
+
+                          <div className="text-left">
                             <p className="text-sm font-bold text-slate-900">{item.room.room_name}</p>
                             <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                               <Building2 size={12} />
@@ -356,15 +423,15 @@ export default function RiwayatPeminjamanPage() {
                             </p>
                           </div>
 
-                          <p className="text-sm text-slate-700">{formatDate(item.res_startTime)}</p>
-                          <p className="text-sm text-slate-700">{formatTime(item.res_startTime, item.res_endTime)}</p>
+                          <p className="text-sm text-slate-700 text-center">{formatDate(item.res_startTime)}</p>
+                          <p className="text-sm text-slate-700 text-center">{formatTime(item.res_startTime, item.res_endTime)}</p>
 
-                          <span className={`inline-flex w-fit items-center gap-1 border rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}>
+                          <span className={`inline-flex w-fit items-center gap-1 border rounded-full px-2.5 py-1 text-xs font-semibold justify-center mx-auto ${status.badge}`}>
                             <StatusIcon size={12} />
                             {status.label}
                           </span>
 
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="flex items-center justify-center gap-2 text-xs">
                             {item.res_documentUrl ? (
                               <a
                                 href={item.res_documentUrl}
@@ -407,23 +474,28 @@ export default function RiwayatPeminjamanPage() {
                             <p className="text-xs text-slate-500">{item.room.room_building}</p>
                           </div>
 
+                          <div className="rounded-lg bg-slate-50 border border-slate-200 p-2">
+                            <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Nama Kegiatan</p>
+                            <p className="text-xs font-bold text-slate-900">{item.res_purpose}</p>
+                          </div>
+
                           <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                            <div className="rounded-lg bg-slate-50 border border-slate-200 p-2">
+                            <div className="rounded-lg bg-slate-50 border border-slate-200 p-2 text-center">
                               <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Tanggal</p>
                               <p>{formatDate(item.res_startTime)}</p>
                             </div>
-                            <div className="rounded-lg bg-slate-50 border border-slate-200 p-2">
+                            <div className="rounded-lg bg-slate-50 border border-slate-200 p-2 text-center">
                               <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Waktu</p>
                               <p>{formatTime(item.res_startTime, item.res_endTime)}</p>
                             </div>
                           </div>
 
-                          <span className={`inline-flex w-fit items-center gap-1 border rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}>
+                          <span className={`inline-flex w-fit items-center gap-1 border rounded-full px-2.5 py-1 text-xs font-semibold justify-center mx-auto ${status.badge}`}>
                             <StatusIcon size={12} />
                             {status.label}
                           </span>
 
-                          <div className="flex flex-wrap gap-2 text-xs">
+                          <div className="flex flex-wrap gap-2 text-xs justify-center">
                             {item.res_documentUrl ? (
                               <a
                                 href={item.res_documentUrl}
