@@ -28,22 +28,55 @@ const buildingColorMap: Record<string, string> = {
     "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
 };
 
+type ReservationDraft = {
+    room_id?: string;
+    room_name?: string;
+    room_building?: string;
+    room_capacity?: string;
+    room_locDetail?: string;
+    room_imageUrl?: string;
+    startDate?: string;
+    endDate?: string;
+    startTime?: string;
+    endTime?: string;
+    name?: string;
+    identifier?: string;
+    email?: string;
+    phone?: string;
+    purpose?: string;
+    reason?: string;
+    documentDataUrl?: string | null;
+};
+
 export default function ReservasiPage() {
     const { data: session } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const roomId = searchParams.get("room_id") ?? "";
-    const roomName = searchParams.get("room_name") ?? "Ruangan";
-    const roomBuilding = searchParams.get("room_building") ?? "Gedung tidak diketahui";
-    const roomCapacity = searchParams.get("room_capacity") ?? "-";
-    const roomLocDetail = searchParams.get("room_locDetail") ?? "";
-    const roomImageUrl = searchParams.get("room_imageUrl") ?? "";
+    const [storedDraft, setStoredDraft] = useState<ReservationDraft | null>(null);
 
-    const startDate = searchParams.get("startDate") ?? "";
-    const endDate = searchParams.get("endDate") ?? startDate;
-    const startTime = searchParams.get("startTime") ?? "";
-    const endTime = searchParams.get("endTime") ?? "";
+    useEffect(() => {
+        const rawDraft = sessionStorage.getItem("reservationDraft");
+        if (!rawDraft) return;
+
+        try {
+            setStoredDraft(JSON.parse(rawDraft) as ReservationDraft);
+        } catch {
+            setStoredDraft(null);
+        }
+    }, []);
+
+    const roomId = searchParams.get("room_id") ?? storedDraft?.room_id ?? "";
+    const roomName = searchParams.get("room_name") ?? storedDraft?.room_name ?? "Ruangan";
+    const roomBuilding = searchParams.get("room_building") ?? storedDraft?.room_building ?? "Gedung tidak diketahui";
+    const roomCapacity = searchParams.get("room_capacity") ?? storedDraft?.room_capacity ?? "-";
+    const roomLocDetail = searchParams.get("room_locDetail") ?? storedDraft?.room_locDetail ?? "";
+    const roomImageUrl = searchParams.get("room_imageUrl") ?? storedDraft?.room_imageUrl ?? "";
+
+    const startDate = searchParams.get("startDate") ?? storedDraft?.startDate ?? "";
+    const endDate = searchParams.get("endDate") ?? storedDraft?.endDate ?? startDate;
+    const startTime = searchParams.get("startTime") ?? storedDraft?.startTime ?? "";
+    const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
     const isCivitas = session?.user?.userType === "STUDENT" || session?.user?.userType === "STAFF";
 
@@ -52,16 +85,48 @@ export default function ReservasiPage() {
     const [email, setEmail] = useState("");
 
     useEffect(() => {
+        if (!storedDraft) return;
+        setBorrowerName(storedDraft.name ?? "");
+        setIdentifier(storedDraft.identifier ?? "");
+        setEmail(storedDraft.email ?? "");
+        setPhone(storedDraft.phone ?? "");
+        setPurposeTitle(storedDraft.purpose ?? "");
+        setPurposeDetail(storedDraft.reason ?? "");
+    }, [storedDraft]);
+
+    useEffect(() => {
         if (!session?.user) return;
-        setBorrowerName(session.user.name ?? "");
-        setEmail(session.user.email ?? "");
-        if (isCivitas) setIdentifier(session.user.identifier ?? "");
+        setBorrowerName((prev) => prev || session.user.name || "");
+        setEmail((prev) => prev || session.user.email || "");
+        if (isCivitas) {
+            setIdentifier((prev) => prev || session.user.identifier || "");
+        }
     }, [session, isCivitas]);
     const [phone, setPhone] = useState("");
     const [purposeTitle, setPurposeTitle] = useState("");
     const [purposeDetail, setPurposeDetail] = useState("");
     const [supportingFile, setSupportingFile] = useState<File | null>(null);
+    const [supportingFileDataUrl, setSupportingFileDataUrl] = useState<string | null>(null);
     const [validationError, setValidationError] = useState("");
+
+    const handleSupportingFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] ?? null;
+        setSupportingFile(file);
+
+        if (!file) {
+            setSupportingFileDataUrl(null);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setSupportingFileDataUrl(typeof reader.result === "string" ? reader.result : null);
+        };
+        reader.onerror = () => {
+            setSupportingFileDataUrl(null);
+        };
+        reader.readAsDataURL(file);
+    };
 
     const buildingGradient = buildingColorMap[roomBuilding] ?? "from-slate-700 via-slate-600 to-slate-800";
 
@@ -105,6 +170,7 @@ export default function ReservasiPage() {
             documentName: supportingFile?.name ?? "Belum ada dokumen",
             documentSize: supportingFile?.size ?? null,
             documentType: supportingFile?.type ?? null,
+            documentDataUrl: supportingFileDataUrl,
         };
 
         sessionStorage.setItem("reservationDraft", JSON.stringify(draftPayload));
@@ -240,7 +306,7 @@ export default function ReservasiPage() {
                                         value={borrowerName}
                                         onChange={(e) => setBorrowerName(e.target.value)}
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
-                                        placeholder="Contoh: Budi Santoso"
+                                        placeholder="Masukkan nama lengkap Anda"
                                         required
                                     />
                                 </label>
@@ -256,7 +322,7 @@ export default function ReservasiPage() {
                                             value={identifier}
                                             onChange={(e) => setIdentifier(e.target.value)}
                                             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
-                                            placeholder={session?.user?.userType === "STAFF" ? "Nomor Induk Pegawai" : "Nomor Induk Mahasiswa"}
+                                            placeholder={session?.user?.userType === "STAFF" ? "Masukkan Nomor Induk Pegawai" : "Masukkan Nomor Induk Mahasiswa"}
                                         />
                                     </label>
                                 )}
@@ -271,21 +337,25 @@ export default function ReservasiPage() {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
-                                            placeholder="nama@email.com"
+                                            placeholder="Masukkan alamat email Anda"
                                             required
                                         />
                                     </div>
                                 </label>
                                 <label className="space-y-1.5">
-                                    <span className="text-[11px] font-semibold text-slate-600">Nomor WhatsApp</span>
+                                    <span className="text-[11px] font-semibold text-slate-600">Nomor Telepon</span>
                                     <div className="relative">
                                         <Phone size={14} className="absolute left-3 top-3 text-slate-400" />
                                         <input
                                             type="tel"
+                                            inputMode="numeric"
                                             value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/\D/g, "");
+                                                setPhone(value);
+                                            }}
                                             className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
-                                            placeholder="08xxxxxxxxxx"
+                                            placeholder="Masukkan nomor telepon Anda"
                                             required
                                         />
                                     </div>
@@ -306,7 +376,7 @@ export default function ReservasiPage() {
                                         value={purposeTitle}
                                         onChange={(e) => setPurposeTitle(e.target.value)}
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
-                                        placeholder="Contoh: Seminar Teknologi Masa Depan"
+                                        placeholder="Masukkan nama kegiatan"
                                         required
                                     />
                                 </label>
@@ -318,7 +388,7 @@ export default function ReservasiPage() {
                                         onChange={(e) => setPurposeDetail(e.target.value)}
                                         rows={3}
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400 resize-y"
-                                        placeholder="Jelaskan secara singkat tujuan peminjaman ruangan"
+                                        placeholder="Jelaskan secara singkat alasan dan tujuan peminjaman ruangan"
                                         required
                                     />
                                 </label>
@@ -336,7 +406,7 @@ export default function ReservasiPage() {
                                     type="file"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     className="hidden"
-                                    onChange={(e) => setSupportingFile(e.target.files?.[0] ?? null)}
+                                    onChange={handleSupportingFileChange}
                                 />
                                 <Upload size={24} className="mx-auto text-slate-400" />
                                 <p className="mt-2 text-sm font-semibold text-slate-700">

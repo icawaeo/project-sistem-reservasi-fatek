@@ -53,6 +53,7 @@ type ReservationDraft = {
   documentName: string;
   documentSize: number | null;
   documentType: string | null;
+  documentDataUrl?: string | null;
 };
 
 const fallbackReservation: ReservationDraft = {
@@ -72,6 +73,7 @@ const fallbackReservation: ReservationDraft = {
   documentName: "Belum ada dokumen",
   documentSize: null,
   documentType: null,
+  documentDataUrl: null,
 };
 
 export default function KonfirmasiReservasiPage() {
@@ -81,6 +83,30 @@ export default function KonfirmasiReservasiPage() {
   const [submitted, setSubmitted] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleEditData = () => {
+    if (!reservation) {
+      router.push("/reservasi");
+      return;
+    }
+
+    sessionStorage.setItem("reservationDraft", JSON.stringify(reservation));
+
+    const params = new URLSearchParams({
+      room_id: reservation.room_id || "",
+      room_name: reservation.room_name,
+      room_building: reservation.room_building,
+      room_capacity: reservation.room_capacity || "",
+      room_locDetail: reservation.room_locDetail || "",
+      room_imageUrl: reservation.room_imageUrl || "",
+      startDate: reservation.startDate,
+      endDate: reservation.endDate,
+      startTime: reservation.startTime,
+      endTime: reservation.endTime,
+    });
+
+    router.push(`/reservasi?${params.toString()}`);
+  };
 
   useEffect(() => {
     const storedDraft = sessionStorage.getItem("reservationDraft");
@@ -113,6 +139,17 @@ export default function KonfirmasiReservasiPage() {
     if (sizeInBytes < 1024) return `${sizeInBytes} B`;
     if (sizeInBytes < 1024 * 1024) return `${(sizeInBytes / 1024).toFixed(1)} KB`;
     return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handlePreviewDocument = () => {
+    if (!reservation.documentDataUrl) return;
+    
+    sessionStorage.setItem("previewDocumentData", JSON.stringify({
+      dataUrl: reservation.documentDataUrl,
+      name: reservation.documentName,
+    }));
+
+    window.open("/reservasi/preview", "_blank");
   };
 
   return (
@@ -160,7 +197,7 @@ export default function KonfirmasiReservasiPage() {
             {!submitted && (
               <button
                 className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-                onClick={() => router.push("/reservasi")}
+                onClick={handleEditData}
               >
                 <ArrowLeft size={13} /> Ubah Data
               </button>
@@ -235,7 +272,7 @@ export default function KonfirmasiReservasiPage() {
                   <div className="font-semibold text-slate-900 break-all">{reservation.email}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Nomor WhatsApp</div>
+                  <div className="text-[11px] text-slate-500">Nomor Telepon</div>
                   <div className="font-semibold text-slate-900">{reservation.phone}</div>
                 </div>
               </div>
@@ -275,17 +312,12 @@ export default function KonfirmasiReservasiPage() {
               </div>
               <button
                 type="button"
-                className="text-slate-400 cursor-not-allowed"
-                title="Preview akan tersedia setelah integrasi upload backend"
+                className={`transition-colors ${reservation.documentDataUrl ? "text-slate-700 hover:text-slate-900" : "text-slate-400 cursor-not-allowed"}`}
+                title={reservation.documentDataUrl ? "Preview dokumen" : "Preview tidak tersedia karena dokumen belum diunggah"}
+                onClick={handlePreviewDocument}
+                disabled={!reservation.documentDataUrl}
               >
                 <Eye size={18} />
-              </button>
-              <button
-                type="button"
-                className="text-slate-400 cursor-not-allowed"
-                title="Download akan tersedia setelah integrasi upload backend"
-              >
-                <Download size={18} />
               </button>
             </div>
           </div>
