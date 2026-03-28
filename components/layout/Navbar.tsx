@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { ChevronDown, CircleUserRound, History, LogOut } from "lucide-react";
 
@@ -22,9 +23,19 @@ export default function Navbar() {
 
     return (
         <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-5">
-            <div>
-                <div className="text-white font-bold text-base leading-tight">Fakultas Teknik</div>
-                <div className="text-white/80 text-xs leading-tight">Universitas Sam Ratulangi</div>
+            <div className="flex items-center gap-3">
+                <Image
+                    src="/images/Logo_Fatek_Unsrat.png"
+                    alt="Logo Fakultas Teknik Unsrat"
+                    width={42}
+                    height={42}
+                    className="h-10 w-10 object-contain"
+                    priority
+                />
+                <div>
+                    <div className="text-white font-bold text-base leading-tight">Fakultas Teknik</div>
+                    <div className="text-white/80 text-xs leading-tight">Universitas Sam Ratulangi</div>
+                </div>
             </div>
             <nav className="flex items-center gap-6">
                 <Link

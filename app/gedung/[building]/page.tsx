@@ -111,9 +111,16 @@ export default function BuildingPage() {
 
     const handleSearch = async () => {
         setValidationError("");
+        const OPENING_TIME = "08:00";
+        const CLOSING_TIME = "18:00";
 
         if (!startDate || !startTime || !endTime || (reservationMode === "date-range" && !endDate)) {
             setValidationError("Lengkapi tanggal dan waktu reservasi terlebih dahulu.");
+            return;
+        }
+
+        if (startTime < OPENING_TIME || endTime > CLOSING_TIME) {
+            setValidationError("Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).");
             return;
         }
 

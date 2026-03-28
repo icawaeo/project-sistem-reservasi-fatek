@@ -184,7 +184,6 @@ export default function RiwayatPeminjamanPage() {
     () => {
       const pending = reservations.filter((item) => item.res_status === "PENDING");
       if (pending.length === 0) return null;
-      // Always get the most recent PENDING regardless of API sort order
       return pending.reduce((latest, current) =>
         new Date(current.res_startTime).getTime() > new Date(latest.res_startTime).getTime()
           ? current
@@ -215,7 +214,6 @@ export default function RiwayatPeminjamanPage() {
   const handlePreviewDocument = () => {
     if (!latestDraftSnapshot?.documentDataUrl) return;
     
-    // Store document data in sessionStorage so preview page can access it after refresh
     sessionStorage.setItem("previewDocumentData", JSON.stringify({
       dataUrl: latestDraftSnapshot.documentDataUrl,
       name: latestDraftSnapshot.documentName,
