@@ -133,7 +133,7 @@ export default function LoginView() {
 
       <p className="mt-6 text-center text-sm text-slate-700">
         Belum punya akun?{" "}
-        <Link className="font-semibold hover:underline" href="/auth?tab=register">
+        <Link className="font-semibold hover:underline" href="/?tab=register">
           Daftar
         </Link>
       </p>

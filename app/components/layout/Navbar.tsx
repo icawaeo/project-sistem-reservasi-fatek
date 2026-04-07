@@ -72,7 +72,7 @@ export default function Navbar() {
                                     Riwayat Peminjaman
                                 </Link>
                                 <button
-                                    onClick={() => signOut({ callbackUrl: "/auth" })}
+                                    onClick={() => signOut({ callbackUrl: "/" })}
                                     className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-slate-100"
                                 >
                                     <LogOut size={15} />
@@ -83,7 +83,7 @@ export default function Navbar() {
                     </div>
                 ) : (
                     <Link
-                        href="/auth?tab=login"
+                        href="/"
                         className="flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-all"
                     >
                         Masuk

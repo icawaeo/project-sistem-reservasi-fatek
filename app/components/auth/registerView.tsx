@@ -358,7 +358,7 @@ export default function RegisterView() {
 
         <p className="pt-2 text-center text-sm text-slate-700">
             Sudah memiliki akun?{" "}
-            <Link className="font-semibold hover:underline" href="/auth?tab=login">
+            <Link className="font-semibold hover:underline" href="/?tab=login">
                 Masuk di sini
             </Link>
         </p>
