@@ -1,0 +1,185 @@
+"use client";
+
+import Image from "next/image";
+import { Pencil, Trash2 } from "lucide-react";
+import type { RoomItem } from "./room-types";
+
+const formatFloorLabel = (value: string) => {
+  const floor = value.trim().match(/\d+/)?.[0] ?? value.trim().replace(/^(lantai|lt\.?)/i, "").trim();
+  return floor ? `Lantai ${floor}` : "Lantai belum diisi";
+};
+
+type RoomTableProps = {
+  rooms: RoomItem[];
+  onEdit: (room: RoomItem) => void;
+  onDelete: (room: RoomItem) => void;
+};
+
+const EmptyState = () => (
+  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+    <p className="text-sm font-semibold text-slate-700">Belum ada data ruangan</p>
+    <p className="mt-1 text-sm text-slate-500">Tambahkan ruangan pertama untuk mulai mengelola.</p>
+  </div>
+);
+
+export default function RoomTable({ rooms, onEdit, onDelete }: RoomTableProps) {
+  if (rooms.length === 0) {
+    return <EmptyState />;
+  }
+
+  return (
+    <>
+      <div className="hidden overflow-hidden rounded-xl border border-slate-200 lg:block">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th className="px-4 py-3 font-semibold">Nama Ruangan</th>
+              <th className="px-4 py-3 font-semibold">Gedung</th>
+              <th className="px-4 py-3 font-semibold">Kapasitas</th>
+              <th className="px-4 py-3 font-semibold">Fasilitas</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
+              <th className="px-4 py-3 font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 bg-white text-sm text-slate-700">
+            {rooms.map((room) => (
+              <tr key={room.id}>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
+                      {room.imageUrl ? (
+                        <Image src={room.imageUrl} alt={room.name} fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No Img</div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">{room.name}</p>
+                      <p className="text-xs text-slate-500">{formatFloorLabel(room.floor)}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3">{room.building}</td>
+                <td className="px-4 py-3">{room.capacity} Orang</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {room.facilities.length > 0 ? (
+                      room.facilities.map((facility) => (
+                        <span
+                          key={`${room.id}-${facility}`}
+                          className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700"
+                        >
+                          {facility}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-slate-400">-</span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                      room.status === "aktif"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {room.status === "aktif" ? "Aktif" : "Maintenance"}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(room)}
+                      className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                      aria-label={`Edit ${room.name}`}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(room)}
+                      className="rounded-md p-2 text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                      aria-label={`Hapus ${room.name}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="grid gap-3 lg:hidden">
+        {rooms.map((room) => (
+          <article key={room.id} className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="flex gap-3">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                {room.imageUrl ? (
+                  <Image src={room.imageUrl} alt={room.name} fill className="object-cover" unoptimized />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No Img</div>
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-slate-900">{room.name}</p>
+                <p className="text-sm text-slate-500">{room.building}</p>
+                <p className="text-sm text-slate-500">{formatFloorLabel(room.floor)}</p>
+                <p className="text-sm text-slate-600">Kapasitas: {room.capacity} Orang</p>
+              </div>
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {room.facilities.length > 0 ? (
+                room.facilities.map((facility) => (
+                  <span
+                    key={`${room.id}-mobile-${facility}`}
+                    className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700"
+                  >
+                    {facility}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-slate-400">Fasilitas belum diisi</span>
+              )}
+            </div>
+
+            <div className="mt-3 flex items-center justify-between">
+              <span
+                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                  room.status === "aktif" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {room.status === "aktif" ? "Aktif" : "Maintenance"}
+              </span>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => onEdit(room)}
+                  className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  aria-label={`Edit ${room.name}`}
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(room)}
+                  className="rounded-md p-2 text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                  aria-label={`Hapus ${room.name}`}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}

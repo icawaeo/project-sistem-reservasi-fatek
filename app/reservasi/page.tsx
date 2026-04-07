@@ -17,7 +17,7 @@ import {
     Upload,
     Users,
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/app/components/layout/Navbar";
 
 const buildingColorMap: Record<string, string> = {
     "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
@@ -50,6 +50,7 @@ type ReservationDraft = {
 
 export default function ReservasiPage() {
     const { data: session } = useSession();
+    const publicSessionUser = session?.user?.userType === "STAFF" ? null : session?.user;
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -78,7 +79,7 @@ export default function ReservasiPage() {
     const startTime = searchParams.get("startTime") ?? storedDraft?.startTime ?? "";
     const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
-    const isCivitas = session?.user?.userType === "STUDENT" || session?.user?.userType === "STAFF";
+    const isCivitas = publicSessionUser?.userType === "STUDENT";
 
     const [borrowerName, setBorrowerName] = useState("");
     const [identifier, setIdentifier] = useState("");
@@ -95,13 +96,13 @@ export default function ReservasiPage() {
     }, [storedDraft]);
 
     useEffect(() => {
-        if (!session?.user) return;
-        setBorrowerName((prev) => prev || session.user.name || "");
-        setEmail((prev) => prev || session.user.email || "");
+        if (!publicSessionUser) return;
+        setBorrowerName((prev) => prev || publicSessionUser.name || "");
+        setEmail((prev) => prev || publicSessionUser.email || "");
         if (isCivitas) {
-            setIdentifier((prev) => prev || session.user.identifier || "");
+            setIdentifier((prev) => prev || publicSessionUser.identifier || "");
         }
-    }, [session, isCivitas]);
+    }, [publicSessionUser, isCivitas]);
     const [phone, setPhone] = useState("");
     const [purposeTitle, setPurposeTitle] = useState("");
     const [purposeDetail, setPurposeDetail] = useState("");
@@ -162,7 +163,7 @@ export default function ReservasiPage() {
             endTime,
             name: borrowerName,
             identifier,
-            identifierLabel: session?.user?.userType === "STAFF" ? "NIP" : "NIM",
+            identifierLabel: "NIM",
             email,
             phone,
             purpose: purposeTitle,
@@ -313,16 +314,14 @@ export default function ReservasiPage() {
                                 {isCivitas && (
                                     <label className="space-y-1.5">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[11px] font-semibold text-slate-600">
-                                                {session?.user?.userType === "STAFF" ? "NIP" : "NIM"}
-                                            </span>
+                                            <span className="text-[11px] font-semibold text-slate-600">NIM</span>
                                         </div>
                                         <input
                                             type="text"
                                             value={identifier}
                                             onChange={(e) => setIdentifier(e.target.value)}
                                             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
-                                            placeholder={session?.user?.userType === "STAFF" ? "Masukkan Nomor Induk Pegawai" : "Masukkan Nomor Induk Mahasiswa"}
+                                            placeholder="Masukkan Nomor Induk Mahasiswa"
                                         />
                                     </label>
                                 )}

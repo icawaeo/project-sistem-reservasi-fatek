@@ -21,7 +21,7 @@ import {
   Download,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/app/components/layout/Navbar";
 
 const buildingColorMap = {
   "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
@@ -79,6 +79,7 @@ const fallbackReservation: ReservationDraft = {
 export default function KonfirmasiReservasiPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const isPrivilegedStaff = session?.user?.userType === "STAFF";
   const [reservation, setReservation] = useState<ReservationDraft | null>(null);
   const [submitted, setSubmitted] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -330,7 +331,7 @@ export default function KonfirmasiReservasiPage() {
                 setLoading(true);
                 setError("");
                 try {
-                  if (!session?.user?.id) {
+                  if (!session?.user?.id || isPrivilegedStaff) {
                     setError("Sesi login tidak ditemukan. Silakan login ulang.");
                     setLoading(false);
                     return;

@@ -15,6 +15,24 @@ export default function LoginView() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const getPostLoginRedirectPath = async () => {
+    try {
+      const response = await fetch("/api/auth/post-login-redirect", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        return "/landingpage";
+      }
+
+      const payload = (await response.json()) as { redirectTo?: string };
+      return payload.redirectTo || "/landingpage";
+    } catch {
+      return "/landingpage";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -30,10 +48,11 @@ export default function LoginView() {
       if (res?.error) {
         setError("Email atau password salah");
       } else {
-        router.push("/landingpage");
+        const redirectTo = await getPostLoginRedirectPath();
+        router.push(redirectTo);
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan sistem");
     } finally {
       setLoading(false);

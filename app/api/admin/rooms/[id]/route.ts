@@ -1,0 +1,215 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
+import { isSuperadminUser } from "@/lib/admin-access";
+
+const parseFacilities = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter(Boolean);
+};
+
+const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
+
+const normalizeCommaSeparated = (value: unknown): string[] => {
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const normalizeFloor = (value: string) => {
+  const trimmed = value.trim();
+  const matchedNumber = trimmed.match(/\d+/);
+
+  if (matchedNumber) {
+    return matchedNumber[0];
+  }
+
+  return trimmed.replace(/^(lantai|lt\.?)/i, "").trim();
+};
+
+const parseRoomDetails = (value: unknown): { floor: string; facilities: string[] } => {
+  const parts = normalizeCommaSeparated(value);
+
+  if (parts.length === 0) {
+    return { floor: "", facilities: [] };
+  }
+
+  const firstPart = parts[0];
+  const hasFloorPrefix = /^(lantai|lt\.?)/i.test(firstPart) || /^\d+$/.test(firstPart);
+
+  if (hasFloorPrefix) {
+    return {
+      floor: normalizeFloor(firstPart),
+      facilities: parts.slice(1),
+    };
+  }
+
+  return {
+    floor: "",
+    facilities: parts,
+  };
+};
+
+const buildRoomLocDetail = (floor: string, facilities: string[]) => {
+  const cleanedFloor = typeof floor === "string" ? normalizeFloor(floor) : "";
+  const cleanedFacilities = Array.isArray(facilities)
+    ? facilities.map((item) => (typeof item === "string" ? item.trim() : "")).filter(Boolean)
+    : [];
+
+  return [cleanedFloor, ...cleanedFacilities].filter(Boolean).join(", ");
+};
+
+const mapRoom = (room: {
+  room_id: string;
+  room_name: string;
+  room_building: string;
+  room_capacity: number;
+  room_locDetail: string;
+  room_imageUrl: string | null;
+  room_isActive: boolean;
+}) => {
+  const details = parseRoomDetails(room.room_locDetail);
+
+  return {
+    id: room.room_id,
+    name: room.room_name,
+    building: room.room_building,
+    floor: details.floor,
+    capacity: room.room_capacity,
+    facilities: details.facilities,
+    imageUrl: room.room_imageUrl,
+    status: room.room_isActive ? "aktif" : "maintenance",
+  };
+};
+
+type RouteParams = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+const authorize = async () => {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user || !isSuperadminUser(session.user)) {
+    return null;
+  }
+
+  return session;
+};
+
+export async function PUT(request: Request, { params }: RouteParams) {
+  try {
+    const session = await authorize();
+
+    if (!session) {
+      return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json({ error: "ID ruangan tidak valid" }, { status: 400 });
+    }
+
+    const body = await request.json();
+
+    const name = typeof body?.name === "string" ? body.name.trim() : "";
+    const building = typeof body?.building === "string" ? body.building.trim() : "";
+    const floor = typeof body?.floor === "string" ? normalizeFloor(body.floor) : "";
+    const capacity = Number(body?.capacity);
+    const facilities = parseFacilities(body?.facilities);
+    const imageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
+    const status = parseStatus(body?.status);
+
+    if (!name || !building || Number.isNaN(capacity) || capacity <= 0) {
+      return NextResponse.json({ error: "Data ruangan belum valid" }, { status: 400 });
+    }
+
+    const buildingExists = await prisma.building.findUnique({
+      where: {
+        building_name: building,
+      },
+      select: {
+        building_id: true,
+      },
+    });
+
+    if (!buildingExists) {
+      return NextResponse.json({ error: "Gedung belum terdaftar di master gedung" }, { status: 400 });
+    }
+
+    const room = await prisma.room.update({
+      where: {
+        room_id: id,
+      },
+      data: {
+        room_name: name,
+        room_building: building,
+        room_capacity: Math.floor(capacity),
+        room_locDetail: buildRoomLocDetail(floor, facilities),
+        room_imageUrl: imageUrl,
+        room_isActive: status === "aktif",
+      },
+    });
+
+    return NextResponse.json(mapRoom(room));
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Ruangan tidak ditemukan" }, { status: 404 });
+    }
+
+    return NextResponse.json({ error: "Gagal memperbarui ruangan" }, { status: 500 });
+  }
+}
+
+export async function DELETE(_request: Request, { params }: RouteParams) {
+  try {
+    const session = await authorize();
+
+    if (!session) {
+      return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json({ error: "ID ruangan tidak valid" }, { status: 400 });
+    }
+
+    await prisma.room.delete({
+      where: {
+        room_id: id,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return NextResponse.json({ error: "Ruangan tidak ditemukan" }, { status: 404 });
+      }
+
+      if (error.code === "P2003") {
+        return NextResponse.json(
+          { error: "Ruangan tidak dapat dihapus karena sudah memiliki riwayat reservasi" },
+          { status: 409 }
+        );
+      }
+    }
+
+    return NextResponse.json({ error: "Gagal menghapus ruangan" }, { status: 500 });
+  }
+}

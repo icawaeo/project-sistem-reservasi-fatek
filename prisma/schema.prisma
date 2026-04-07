@@ -46,6 +46,16 @@ model Room {
   reservations Reservation[]
 }
 
+model Building {
+  building_id      String   @id @default(cuid())
+  building_name    String   @unique
+  operational_days String[]
+  open_time        String
+  close_time       String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 model Facility {
   fac_id   String @id @default(cuid())
   fac_name String

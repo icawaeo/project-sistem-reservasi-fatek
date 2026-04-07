@@ -15,7 +15,7 @@ import {
     ExternalLink,
     Home,
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/app/components/layout/Navbar";
 import { useSession } from "next-auth/react";
 
 type RoomWithStatus = {
@@ -71,6 +71,7 @@ export default function BuildingPage() {
     const router = useRouter();
     const buildingName = decodeURIComponent(params.building as string);
     const { data: session } = useSession();
+    const isPrivilegedStaff = session?.user?.userType === "STAFF";
 
     const [rooms, setRooms] = useState<RoomWithStatus[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -176,7 +177,7 @@ export default function BuildingPage() {
     };
 
     const handleReservasi = (room: RoomWithStatus) => {
-        if (!session?.user) {
+        if (!session?.user || isPrivilegedStaff) {
             router.push("/auth?tab=login");
             return;
         }

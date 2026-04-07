@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Clock, Calendar, Search, X, ChevronDown, ChevronUp, Building2, MapPin, ExternalLink } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/app/components/layout/Navbar";
 import { motion, type PanInfo } from "framer-motion";
 import { useSession } from "next-auth/react";
 
@@ -83,6 +83,7 @@ const tripled = [...buildings, ...buildings, ...buildings];
 
 export default function LandingPage() {
     const { data: session } = useSession();
+    const isPrivilegedStaff = session?.user?.userType === "STAFF";
     const router = useRouter();
     const [reservationMode, setReservationMode] = useState<"per-day" | "date-range">("per-day");
     const [startDate, setStartDate] = useState("");
@@ -177,7 +178,7 @@ export default function LandingPage() {
     };
 
     const handleRoomSelect = (room: RoomAvailability) => {
-        if (!session?.user) {
+        if (!session?.user || isPrivilegedStaff) {
             router.push("/auth?tab=login");
             return;
         }

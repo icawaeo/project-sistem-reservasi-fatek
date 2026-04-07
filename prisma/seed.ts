@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import bcrypt from "bcryptjs";
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -16,6 +17,30 @@ const pgPool = new Pool({
 const adapter = new PrismaPg(pgPool);
 const prisma = new PrismaClient({ adapter });
 
+type SeedUser = {
+  name: string;
+  email: string;
+  identifier: string;
+  userType: "STAFF";
+};
+
+const dummyPassword = "Admin12345";
+
+const userSeeds: SeedUser[] = [
+  {
+    name: "Superadmin Dummy",
+    email: "superadmin@unsrat.ac.id",
+    identifier: "19870001",
+    userType: "STAFF",
+  },
+  {
+    name: "Admin Dummy",
+    email: "admin@unsrat.ac.id",
+    identifier: "19870002",
+    userType: "STAFF",
+  },
+];
+
 type SeedRoom = {
   room_name: string;
   room_building: string;
@@ -23,6 +48,13 @@ type SeedRoom = {
   room_capacity: number;
   room_imageUrl: string;
   room_isActive?: boolean;
+};
+
+type SeedBuilding = {
+  building_name: string;
+  operational_days: string[];
+  open_time: string;
+  close_time: string;
 };
 
 const buildingImageMap: Record<string, string> = {
@@ -33,6 +65,45 @@ const buildingImageMap: Record<string, string> = {
   "Gedung Jurusan Teknik Mesin": "/images/building/dekanat.jpeg",
   "Gedung Laboratorium Fakultas Teknik": "/images/building/lab.jpeg",
 };
+
+const buildingSeeds: SeedBuilding[] = [
+  {
+    building_name: "Gedung Dekanat Fakultas Teknik",
+    operational_days: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"],
+    open_time: "08:00",
+    close_time: "16:00",
+  },
+  {
+    building_name: "Gedung Jurusan Teknik Sipil",
+    operational_days: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"],
+    open_time: "08:00",
+    close_time: "16:00",
+  },
+  {
+    building_name: "Gedung Jurusan Teknik Arsitektur",
+    operational_days: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
+    open_time: "08:00",
+    close_time: "17:00",
+  },
+  {
+    building_name: "Gedung Jurusan Teknik Elektro",
+    operational_days: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"],
+    open_time: "08:00",
+    close_time: "16:00",
+  },
+  {
+    building_name: "Gedung Jurusan Teknik Mesin",
+    operational_days: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"],
+    open_time: "08:00",
+    close_time: "16:00",
+  },
+  {
+    building_name: "Gedung Laboratorium Fakultas Teknik",
+    operational_days: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
+    open_time: "08:00",
+    close_time: "18:00",
+  },
+];
 
 const roomSeeds: SeedRoom[] = [
   {
@@ -202,8 +273,71 @@ async function seedRooms() {
   console.log(`Room seed complete. Created: ${createdCount}, Updated: ${updatedCount}`);
 }
 
+async function seedBuildings() {
+  let createdCount = 0;
+  let updatedCount = 0;
+
+  for (const building of buildingSeeds) {
+    const existingBuilding = await prisma.building.findUnique({
+      where: {
+        building_name: building.building_name,
+      },
+      select: { building_id: true },
+    });
+
+    if (existingBuilding) {
+      await prisma.building.update({
+        where: { building_id: existingBuilding.building_id },
+        data: {
+          operational_days: building.operational_days,
+          open_time: building.open_time,
+          close_time: building.close_time,
+        },
+      });
+      updatedCount += 1;
+      continue;
+    }
+
+    await prisma.building.create({
+      data: building,
+    });
+    createdCount += 1;
+  }
+
+  console.log(`Building seed complete. Created: ${createdCount}, Updated: ${updatedCount}`);
+}
+
+async function seedUsers() {
+  const passwordHash = await bcrypt.hash(dummyPassword, 10);
+
+  for (const user of userSeeds) {
+    await prisma.user.upsert({
+      where: { email: user.email.toLowerCase() },
+      update: {
+        name: user.name,
+        identifier: user.identifier,
+        userType: user.userType,
+        passwordHash,
+      },
+      create: {
+        name: user.name,
+        email: user.email.toLowerCase(),
+        identifier: user.identifier,
+        userType: user.userType,
+        passwordHash,
+      },
+    });
+  }
+
+  console.log("Dummy users are ready:");
+  console.log("- superadmin@unsrat.ac.id / Admin12345");
+  console.log("- admin@unsrat.ac.id / Admin12345");
+}
+
 async function main() {
-  console.log("Seeding room data for landing page and building pages...");
+  console.log("Seeding building and room data for admin pages...");
+  await seedUsers();
+  await seedBuildings();
   await seedRooms();
 }
 

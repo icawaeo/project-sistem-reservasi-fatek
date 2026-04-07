@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Assistant, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import NextAuthProvider from "@/components/providers/NextAuthProvider";
+import "@/app/globals.css";
+import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
 
 const assistant = Assistant({
   variable: "--font-assistant",

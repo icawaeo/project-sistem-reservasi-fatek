@@ -18,7 +18,7 @@ import {
   Building2,
   Eye,
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/app/components/layout/Navbar";
 
 type ReservationStatus = "PENDING" | "APPROVED" | "REJECTED" | string;
 
@@ -121,6 +121,7 @@ const formatDateTimeFull = (start: string, end: string) => {
 
 export default function RiwayatPeminjamanPage() {
   const { data: session, status } = useSession();
+  const isPrivilegedStaff = session?.user?.userType === "STAFF";
   const router = useRouter();
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filterStatus, setFilterStatus] = useState<"ALL" | ReservationStatus>("ALL");
@@ -130,10 +131,10 @@ export default function RiwayatPeminjamanPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (status === "unauthenticated" || (status === "authenticated" && isPrivilegedStaff)) {
       router.push("/auth");
     }
-  }, [status, router]);
+  }, [status, isPrivilegedStaff, router]);
 
   useEffect(() => {
     const rawDraft = sessionStorage.getItem("reservationDraft");
@@ -150,7 +151,7 @@ export default function RiwayatPeminjamanPage() {
   }, []);
 
   useEffect(() => {
-    if (status !== "authenticated") {
+    if (status !== "authenticated" || isPrivilegedStaff) {
       return;
     }
 
@@ -178,7 +179,7 @@ export default function RiwayatPeminjamanPage() {
     };
 
     fetchReservations();
-  }, [status, sortOrder]);
+  }, [status, isPrivilegedStaff, sortOrder]);
 
   const latestActiveSubmission = useMemo(
     () => {

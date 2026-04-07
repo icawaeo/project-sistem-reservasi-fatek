@@ -10,6 +10,8 @@ export default function Navbar() {
     const { data: session } = useSession();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const isPrivilegedStaff = session?.user?.userType === "STAFF";
+    const showUserMenu = Boolean(session?.user) && !isPrivilegedStaff;
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -45,14 +47,14 @@ export default function Navbar() {
                     Beranda
                 </Link>
 
-                {session?.user ? (
+                {showUserMenu ? (
                     <div ref={dropdownRef} className="relative">
                         <button
                             onClick={() => setIsDropdownOpen((prev) => !prev)}
                             className="flex items-center gap-2 rounded-full bg-white/20 border border-white/30 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-all"
                         >
                             <CircleUserRound size={16} />
-                            <span>Hi, {session.user.name ?? "Pengguna"}</span>
+                            <span>Hi, {session?.user?.name ?? "Pengguna"}</span>
                             <ChevronDown
                                 size={13}
                                 className={`transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
