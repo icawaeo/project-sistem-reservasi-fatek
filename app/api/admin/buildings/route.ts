@@ -24,18 +24,24 @@ const normalizeTime = (value: unknown): string => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : "";
 };
 
+const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
+
 const mapBuilding = (building: {
   building_id: string;
   building_name: string;
   operational_days: string[];
   open_time: string;
   close_time: string;
+  building_imageUrl: string | null;
+  building_isActive: boolean;
 }) => ({
   id: building.building_id,
   name: building.building_name,
   operationalDays: building.operational_days,
   openTime: building.open_time,
   closeTime: building.close_time,
+  imageUrl: building.building_imageUrl,
+  status: building.building_isActive ? "aktif" : "maintenance",
 });
 
 const authorize = async () => {
@@ -82,6 +88,8 @@ export async function POST(request: Request) {
     const operationalDays = normalizeDays(body?.operationalDays);
     const openTime = normalizeTime(body?.openTime);
     const closeTime = normalizeTime(body?.closeTime);
+    const imageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
+    const status = parseStatus(body?.status);
 
     if (!name || operationalDays.length === 0 || !openTime || !closeTime || openTime >= closeTime) {
       return NextResponse.json({ error: "Data gedung belum valid" }, { status: 400 });
@@ -93,6 +101,8 @@ export async function POST(request: Request) {
         operational_days: operationalDays,
         open_time: openTime,
         close_time: closeTime,
+        building_imageUrl: imageUrl,
+        building_isActive: status === "aktif",
       },
     });
 

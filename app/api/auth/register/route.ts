@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { UserType } from "@prisma/client";
+import { UserRole, UserType } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
         passwordHash,
         identifier: identifier || null,
         userType,
+        role: UserRole.USER,
       },
     });
 

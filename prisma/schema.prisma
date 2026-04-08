@@ -20,6 +20,14 @@ enum UserType {
   PUBLIC
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  ADMIN_DEKAN
+  ADMIN_WD2
+  SUPERADMIN
+}
+
 model User {
   user_id      String    @id @default(uuid())
   email        String    @unique
@@ -27,10 +35,25 @@ model User {
   passwordHash String
   identifier   String?   // NIM/NIP - nullable for PUBLIC users
   userType     UserType
+  role         UserRole  @default(USER)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   
   reservations Reservation[]
+  passwordSetupTokens PasswordSetupToken[]
+}
+
+model PasswordSetupToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Room {
@@ -52,6 +75,8 @@ model Building {
   operational_days String[]
   open_time        String
   close_time       String
+  building_imageUrl String?
+  building_isActive Boolean @default(true)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }

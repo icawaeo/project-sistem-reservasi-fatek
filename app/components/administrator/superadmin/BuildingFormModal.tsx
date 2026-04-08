@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, X } from "lucide-react";
-import type { BuildingItem, BuildingPayload } from "./building-types";
+import ImageUpload from "./ImageUpload";
+import type { BuildingItem, BuildingPayload, BuildingStatus } from "./building-types";
 
 type BuildingFormModalProps = {
   isOpen: boolean;
@@ -17,6 +18,8 @@ type FormState = {
   operationalDays: string[];
   openTime: string;
   closeTime: string;
+  status: BuildingStatus;
+  imageUrl: string | null;
 };
 
 const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -26,6 +29,8 @@ const initialState: FormState = {
   operationalDays: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"],
   openTime: "08:00",
   closeTime: "17:00",
+  status: "aktif",
+  imageUrl: null,
 };
 
 export default function BuildingFormModal({
@@ -50,6 +55,8 @@ export default function BuildingFormModal({
         operationalDays: building.operationalDays,
         openTime: building.openTime,
         closeTime: building.closeTime,
+        status: building.status,
+        imageUrl: building.imageUrl,
       });
       setError(null);
       return;
@@ -113,6 +120,8 @@ export default function BuildingFormModal({
         operationalDays: form.operationalDays,
         openTime: form.openTime,
         closeTime: form.closeTime,
+        status: form.status,
+        imageUrl: form.imageUrl,
       });
 
       onClose();
@@ -234,7 +243,27 @@ export default function BuildingFormModal({
                 required
               />
             </label>
+
+            <label className="space-y-1.5">
+              <span className="text-sm font-semibold text-slate-700">Status</span>
+              <select
+                value={form.status}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, status: event.target.value as BuildingStatus }))
+                }
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+              >
+                <option value="aktif">Aktif</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </label>
           </div>
+
+          <ImageUpload
+            value={form.imageUrl}
+            onChange={(value) => setForm((prev) => ({ ...prev, imageUrl: value }))}
+            label="Foto Gedung"
+          />
 
           {error ? (
             <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div>

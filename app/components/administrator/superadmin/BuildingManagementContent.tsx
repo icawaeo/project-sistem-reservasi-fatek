@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Building2, Plus, Search } from "lucide-react";
+import { Building2, Filter, Plus, Search } from "lucide-react";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import BuildingFormModal from "./BuildingFormModal";
 import BuildingTable from "./BuildingTable";
@@ -27,6 +27,7 @@ const buildErrorMessage = async (response: Response, fallbackMessage: string) =>
 export default function BuildingManagementContent({ initialBuildings }: BuildingManagementContentProps) {
   const [buildings, setBuildings] = useState<BuildingItem[]>(initialBuildings);
   const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<"ALL" | "aktif" | "maintenance">("ALL");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingBuilding, setEditingBuilding] = useState<BuildingItem | null>(null);
@@ -38,21 +39,29 @@ export default function BuildingManagementContent({ initialBuildings }: Building
   const filteredBuildings = useMemo(() => {
     const loweredSearch = search.trim().toLowerCase();
 
-    if (!loweredSearch) {
-      return buildings;
-    }
-
     return buildings.filter((building) => {
+      const matchStatus = selectedStatus === "ALL" || building.status === selectedStatus;
+
+      if (!matchStatus) {
+        return false;
+      }
+
+      if (!loweredSearch) {
+        return true;
+      }
+
       const dayText = building.operationalDays.join(" ").toLowerCase();
       const operationalText = `${building.openTime} ${building.closeTime}`;
+      const statusText = building.status.toLowerCase();
 
       return (
         building.name.toLowerCase().includes(loweredSearch) ||
         dayText.includes(loweredSearch) ||
-        operationalText.includes(loweredSearch)
+        operationalText.includes(loweredSearch) ||
+        statusText.includes(loweredSearch)
       );
     });
-  }, [buildings, search]);
+  }, [buildings, search, selectedStatus]);
 
   const sortByName = (items: BuildingItem[]) => [...items].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -161,6 +170,21 @@ export default function BuildingManagementContent({ initialBuildings }: Building
               placeholder="Cari nama gedung atau jadwal operasional"
               className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
             />
+          </label>
+
+          <label className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm text-slate-700">
+            <Filter size={15} className="text-slate-500" />
+            <select
+              value={selectedStatus}
+              onChange={(event) => {
+                setSelectedStatus(event.target.value as "ALL" | "aktif" | "maintenance");
+              }}
+              className="bg-transparent text-sm font-semibold text-slate-900 outline-none"
+            >
+              <option value="ALL">Semua Status</option>
+              <option value="aktif">Aktif</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
           </label>
 
           <span className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm text-slate-600">
