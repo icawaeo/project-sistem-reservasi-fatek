@@ -7,6 +7,7 @@ export type MonitoringReservation = {
   purpose: string;
   status: string;
   documentUrl: string | null;
+  decisionDocumentUrl?: string | null;
   user: {
     name: string;
     userType: "STUDENT" | "STAFF" | "PUBLIC";

@@ -7,6 +7,20 @@ import Navbar from "@/app/components/administrator/Navbar";
 import DashboardContent from "@/app/components/administrator/superadmin/DashboardContent";
 import type { MonitoringReservation } from "@/app/components/administrator/superadmin/types";
 
+const splitReservationPurpose = (value: string | null) => {
+	if (!value) {
+		return { activityName: "-", purpose: "-" };
+	}
+
+	const [activityName, ...purposeParts] = value.split(" - ");
+	const purpose = purposeParts.join(" - ").trim();
+
+	return {
+		activityName: activityName.trim() || "-",
+		purpose: purpose || "-",
+	};
+};
+
 export default async function SuperadminDashboardPage() {
 	const session = await getServerSession(authOptions);
 
@@ -49,15 +63,19 @@ export default async function SuperadminDashboardPage() {
 
 	const totalUsers = await prisma.user.count();
 
-	const tableData: MonitoringReservation[] = reservations.map((item) => ({
+	const tableData: MonitoringReservation[] = reservations.map((item) => {
+		const parsedPurpose = splitReservationPurpose(item.res_purpose);
+
+		return {
 		id: item.res_id,
 		createdAt: item.res_date.toISOString(),
 		startTime: item.res_startTime.toISOString(),
 		endTime: item.res_endTime.toISOString(),
-		activityName: item.res_purpose || "-",
-		purpose: item.res_purpose || "-",
+		activityName: parsedPurpose.activityName,
+		purpose: parsedPurpose.purpose,
 		status: item.res_status,
 		documentUrl: item.res_documentUrl,
+		decisionDocumentUrl: item.res_status === "PENDING" ? null : item.res_documentUrl,
 		user: {
 			name: item.user.name,
 			userType: item.user.userType,
@@ -69,7 +87,8 @@ export default async function SuperadminDashboardPage() {
 			building: item.room.room_building,
 			location: item.room.room_locDetail,
 		},
-	}));
+		};
+	});
 
 	const lastSync = new Intl.DateTimeFormat("id-ID", {
 		dateStyle: "medium",

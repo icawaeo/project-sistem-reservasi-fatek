@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 import TableMonitoring from "./TableMonitoring";
@@ -9,6 +10,7 @@ type MonitoringSectionProps = {
   data: MonitoringReservation[];
   lastSync: string;
   primaryStatusLabel: string;
+  headerAction?: ReactNode;
   onDeleteSuccess?: (deletedId: string) => void;
 };
 
@@ -16,6 +18,7 @@ export default function MonitoringSection({
   data,
   lastSync,
   primaryStatusLabel,
+  headerAction,
   onDeleteSuccess,
 }: MonitoringSectionProps) {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
@@ -23,13 +26,17 @@ export default function MonitoringSection({
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
-      <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-        <div>
-          <h2 className="text-base font-bold text-slate-900">Monitoring Pengajuan Terbaru</h2>
-          <p className="text-sm text-slate-500">
-            Data reservasi terbaru tanpa aksi approve/reject. Fokus monitoring status.
-          </p>
-          {/* <p className="mt-1 text-xs text-slate-400">Last Sync: {lastSync} WITA</p> */}
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Monitoring Pengajuan Terbaru</h2>
+            <p className="text-sm text-slate-500">
+              Data reservasi terbaru tanpa aksi approve/reject. Fokus monitoring status.
+            </p>
+            {/* <p className="mt-1 text-xs text-slate-400">Last Sync: {lastSync} WITA</p> */}
+          </div>
+
+          {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

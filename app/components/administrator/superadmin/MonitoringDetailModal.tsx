@@ -90,11 +90,19 @@ export default function MonitoringDetailModal({
 
           <div className="rounded-lg border border-slate-200 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Data Kegiatan</p>
-            <p className="mt-2 text-sm font-semibold text-slate-900">{data.activityName}</p>
-            <p className="mt-1 text-sm text-slate-700">{data.purpose}</p>
+            <div className="mt-2 space-y-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Nama Kegiatan</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{data.activityName}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tujuan Kegiatan</p>
+                <p className="mt-1 text-sm text-slate-700">{data.purpose}</p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+          <div className="rounded-lg border border-slate-200 p-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status Pengajuan</p>
               <div className="mt-1">
@@ -102,26 +110,49 @@ export default function MonitoringDetailModal({
               </div>
             </div>
 
-            {data.documentUrl ? (
-              <a
-                href={data.documentUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
-              >
-                <FileText size={14} />
-                Lihat Surat Pengantar
-              </a>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold text-slate-500"
-              >
-                <FileText size={14} />
-                Surat Tidak Tersedia
-              </button>
-            )}
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {data.documentUrl ? (
+                <a
+                  href={data.documentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                >
+                  <FileText size={14} />
+                  Surat Pengantar
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold text-slate-500"
+                >
+                  <FileText size={14} />
+                  Surat Pengantar Belum Ada
+                </button>
+              )}
+
+              {data.decisionDocumentUrl ? (
+                <a
+                  href={data.decisionDocumentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+                >
+                  <FileText size={14} />
+                  Surat Keputusan
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold text-slate-500"
+                >
+                  <FileText size={14} />
+                  Surat Keputusan Belum Ada
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
