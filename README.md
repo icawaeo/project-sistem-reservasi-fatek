@@ -24,6 +24,12 @@ To seed room data for the landing page availability popup and the building room 
 npm run db:seed
 ```
 
+## LibreOffice (DOCX -> PDF Preview)
+
+Fitur preview template surat mengonversi file `.docx` menjadi `.pdf` menggunakan LibreOffice (perintah `soffice`) di server.
+
+- Pastikan LibreOffice sudah terpasang dan `soffice` tersedia di PATH, atau set environment variable `LIBREOFFICE_PATH` ke path executable `soffice` (mis. `C:\Program Files\LibreOffice\program\soffice.exe`).
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

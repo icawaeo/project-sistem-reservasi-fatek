@@ -7,6 +7,7 @@ import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
 import SuperadminMonitoringContent from "@/app/components/administrator/superadmin/SuperadminMonitoringContent";
 import type { MonitoringReservation } from "@/app/components/administrator/superadmin/types";
+import { computeReservationStatus } from "@/app/components/administrator/superadmin/reservationStatus";
 
 const splitReservationPurpose = (value: string | null) => {
 	if (!value) {
@@ -58,6 +59,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 
 	const tableData: MonitoringReservation[] = reservations.map((item) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
+		const computedStatus = computeReservationStatus(item.res_status, item.res_endTime);
 
 		return {
 		id: item.res_id,
@@ -66,9 +68,9 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		endTime: item.res_endTime.toISOString(),
 		activityName: parsedPurpose.activityName,
 		purpose: parsedPurpose.purpose,
-		status: item.res_status,
+		status: computedStatus,
 		documentUrl: item.res_documentUrl,
-		decisionDocumentUrl: item.res_status === "PENDING" ? null : item.res_documentUrl,
+		decisionDocumentUrl: computedStatus === "PENDING" ? null : item.res_documentUrl,
 		user: {
 			name: item.user.name,
 			userType: item.user.userType,

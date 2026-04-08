@@ -6,6 +6,7 @@ import type { MonitoringReservation } from "./types";
 import StatusBadge from "./StatusBadge";
 import MonitoringDetailModal from "./MonitoringDetailModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { computeReservationStatus } from "./reservationStatus";
 
 const PAGE_SIZE = 10;
 
@@ -27,9 +28,9 @@ function formatTime(dateInput: string) {
 type TableMonitoringProps = {
   data: MonitoringReservation[];
   sortOrder?: "newest" | "oldest";
-  filterStatus?: "ALL" | "PENDING" | "APPROVED" | "REJECTED";
+  filterStatus?: "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
   onSortOrderChange?: (value: "newest" | "oldest") => void;
-  onFilterStatusChange?: (value: "ALL" | "PENDING" | "APPROVED" | "REJECTED") => void;
+  onFilterStatusChange?: (value: "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED") => void;
   onDeleteSuccess?: (deletedId: string) => void;
   showControls?: boolean;
 };
@@ -53,7 +54,7 @@ export default function TableMonitoring({
   const [isDeleting, setIsDeleting] = useState(false);
   const [internalSortOrder, setInternalSortOrder] = useState<"newest" | "oldest">("newest");
   const [internalFilterStatus, setInternalFilterStatus] = useState<
-    "ALL" | "PENDING" | "APPROVED" | "REJECTED"
+    "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED"
   >("ALL");
 
   const activeSortOrder = sortOrder ?? internalSortOrder;
@@ -67,7 +68,9 @@ export default function TableMonitoring({
     const filtered =
       activeFilterStatus === "ALL"
         ? tableData
-        : tableData.filter((item) => item.status.toUpperCase() === activeFilterStatus);
+        : tableData.filter(
+            (item) => computeReservationStatus(item.status, item.endTime).toUpperCase() === activeFilterStatus
+          );
 
     return [...filtered].sort((a, b) => {
       const left = new Date(a.createdAt).getTime();
@@ -88,7 +91,7 @@ export default function TableMonitoring({
     setInternalSortOrder(value);
   };
 
-  const handleFilterStatusChange = (value: "ALL" | "PENDING" | "APPROVED" | "REJECTED") => {
+  const handleFilterStatusChange = (value: "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED") => {
     if (onFilterStatusChange) {
       onFilterStatusChange(value);
       return;
@@ -205,13 +208,16 @@ export default function TableMonitoring({
           <select
             value={activeFilterStatus}
             onChange={(event) =>
-              handleFilterStatusChange(event.target.value as "ALL" | "PENDING" | "APPROVED" | "REJECTED")
+              handleFilterStatusChange(
+                event.target.value as "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED"
+              )
             }
             className="bg-transparent text-sm font-semibold outline-none"
           >
             <option value="ALL">Semua Status</option>
             <option value="PENDING">Menunggu</option>
             <option value="APPROVED">Disetujui</option>
+            <option value="COMPLETED">Selesai</option>
             <option value="REJECTED">Ditolak</option>
           </select>
         </label>
@@ -255,14 +261,19 @@ export default function TableMonitoring({
                     </td>
                       <td className="px-2 py-3 text-center align-middle">
                         <div className="flex w-full justify-center">
-                          <StatusBadge status={item.status} />
+                          <StatusBadge status={computeReservationStatus(item.status, item.endTime)} />
                         </div>
                       </td>
                       <td className="px-2 py-3 text-center align-middle">
                         <div className="flex w-full justify-center">
                           <button
                             type="button"
-                            onClick={() => setSelectedRow(item)}
+                            onClick={() =>
+                              setSelectedRow({
+                                ...item,
+                                status: computeReservationStatus(item.status, item.endTime),
+                              })
+                            }
                             className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                           >
                             Lihat Detail

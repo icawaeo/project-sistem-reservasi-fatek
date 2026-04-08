@@ -6,6 +6,7 @@ const styleByGroup = {
   pending: "bg-amber-50 text-amber-700 border-amber-200",
   approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
   rejected: "bg-rose-50 text-rose-700 border-rose-200",
+  completed: "bg-slate-50 text-slate-700 border-slate-200",
   cancelled: "bg-slate-100 text-slate-700 border-slate-200",
 } as const;
 
@@ -19,6 +20,7 @@ const labelMap: Record<string, string> = {
   PENDING: "Menunggu Persetujuan Dekan",
 
   APPROVED: "Disetujui",
+  COMPLETED: "Selesai",
   REJECTED: "Ditolak",
   CANCELLED: "Dibatalkan",
   CANCELED: "Dibatalkan",
@@ -28,6 +30,7 @@ const labelMap: Record<string, string> = {
   "MENUNGGU TTD WAKIL DEKAN 2": "Menunggu TTD Wakil Dekan 2",
   "MENUNGGU KONFIRMASI KABAG": "Menunggu Konfirmasi Kabag",
   DISETUJUI: "Disetujui",
+  SELESAI: "Selesai",
   DITOLAK: "Ditolak",
   DIBATALKAN: "Dibatalkan",
 };
@@ -42,6 +45,9 @@ function resolveStatusLabelAndClass(status: string) {
     }
     if (normalized === "APPROVED" || normalized === "DISETUJUI") {
       return { label, className: styleByGroup.approved };
+    }
+    if (normalized === "COMPLETED" || normalized === "SELESAI") {
+      return { label, className: styleByGroup.completed };
     }
     if (normalized === "REJECTED" || normalized === "DITOLAK") {
       return { label, className: styleByGroup.rejected };
@@ -67,6 +73,9 @@ function resolveStatusLabelAndClass(status: string) {
 
   if (normalized.includes("APPROV")) {
     return { label: "Disetujui", className: styleByGroup.approved };
+  }
+  if (normalized.includes("COMPLETE") || normalized.includes("SELESAI")) {
+    return { label: "Selesai", className: styleByGroup.completed };
   }
   if (normalized.includes("REJECT")) {
     return { label: "Ditolak", className: styleByGroup.rejected };

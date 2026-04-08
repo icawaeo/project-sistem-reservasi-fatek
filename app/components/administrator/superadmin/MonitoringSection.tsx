@@ -22,7 +22,9 @@ export default function MonitoringSection({
   onDeleteSuccess,
 }: MonitoringSectionProps) {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("ALL");
+  const [filterStatus, setFilterStatus] = useState<
+    "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED"
+  >("ALL");
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
@@ -58,13 +60,14 @@ export default function MonitoringSection({
             <select
               value={filterStatus}
               onChange={(event) =>
-                setFilterStatus(event.target.value as "ALL" | "PENDING" | "APPROVED" | "REJECTED")
+                setFilterStatus(event.target.value as "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED")
               }
               className="bg-transparent text-sm font-semibold outline-none"
             >
               <option value="ALL">Semua Status</option>
               <option value="PENDING">Menunggu</option>
               <option value="APPROVED">Disetujui</option>
+              <option value="COMPLETED">Selesai</option>
               <option value="REJECTED">Ditolak</option>
             </select>
           </label>
