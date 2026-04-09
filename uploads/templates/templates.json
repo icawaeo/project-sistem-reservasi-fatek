@@ -1,13 +1,13 @@
 [
   {
-    "id": "f5cfd14d-05ba-4c46-9f20-cdb9f94c5839",
+    "id": "8bab4e31-7b42-4cb3-81b5-670601148e27",
     "name": "Template-Surat-Keterangan-Pengajuan-Reservasi",
     "originalFilename": "Template-Surat-Keterangan-Pengajuan-Reservasi.docx",
-    "storedFilename": "f5cfd14d-05ba-4c46-9f20-cdb9f94c5839.docx",
-    "storedPath": "uploads/templates/f5cfd14d-05ba-4c46-9f20-cdb9f94c5839.docx",
+    "storedFilename": "8bab4e31-7b42-4cb3-81b5-670601148e27.docx",
+    "storedPath": "uploads/templates/8bab4e31-7b42-4cb3-81b5-670601148e27.docx",
     "pdfOriginalFilename": "Template-Surat-Keterangan-Pengajuan-Reservasi.pdf",
-    "pdfStoredFilename": "f5cfd14d-05ba-4c46-9f20-cdb9f94c5839.pdf",
-    "pdfStoredPath": "uploads/templates/f5cfd14d-05ba-4c46-9f20-cdb9f94c5839.pdf",
+    "pdfStoredFilename": "8bab4e31-7b42-4cb3-81b5-670601148e27.pdf",
+    "pdfStoredPath": "uploads/templates/8bab4e31-7b42-4cb3-81b5-670601148e27.pdf",
     "fileSize": 65878,
     "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "pdfMimeType": "application/pdf",
@@ -43,7 +43,7 @@
       "waktu": null
     },
     "isActive": true,
-    "createdAt": "2026-04-08T12:50:27.455Z",
-    "updatedAt": "2026-04-08T12:50:27.455Z"
+    "createdAt": "2026-04-09T07:29:38.882Z",
+    "updatedAt": "2026-04-09T07:29:38.882Z"
   }
 ]

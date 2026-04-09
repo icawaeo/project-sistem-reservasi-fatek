@@ -35,7 +35,7 @@ async function testConnection() {
     await pgPool.end();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Connection failed:', error.message);
+    console.error('Connection failed:', error.message);
     console.error('Full error:', error);
     process.exit(1);
   }

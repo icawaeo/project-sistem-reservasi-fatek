@@ -52,6 +52,11 @@ export default function TemplateSuratManagementContent({
   const [templates, setTemplates] = useState<TemplateSummary[]>(initialTemplates);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(() => {
+    const active = initialTemplates.find((item) => item.isActive);
+    return active?.id ?? initialTemplates[0]?.id ?? null;
+  });
+
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -175,8 +180,26 @@ export default function TemplateSuratManagementContent({
     return templates.find((item) => item.isActive) ?? templates[0] ?? null;
   }, [templates]);
 
+  const selectedTemplate = useMemo(() => {
+    if (!templates.length) {
+      return null;
+    }
+
+    const resolved = templates.find((item) => item.id === selectedTemplateId);
+    return resolved ?? activeTemplate;
+  }, [activeTemplate, selectedTemplateId, templates]);
+
+  const sortedTemplates = useMemo(() => {
+    return [...templates].sort((a, b) => {
+      if (a.isActive !== b.isActive) {
+        return a.isActive ? -1 : 1;
+      }
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+  }, [templates]);
+
   return (
-    <main className="space-y-5 p-4 lg:p-7">
+    <main className="flex min-h-screen flex-col gap-5 p-4 lg:p-7">
       {feedback ? (
         <div
           className={`rounded-xl border px-4 py-3 text-sm lg:px-5 lg:py-4 ${
@@ -189,10 +212,10 @@ export default function TemplateSuratManagementContent({
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
+      <section className="flex flex-1 min-h-0 flex-col rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Tinjau Template Surat</h3>
+            <h3 className="text-base font-bold text-slate-900">Kelola Template Surat</h3>
             <p className="text-sm text-slate-500">Sistem hanya menggunakan 1 template aktif.</p>
           </div>
 
@@ -202,7 +225,7 @@ export default function TemplateSuratManagementContent({
               onClick={() => setIsUploadModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
             >
-              <Plus size={16} /> Upload Template
+              <Plus size={16} /> Template Baru
             </button>
 
             <button
@@ -225,65 +248,87 @@ export default function TemplateSuratManagementContent({
           </div>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-600">
-              <tr>
-                <th className="px-4 py-2 font-semibold">Nama Template</th>
-                <th className="px-4 py-2 font-semibold">Terakhir Update</th>
-                <th className="px-4 py-2 font-semibold">Preview</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {!activeTemplate ? (
-                <tr>
-                  <td className="px-4 py-3 text-slate-500" colSpan={3}>
-                    Belum ada template aktif. Unggah template di atas.
-                  </td>
-                </tr>
-              ) : (
-                <tr key={activeTemplate.id} className="bg-white">
-                  <td className="px-4 py-3 align-top">
-                    <div className="flex items-center gap-2">
-                      <FileText size={16} className="text-slate-400" />
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-slate-900">{activeTemplate.name}</p>
-                        <div className="mt-1">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                            <CheckCircle2 size={12} /> Aktif
-                          </span>
-                        </div>
-                        <p className="mt-2 text-xs text-slate-500">DOCX: {activeTemplate.originalFilename}</p>
-                        {activeTemplate.pdfOriginalFilename ? (
-                          <p className="mt-1 text-xs text-slate-500">PDF: {activeTemplate.pdfOriginalFilename}</p>
+        <div className="mt-5 flex flex-1 min-h-0 flex-col gap-6 lg:flex-row">
+          <section className="flex min-h-0 flex-col gap-4 lg:w-1/3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-600">Daftar Template</h4>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto pr-1">
+              {sortedTemplates.length ? (
+                sortedTemplates.map((item) => {
+                  const isSelected = item.id === (selectedTemplate?.id ?? null);
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSelectedTemplateId(item.id)}
+                      className={`w-full rounded-xl border p-4 text-left transition-colors ${
+                        isSelected
+                          ? "border-slate-900 bg-white"
+                          : "border-slate-200 bg-slate-50 hover:bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            item.isActive
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-slate-200 text-slate-700"
+                          }`}
+                        >
+                          {item.isActive ? "Aktif" : "Nonaktif"}
+                        </span>
+
+                        {isSelected ? (
+                          <span className="text-xs font-semibold text-slate-900">Sedang dilihat</span>
                         ) : null}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 align-top text-slate-600">{formatDateTime(activeTemplate.updatedAt)}</td>
-                  <td className="px-4 py-3">
-                    {activeTemplate.hasPdfPreview ? (
-                      <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-                        <iframe
-                          title="Preview template surat"
-                          src={`/api/admin/templates/${activeTemplate.id}/pdf`}
-                          className="h-80 w-full"
-                        />
+
+                      <p className="mt-3 wrap-break-word font-semibold text-slate-900">{item.name}</p>
+                      <p className="mt-1 text-xs text-slate-500">Terakhir diperbarui: {formatDateTime(item.updatedAt)}</p>
+
+                      <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700">
+                        <FileText size={14} className="text-slate-400" />
+                        <span className="truncate">{item.originalFilename}</span>
                       </div>
-                    ) : (
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                        <p className="text-sm font-semibold text-slate-700">Preview belum tersedia</p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          Sistem akan mengonversi DOCX ke PDF via LibreOffice secara otomatis. Jika preview belum muncul, coba
-                          klik Refresh.
-                        </p>
-                      </div>
-                    )}
-                  </td>
-                </tr>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                  Belum ada template. Klik “Template Baru” untuk mengunggah.
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          </section>
+
+          <section className="flex min-h-0 flex-1 flex-col lg:w-2/3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-600">Preview Dokumen</h4>
+            </div>
+
+            <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+              {!selectedTemplate ? (
+                <div className="px-4 py-4 text-sm text-slate-500">Pilih template untuk melihat preview.</div>
+              ) : selectedTemplate.hasPdfPreview ? (
+                <iframe
+                  title="Preview template surat"
+                  src={`/api/admin/templates/${selectedTemplate.id}/pdf`}
+                  className="h-full w-full flex-1"
+                />
+              ) : (
+                <div className="px-4 py-4">
+                  <p className="text-sm font-semibold text-slate-700">Preview belum tersedia</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Sistem akan mengonversi DOCX ke PDF via LibreOffice secara otomatis. Jika preview belum muncul, coba klik
+                    Refresh.
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </section>
 
