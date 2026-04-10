@@ -1,7 +1,9 @@
+import { ToastProvider } from "@/app/components/ui/toast";
+
 export default function AdministratorLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	return children;
+	return <ToastProvider>{children}</ToastProvider>;
 }

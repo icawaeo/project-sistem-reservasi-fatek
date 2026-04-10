@@ -5,9 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import MonitoringSection from "@/app/components/administrator/superadmin/MonitoringSection";
-import type { MonitoringReservation } from "@/app/components/administrator/superadmin/types";
-import { computeReservationStatus } from "@/app/components/administrator/superadmin/reservationStatus";
+import AdminMonitoringContent from "@/app/components/administrator/admin/AdminMonitoringContent";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
 
 const splitReservationPurpose = (value: string | null) => {
 	if (!value) {
@@ -34,6 +33,9 @@ export default async function AdminMonitoringPengajuanPage() {
 		redirect("/administrator/superadmin/monitoring-pengajuan");
 	}
 
+	const role = (session.user.role || "ADMIN").toUpperCase();
+	const adminRole: AdminRole = role === "ADMIN_DEKAN" || role === "ADMIN_WD2" ? (role as AdminRole) : "ADMIN";
+
 	const reservations = await prisma.reservation.findMany({
 		include: {
 			user: {
@@ -57,9 +59,8 @@ export default async function AdminMonitoringPengajuanPage() {
 		},
 	});
 
-	const tableData: MonitoringReservation[] = reservations.map((item) => {
+	const tableData: AdminReservationRecord[] = reservations.map((item) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
-		const computedStatus = computeReservationStatus(item.res_status, item.res_endTime);
 
 		return {
 			id: item.res_id,
@@ -68,9 +69,9 @@ export default async function AdminMonitoringPengajuanPage() {
 			endTime: item.res_endTime.toISOString(),
 			activityName: parsedPurpose.activityName,
 			purpose: parsedPurpose.purpose,
-			status: computedStatus,
+			rawPurpose: item.res_purpose || "-",
+			status: item.res_status,
 			documentUrl: item.res_documentUrl,
-			decisionDocumentUrl: computedStatus === "PENDING" ? null : item.res_documentUrl,
 			user: {
 				name: item.user.name,
 				userType: item.user.userType,
@@ -105,13 +106,7 @@ export default async function AdminMonitoringPengajuanPage() {
 						role="admin"
 					/>
 
-					<main className="p-4 lg:p-7">
-						<MonitoringSection
-							data={tableData}
-							lastSync={lastSync}
-							primaryStatusLabel="Menunggu Persetujuan"
-						/>
-					</main>
+					<AdminMonitoringContent initialData={tableData} adminRole={adminRole} lastSync={lastSync} />
 				</div>
 			</div>
 		</div>

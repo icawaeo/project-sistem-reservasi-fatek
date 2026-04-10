@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, X } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import ImageUpload from "./ImageUpload";
 import type { BuildingItem, BuildingPayload, BuildingStatus } from "./building-types";
 
@@ -40,8 +41,8 @@ export default function BuildingFormModal({
   onClose,
   onSubmit,
 }: BuildingFormModalProps) {
+  const { pushToast } = useToast();
   const [form, setForm] = useState<FormState>(initialState);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -58,12 +59,10 @@ export default function BuildingFormModal({
         status: building.status,
         imageUrl: building.imageUrl,
       });
-      setError(null);
       return;
     }
 
     setForm(initialState);
-    setError(null);
   }, [isOpen, mode, building]);
 
   const hasValidTimeRange = useMemo(() => {
@@ -93,22 +92,21 @@ export default function BuildingFormModal({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
 
     const name = form.name.trim();
 
     if (!name) {
-      setError("Nama gedung belum diisi.");
+      pushToast({ type: "warning", message: "Nama gedung belum diisi." });
       return;
     }
 
     if (form.operationalDays.length === 0) {
-      setError("Pilih minimal satu hari operasional.");
+      pushToast({ type: "warning", message: "Pilih minimal satu hari operasional." });
       return;
     }
 
     if (!hasValidTimeRange) {
-      setError("Jam buka harus lebih awal dari jam tutup.");
+      pushToast({ type: "warning", message: "Jam buka harus lebih awal dari jam tutup." });
       return;
     }
 
@@ -126,7 +124,10 @@ export default function BuildingFormModal({
 
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data.");
+      pushToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -264,10 +265,6 @@ export default function BuildingFormModal({
             onChange={(value) => setForm((prev) => ({ ...prev, imageUrl: value }))}
             label="Foto Gedung"
           />
-
-          {error ? (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div>
-          ) : null}
 
           <div className="flex justify-end gap-2 border-t border-slate-200 pt-3">
             <button

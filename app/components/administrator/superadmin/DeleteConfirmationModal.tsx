@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useToast } from "@/app/components/ui/toast";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 
 type DeleteConfirmationModalProps = {
@@ -20,14 +20,16 @@ export default function DeleteConfirmationModal({
   onCancel,
   isLoading = false,
 }: DeleteConfirmationModalProps) {
-  const [error, setError] = useState<string | null>(null);
+  const { pushToast } = useToast();
 
   const handleConfirm = async () => {
     try {
-      setError(null);
       await onConfirm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+      pushToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Terjadi kesalahan",
+      });
     }
   };
 
@@ -67,13 +69,6 @@ export default function DeleteConfirmationModal({
             <X size={18} />
           </button>
         </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="border-b border-rose-200 bg-rose-50 px-5 py-3">
-            <p className="text-sm text-rose-700">{error}</p>
-          </div>
-        )}
 
         {/* Body */}
         <div className="px-5 py-4">

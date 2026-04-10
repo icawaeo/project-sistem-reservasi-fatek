@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import UserFilter from "./UserFilter";
 import UserFormModal from "./UserFormModal";
@@ -28,6 +29,7 @@ const buildErrorMessage = async (response: Response, fallbackMessage: string) =>
 };
 
 export default function UserManagementContent({ initialUsers }: UserManagementContentProps) {
+  const { pushToast } = useToast();
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
   const [resendCooldownByUserId, setResendCooldownByUserId] = useState<Record<string, number>>(() => {
     return initialUsers.reduce<Record<string, number>>((acc, user) => {
@@ -52,8 +54,6 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
   const [isDeletingSingle, setIsDeletingSingle] = useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
-
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const filteredUsers = useMemo(() => {
     const loweredSearch = search.trim().toLowerCase();
@@ -153,19 +153,23 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
     setCurrentPage(1);
 
     if (created.inviteEmailSent) {
-      setFeedback({ type: "success", message: "User berhasil ditambahkan. Link set password telah dikirim ke email user." });
-      return;
-    }
-
-    if (typeof created.setupUrl === "string" && created.setupUrl.trim()) {
-      setFeedback({
+      pushToast({
         type: "success",
-        message: `User berhasil ditambahkan. SMTP belum aktif, gunakan link manual ini: ${created.setupUrl}`,
+        message: "User berhasil ditambahkan. Link set password telah dikirim ke email user.",
       });
       return;
     }
 
-    setFeedback({ type: "success", message: "User berhasil ditambahkan." });
+    if (typeof created.setupUrl === "string" && created.setupUrl.trim()) {
+      pushToast({
+        type: "success",
+        message: `User berhasil ditambahkan. SMTP belum aktif, gunakan link manual ini: ${created.setupUrl}`,
+        durationMs: 8000,
+      });
+      return;
+    }
+
+    pushToast({ type: "success", message: "User berhasil ditambahkan." });
   };
 
   const handleUpdateUser = async (payload: UserPayload) => {
@@ -189,7 +193,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
 
     setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
     setEditingUser(null);
-    setFeedback({ type: "success", message: "Data user berhasil diperbarui." });
+    pushToast({ type: "success", message: "Data user berhasil diperbarui." });
   };
 
   const handleDeleteUser = async () => {
@@ -211,12 +215,8 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
       setUsers((prev) => prev.filter((item) => item.id !== deletingUser.id));
       setSelectedIds((prev) => prev.filter((id) => id !== deletingUser.id));
       setDeletingUser(null);
-      setFeedback({ type: "success", message: "User berhasil dihapus." });
+      pushToast({ type: "success", message: "User berhasil dihapus." });
     } catch (error) {
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Terjadi kesalahan saat menghapus user.",
-      });
       throw error;
     } finally {
       setIsDeletingSingle(false);
@@ -250,19 +250,20 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
     }
 
     if (payload.inviteEmailSent) {
-      setFeedback({ type: "success", message: `Link verifikasi berhasil dikirim ke ${user.email}.` });
+      pushToast({ type: "success", message: `Link verifikasi berhasil dikirim ke ${user.email}.` });
       return;
     }
 
     if (typeof payload.setupUrl === "string" && payload.setupUrl.trim()) {
-      setFeedback({
+      pushToast({
         type: "success",
         message: `SMTP belum aktif. Gunakan link verifikasi manual: ${payload.setupUrl}`,
+        durationMs: 8000,
       });
       return;
     }
 
-    setFeedback({ type: "success", message: "Link verifikasi berhasil dibuat." });
+    pushToast({ type: "success", message: "Link verifikasi berhasil dibuat." });
   };
 
   const handleBulkDelete = async () => {
@@ -291,12 +292,8 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
       setUsers((prev) => prev.filter((item) => !deletedIds.includes(item.id)));
       setSelectedIds([]);
       setIsBulkDeleteOpen(false);
-      setFeedback({ type: "success", message: `${deletedIds.length} user berhasil dihapus.` });
+      pushToast({ type: "success", message: `${deletedIds.length} user berhasil dihapus.` });
     } catch (error) {
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Terjadi kesalahan saat menghapus user terpilih.",
-      });
       throw error;
     } finally {
       setIsDeletingBulk(false);
@@ -391,18 +388,6 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
           </div>
         ) : null}
 
-        {feedback ? (
-          <div
-            className={`mt-4 rounded-lg border px-3 py-2 text-sm ${
-              feedback.type === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-rose-200 bg-rose-50 text-rose-700"
-            }`}
-          >
-            {feedback.message}
-          </div>
-        ) : null}
-
         <div className="mt-4">
           <UserTable
             users={paginatedUsers}
@@ -414,7 +399,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
             resendCooldownByUserId={resendCooldownByUserId}
             onSendVerificationLink={(user) => {
               handleSendVerificationLink(user).catch((error) => {
-                setFeedback({
+                pushToast({
                   type: "error",
                   message: error instanceof Error ? error.message : "Gagal mengirim link verifikasi.",
                 });

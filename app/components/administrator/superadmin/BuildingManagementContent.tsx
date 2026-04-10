@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Building2, Filter, Plus, Search } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import BuildingFormModal from "./BuildingFormModal";
 import BuildingTable from "./BuildingTable";
@@ -25,6 +26,7 @@ const buildErrorMessage = async (response: Response, fallbackMessage: string) =>
 };
 
 export default function BuildingManagementContent({ initialBuildings }: BuildingManagementContentProps) {
+  const { pushToast } = useToast();
   const [buildings, setBuildings] = useState<BuildingItem[]>(initialBuildings);
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"ALL" | "aktif" | "maintenance">("ALL");
@@ -33,8 +35,6 @@ export default function BuildingManagementContent({ initialBuildings }: Building
   const [editingBuilding, setEditingBuilding] = useState<BuildingItem | null>(null);
   const [deletingBuilding, setDeletingBuilding] = useState<BuildingItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const filteredBuildings = useMemo(() => {
     const loweredSearch = search.trim().toLowerCase();
@@ -81,7 +81,7 @@ export default function BuildingManagementContent({ initialBuildings }: Building
     const createdBuilding: BuildingItem = await response.json();
 
     setBuildings((prev) => sortByName([...prev, createdBuilding]));
-    setFeedback({ type: "success", message: "Gedung berhasil ditambahkan." });
+    pushToast({ type: "success", message: "Gedung berhasil ditambahkan." });
   };
 
   const handleUpdateBuilding = async (payload: BuildingPayload) => {
@@ -105,7 +105,7 @@ export default function BuildingManagementContent({ initialBuildings }: Building
 
     setBuildings((prev) => sortByName(prev.map((item) => (item.id === updatedBuilding.id ? updatedBuilding : item))));
     setEditingBuilding(null);
-    setFeedback({ type: "success", message: "Data gedung berhasil diperbarui." });
+    pushToast({ type: "success", message: "Data gedung berhasil diperbarui." });
   };
 
   const handleDeleteBuilding = async () => {
@@ -125,13 +125,9 @@ export default function BuildingManagementContent({ initialBuildings }: Building
       }
 
       setBuildings((prev) => prev.filter((building) => building.id !== deletingBuilding.id));
-      setFeedback({ type: "success", message: "Gedung berhasil dihapus." });
+      pushToast({ type: "success", message: "Gedung berhasil dihapus." });
       setDeletingBuilding(null);
     } catch (error) {
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Terjadi kesalahan saat menghapus gedung.",
-      });
       throw error;
     } finally {
       setIsDeleting(false);
@@ -192,18 +188,6 @@ export default function BuildingManagementContent({ initialBuildings }: Building
             {filteredBuildings.length} Gedung
           </span>
         </div>
-
-        {feedback ? (
-          <div
-            className={`mt-4 rounded-lg border px-3 py-2 text-sm ${
-              feedback.type === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-rose-200 bg-rose-50 text-rose-700"
-            }`}
-          >
-            {feedback.message}
-          </div>
-        ) : null}
 
         <div className="mt-4">
           <BuildingTable

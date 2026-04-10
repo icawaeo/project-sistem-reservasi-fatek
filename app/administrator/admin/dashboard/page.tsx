@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import StatCard from "@/app/components/administrator/StatCard";
-import { Clock, CheckCircle, XCircle, FileText } from "lucide-react";
+import AdminDashboardContent from "@/app/components/administrator/admin/AdminDashboardContent";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
 
 export default async function AdminDashboardPage() {
 	const session = await getServerSession(authOptions);
@@ -14,16 +14,78 @@ export default async function AdminDashboardPage() {
 		redirect("/auth");
 	}
 
+	const role = (session.user.role || "ADMIN").toUpperCase();
+	const adminRole: AdminRole = role === "ADMIN_DEKAN" || role === "ADMIN_WD2" ? (role as AdminRole) : "ADMIN";
+
+	const splitReservationPurpose = (value: string | null) => {
+		if (!value) {
+			return { activityName: "-", purpose: "-" };
+		}
+
+		const [activityName, ...purposeParts] = value.split(" - ");
+		const purpose = purposeParts.join(" - ").trim();
+
+		return {
+			activityName: activityName.trim() || "-",
+			purpose: purpose || "-",
+		};
+	};
+
 	const reservations = await prisma.reservation.findMany({
+		include: {
+			user: {
+				select: {
+					name: true,
+					userType: true,
+					identifier: true,
+					email: true,
+				},
+			},
+			room: {
+				select: {
+					room_name: true,
+					room_building: true,
+					room_locDetail: true,
+				},
+			},
+		},
 		orderBy: {
 			res_date: "desc",
 		},
-		take: 100,
 	});
 
-	const totalPending = reservations.filter((item) => item.res_status.toUpperCase() === "PENDING").length;
-	const totalApproved = reservations.filter((item) => item.res_status.toUpperCase() === "APPROVED").length;
-	const totalRejected = reservations.filter((item) => item.res_status.toUpperCase() === "REJECTED").length;
+	const tableData: AdminReservationRecord[] = reservations.map((item) => {
+		const parsedPurpose = splitReservationPurpose(item.res_purpose);
+
+		return {
+			id: item.res_id,
+			createdAt: item.res_date.toISOString(),
+			startTime: item.res_startTime.toISOString(),
+			endTime: item.res_endTime.toISOString(),
+			activityName: parsedPurpose.activityName,
+			purpose: parsedPurpose.purpose,
+			rawPurpose: item.res_purpose || "-",
+			status: item.res_status,
+			documentUrl: item.res_documentUrl,
+			user: {
+				name: item.user.name,
+				userType: item.user.userType,
+				identifier: item.user.identifier,
+				email: item.user.email,
+			},
+			room: {
+				name: item.room.room_name,
+				building: item.room.room_building,
+				location: item.room.room_locDetail,
+			},
+		};
+	});
+
+	const lastSync = new Intl.DateTimeFormat("id-ID", {
+		dateStyle: "medium",
+		timeStyle: "short",
+		timeZone: "Asia/Makassar",
+	}).format(new Date());
 
 	return (
 		<div className="min-h-screen bg-slate-100">
@@ -39,62 +101,7 @@ export default async function AdminDashboardPage() {
 						role="admin"
 					/>
 
-					<main className="space-y-5 p-4 lg:p-7">
-						<section className="grid gap-4 sm:grid-cols-4">
-							<StatCard
-								icon={FileText}
-								label="Pengajuan Pending"
-								value={totalPending}
-								sublabel="Menunggu Persetujuan"
-								color="amber"
-								iconColor="amber"
-							/>
-							<StatCard
-								icon={CheckCircle}
-								label="Pengajuan Disetujui"
-								value={totalApproved}
-								sublabel={totalApproved > 0 ? "Telah Disetujui" : "Belum Ada"}
-								color="emerald"
-								iconColor="emerald"
-							/>
-							<StatCard
-								icon={XCircle}
-								label="Pengajuan Ditolak"
-								value={totalRejected}
-								sublabel={totalRejected > 0 ? "Telah Ditolak" : "Belum Ada"}
-								color="rose"
-								iconColor="rose"
-							/>
-							<StatCard
-								icon={Clock}
-								label="Total Pengajuan"
-								value={reservations.length}
-								sublabel="Semua Status"
-								color="slate"
-								iconColor="slate"
-							/>
-						</section>
-
-						<section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
-							<h2 className="text-base font-bold text-slate-900">Data Akun</h2>
-							<p className="text-sm text-slate-500">Informasi akun admin yang sedang login.</p>
-
-							<div className="mt-4 grid gap-3 sm:grid-cols-3">
-								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-									<p className="text-xs uppercase tracking-wide text-slate-500">Nama</p>
-									<p className="mt-1 text-sm font-semibold text-slate-900">{session.user.name || "-"}</p>
-								</div>
-								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-									<p className="text-xs uppercase tracking-wide text-slate-500">Email</p>
-									<p className="mt-1 text-sm font-semibold text-slate-900">{session.user.email || "-"}</p>
-								</div>
-								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-									<p className="text-xs uppercase tracking-wide text-slate-500">Role</p>
-									<p className="mt-1 text-sm font-semibold text-slate-900">Admin</p>
-								</div>
-							</div>
-						</section>
-					</main>
+					<AdminDashboardContent initialData={tableData} adminRole={adminRole} lastSync={lastSync} />
 				</div>
 			</div>
 		</div>

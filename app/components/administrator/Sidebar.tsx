@@ -163,7 +163,7 @@ export default function Sidebar({ role }: SidebarProps) {
       >
         <button
           type="button"
-          onClick={() => signOut({ callbackUrl: "/auth" })}
+          onClick={() => signOut({ callbackUrl: "/" })}
           title="Keluar"
           className={`flex w-full items-center rounded-lg py-2.5 text-sm font-medium text-red-600 motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-red-50 ${
             isExpanded ? "gap-2.5 px-3 justify-start" : "justify-center px-2"

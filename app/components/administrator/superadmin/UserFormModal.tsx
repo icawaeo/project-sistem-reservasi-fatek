@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import type { UserItem, UserPayload } from "./user-types";
 import { USER_CATEGORY_OPTIONS, USER_ROLE_OPTIONS } from "./user-types";
 
@@ -30,8 +31,8 @@ const initialState: FormState = {
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }: UserFormModalProps) {
+  const { pushToast } = useToast();
   const [form, setForm] = useState<FormState>(initialState);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -46,28 +47,25 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
         userCategory: user.userCategory,
         role: user.role,
       });
-      setError(null);
       return;
     }
 
     setForm(initialState);
-    setError(null);
   }, [isOpen, mode, user]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
 
     const name = form.name.trim();
     const email = form.email.trim().toLowerCase();
 
     if (!name) {
-      setError("Nama user belum diisi.");
+      pushToast({ type: "warning", message: "Nama user belum diisi." });
       return;
     }
 
     if (!EMAIL_PATTERN.test(email)) {
-      setError("Format email tidak valid.");
+      pushToast({ type: "warning", message: "Format email tidak valid." });
       return;
     }
 
@@ -83,7 +81,10 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
 
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data user.");
+      pushToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data user.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -184,10 +185,6 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
             <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-700">
               Sistem akan otomatis mengirim link set kata sandi ke email user.
             </div>
-          ) : null}
-
-          {error ? (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div>
           ) : null}
 
           <div className="flex justify-end gap-2 border-t border-slate-200 pt-3">

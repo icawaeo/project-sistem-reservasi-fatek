@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, Clock, Mail, Phone, User, X } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import type { MonitoringReservation } from "./types";
 
 type RoomOption = {
@@ -40,11 +41,11 @@ export default function AddReservationModal({
   buildingOptions,
   onCreated,
 }: AddReservationModalProps) {
+  const { pushToast } = useToast();
   const [form, setForm] = useState(initialForm);
   const [roomOptions, setRoomOptions] = useState<RoomOption[]>([]);
   const [isCheckingRooms, setIsCheckingRooms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const selectedRoom = useMemo(
     () => roomOptions.find((room) => room.room_id === form.roomId) ?? null,
@@ -59,7 +60,6 @@ export default function AddReservationModal({
     if (!isOpen) {
       setForm(initialForm);
       setRoomOptions([]);
-      setErrorMessage("");
       setIsCheckingRooms(false);
       setIsSubmitting(false);
       return;
@@ -74,7 +74,6 @@ export default function AddReservationModal({
 
     const fetchRooms = async () => {
       setIsCheckingRooms(true);
-      setErrorMessage("");
 
       try {
         const params = new URLSearchParams({
@@ -105,7 +104,11 @@ export default function AddReservationModal({
         }
 
         setRoomOptions([]);
-        setErrorMessage(error instanceof Error ? error.message : "Gagal mengecek ketersediaan ruangan");
+
+        pushToast({
+          type: "error",
+          message: error instanceof Error ? error.message : "Gagal mengecek ketersediaan ruangan",
+        });
       } finally {
         setIsCheckingRooms(false);
       }
@@ -145,15 +148,14 @@ export default function AddReservationModal({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setErrorMessage("");
 
     if (!form.roomId) {
-      setErrorMessage("Pilih ruangan yang tersedia terlebih dahulu.");
+      pushToast({ type: "warning", message: "Pilih ruangan yang tersedia terlebih dahulu." });
       return;
     }
 
     if (!form.borrowerName || !form.borrowerEmail || !form.borrowerPhone || !form.activityName) {
-      setErrorMessage("Mohon lengkapi data peminjam dan detail kegiatan.");
+      pushToast({ type: "warning", message: "Mohon lengkapi data peminjam dan detail kegiatan." });
       return;
     }
 
@@ -186,10 +188,14 @@ export default function AddReservationModal({
         throw new Error(payload.error || "Gagal menambahkan pengajuan");
       }
 
+      pushToast({ type: "success", message: "Pengajuan berhasil ditambahkan." });
       onCreated(payload.data as MonitoringReservation);
       onClose();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Gagal menambahkan pengajuan");
+      pushToast({
+        type: "error",
+        message: error instanceof Error ? error.message : "Gagal menambahkan pengajuan",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -419,12 +425,6 @@ export default function AddReservationModal({
               </label>
             </div>
           </section>
-
-          {errorMessage ? (
-            <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
-              {errorMessage}
-            </p>
-          ) : null}
 
           <div className="flex items-center justify-end gap-2 border-t border-slate-200 pt-4">
             <button

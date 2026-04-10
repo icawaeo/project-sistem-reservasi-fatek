@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CheckCircle2, FileText, Loader2, Plus, Trash2, X } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 
 export type TemplateSummary = {
   id: string;
@@ -15,8 +16,6 @@ export type TemplateSummary = {
   createdAt: string;
   updatedAt: string;
 };
-
-type Feedback = { type: "success" | "error"; message: string };
 
 const formatDateTime = (value: string) => {
   const date = new Date(value);
@@ -49,8 +48,8 @@ export default function TemplateSuratManagementContent({
 }: {
   initialTemplates: TemplateSummary[];
 }) {
+  const { pushToast } = useToast();
   const [templates, setTemplates] = useState<TemplateSummary[]>(initialTemplates);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(() => {
     const active = initialTemplates.find((item) => item.isActive);
@@ -104,7 +103,6 @@ export default function TemplateSuratManagementContent({
   };
 
   const handleUpload = async () => {
-    setFeedback(null);
     setUploadError(null);
 
     if (!uploadDocx) {
@@ -130,13 +128,20 @@ export default function TemplateSuratManagementContent({
 
       await response.json();
 
-      setFeedback({ type: "success", message: "Template berhasil ditambahkan." });
+      pushToast({ type: "success", message: "Template berhasil ditambahkan." });
       closeUploadModal();
 
-      await refreshList();
+      try {
+        await refreshList();
+      } catch (error) {
+        pushToast({
+          type: "error",
+          message: error instanceof Error ? error.message : "Gagal memuat daftar template.",
+        });
+      }
       // template baru otomatis menjadi template aktif
     } catch (error) {
-      setFeedback({
+      pushToast({
         type: "error",
         message: error instanceof Error ? error.message : "Terjadi kesalahan saat mengunggah template.",
       });
@@ -150,8 +155,6 @@ export default function TemplateSuratManagementContent({
       return;
     }
 
-    setFeedback(null);
-
     const confirmed = window.confirm("Hapus template aktif? File DOCX dan PDF preview juga akan terhapus.");
     if (!confirmed) {
       return;
@@ -164,10 +167,18 @@ export default function TemplateSuratManagementContent({
         throw new Error(await buildErrorMessage(response, "Gagal menghapus template."));
       }
 
-      setFeedback({ type: "success", message: "Template berhasil dihapus." });
-      await refreshList();
+      pushToast({ type: "success", message: "Template berhasil dihapus." });
+
+      try {
+        await refreshList();
+      } catch (error) {
+        pushToast({
+          type: "error",
+          message: error instanceof Error ? error.message : "Gagal memuat daftar template.",
+        });
+      }
     } catch (error) {
-      setFeedback({
+      pushToast({
         type: "error",
         message: error instanceof Error ? error.message : "Terjadi kesalahan saat menghapus template.",
       });
@@ -200,18 +211,6 @@ export default function TemplateSuratManagementContent({
 
   return (
     <main className="flex min-h-screen flex-col gap-5 p-4 lg:p-7">
-      {feedback ? (
-        <div
-          className={`rounded-xl border px-4 py-3 text-sm lg:px-5 lg:py-4 ${
-            feedback.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-rose-200 bg-rose-50 text-rose-800"
-          }`}
-        >
-          {feedback.message}
-        </div>
-      ) : null}
-
       <section className="flex flex-1 min-h-0 flex-col rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -230,7 +229,14 @@ export default function TemplateSuratManagementContent({
 
             <button
               type="button"
-              onClick={() => refreshList().catch(() => null)}
+              onClick={() =>
+                refreshList().catch((error) => {
+                  pushToast({
+                    type: "error",
+                    message: error instanceof Error ? error.message : "Gagal memuat daftar template.",
+                  });
+                })
+              }
               className="w-fit rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Refresh
@@ -280,10 +286,6 @@ export default function TemplateSuratManagementContent({
                         >
                           {item.isActive ? "Aktif" : "Nonaktif"}
                         </span>
-
-                        {isSelected ? (
-                          <span className="text-xs font-semibold text-slate-900">Sedang dilihat</span>
-                        ) : null}
                       </div>
 
                       <p className="mt-3 wrap-break-word font-semibold text-slate-900">{item.name}</p>
@@ -313,11 +315,20 @@ export default function TemplateSuratManagementContent({
               {!selectedTemplate ? (
                 <div className="px-4 py-4 text-sm text-slate-500">Pilih template untuk melihat preview.</div>
               ) : selectedTemplate.hasPdfPreview ? (
-                <iframe
-                  title="Preview template surat"
-                  src={`/api/admin/templates/${selectedTemplate.id}/pdf`}
+                <object
+                  key={selectedTemplate.id}
+                  data={`/api/admin/templates/${selectedTemplate.id}/pdf`}
+                  type="application/pdf"
                   className="h-full w-full flex-1"
-                />
+                  title="Preview template surat"
+                >
+                  <div className="px-4 py-4">
+                    <p className="text-sm font-semibold text-slate-700">PDF tidak ditemukan</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      File preview PDF tidak tersedia atau gagal dimuat. Coba klik Refresh atau unggah ulang template.
+                    </p>
+                  </div>
+                </object>
               ) : (
                 <div className="px-4 py-4">
                   <p className="text-sm font-semibold text-slate-700">Preview belum tersedia</p>

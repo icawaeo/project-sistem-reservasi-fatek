@@ -47,7 +47,24 @@ export default function PreviewPage() {
           type="application/pdf"
           style={{ width: "100%", height: "100%" }}
           title={previewData.name}
-        />
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              backgroundColor: "#0f172a",
+              color: "#e2e8f0",
+              fontFamily: "sans-serif",
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <p style={{ marginBottom: "12px" }}>PDF tidak ditemukan atau gagal dimuat.</p>
+              <p style={{ fontSize: "12px", color: "#cbd5e1" }}>Silakan kembali dan coba preview lagi.</p>
+            </div>
+          </div>
+        </object>
       ) : (
         <iframe
           src={previewData.dataUrl}

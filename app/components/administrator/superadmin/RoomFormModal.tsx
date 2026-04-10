@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import ImageUpload from "./ImageUpload";
 import type { RoomItem, RoomPayload, RoomStatus } from "./room-types";
 
@@ -44,8 +45,8 @@ export default function RoomFormModal({
   onClose,
   onSubmit,
 }: RoomFormModalProps) {
+  const { pushToast } = useToast();
   const [form, setForm] = useState<FormState>(initialState);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -64,12 +65,10 @@ export default function RoomFormModal({
         imageUrl: room.imageUrl,
         facilityInput: "",
       });
-      setError(null);
       return;
     }
 
     setForm(initialState);
-    setError(null);
   }, [isOpen, mode, room, buildings]);
 
   const addFacility = (rawValue: string) => {
@@ -99,23 +98,22 @@ export default function RoomFormModal({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
 
     const capacity = Number(form.capacity);
     const roomName = (form.name ?? "").trim();
 
     if (!roomName) {
-      setError("Nama ruangan belum diisi.");
+      pushToast({ type: "warning", message: "Nama ruangan belum diisi." });
       return;
     }
 
     if (!form.building.trim()) {
-      setError("Belum ada gedung yang dipilih.");
+      pushToast({ type: "warning", message: "Belum ada gedung yang dipilih." });
       return;
     }
 
     if (Number.isNaN(capacity) || capacity <= 0) {
-      setError("Kapasitas wajib diisi dengan benar.");
+      pushToast({ type: "warning", message: "Kapasitas wajib diisi dengan benar." });
       return;
     }
 
@@ -134,7 +132,10 @@ export default function RoomFormModal({
 
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data.");
+      pushToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -307,10 +308,6 @@ export default function RoomFormModal({
           </div>
 
           <ImageUpload value={form.imageUrl} onChange={(value) => setForm((prev) => ({ ...prev, imageUrl: value }))} />
-
-          {error ? (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div>
-          ) : null}
 
           <div className="flex justify-end gap-2 border-t border-slate-200 pt-3">
             <button

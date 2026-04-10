@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Building2, Filter, Plus, Search } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import RoomFormModal from "./RoomFormModal";
 import RoomTable from "./RoomTable";
@@ -32,6 +33,7 @@ export default function RoomManagementContent({
   initialRooms,
   initialBuildings,
 }: RoomManagementContentProps) {
+  const { pushToast } = useToast();
   const [rooms, setRooms] = useState<RoomItem[]>(initialRooms);
   const buildings = useMemo(() => sortAlphabetically(initialBuildings), [initialBuildings]);
   const [search, setSearch] = useState("");
@@ -43,8 +45,6 @@ export default function RoomManagementContent({
   const [editingRoom, setEditingRoom] = useState<RoomItem | null>(null);
   const [deletingRoom, setDeletingRoom] = useState<RoomItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const filteredRooms = useMemo(() => {
     const loweredSearch = search.trim().toLowerCase();
@@ -116,7 +116,7 @@ export default function RoomManagementContent({
 
     setCurrentPage(1);
 
-    setFeedback({ type: "success", message: "Ruangan berhasil ditambahkan." });
+    pushToast({ type: "success", message: "Ruangan berhasil ditambahkan." });
   };
 
   const handleUpdateRoom = async (payload: RoomPayload) => {
@@ -143,7 +143,7 @@ export default function RoomManagementContent({
     });
 
     setEditingRoom(null);
-    setFeedback({ type: "success", message: "Data ruangan berhasil diperbarui." });
+    pushToast({ type: "success", message: "Data ruangan berhasil diperbarui." });
   };
 
   const handleDeleteRoom = async () => {
@@ -166,13 +166,9 @@ export default function RoomManagementContent({
         return prev.filter((room) => room.id !== deletingRoom.id);
       });
 
-      setFeedback({ type: "success", message: "Ruangan berhasil dihapus." });
+      pushToast({ type: "success", message: "Ruangan berhasil dihapus." });
       setDeletingRoom(null);
     } catch (error) {
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Terjadi kesalahan saat menghapus ruangan.",
-      });
       throw error;
     } finally {
       setIsDeleting(false);
@@ -256,18 +252,6 @@ export default function RoomManagementContent({
             {filteredRooms.length} Ruangan
           </span>
         </div>
-
-        {feedback ? (
-          <div
-            className={`mt-4 rounded-lg border px-3 py-2 text-sm ${
-              feedback.type === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-rose-200 bg-rose-50 text-rose-700"
-            }`}
-          >
-            {feedback.message}
-          </div>
-        ) : null}
 
         <div className="mt-4">
           <RoomTable rooms={paginatedRooms} onEdit={setEditingRoom} onDelete={setDeletingRoom} />

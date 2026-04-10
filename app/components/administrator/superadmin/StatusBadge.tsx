@@ -17,7 +17,11 @@ const labelMap: Record<string, string> = {
   PENDING_KABAG: "Menunggu Konfirmasi Kabag",
 
   // Fallback pending (jika belum ada granular step)
-  PENDING: "Menunggu Persetujuan Dekan",
+  PENDING: "Menunggu Konfirmasi Kabag",
+
+  REJECTED_KABAG: "Ditolak Kabag",
+  REJECTED_DEKAN: "Ditolak Dekan",
+  REJECTED_WD2: "Ditolak Wakil Dekan 2",
 
   APPROVED: "Disetujui",
   COMPLETED: "Selesai",
@@ -43,13 +47,13 @@ function resolveStatusLabelAndClass(status: string) {
     if (normalized.startsWith("PENDING")) {
       return { label, className: styleByGroup.pending };
     }
-    if (normalized === "APPROVED" || normalized === "DISETUJUI") {
+    if (normalized === "APPROVED" || normalized === "DISETUJUI" || normalized.startsWith("APPROVED")) {
       return { label, className: styleByGroup.approved };
     }
     if (normalized === "COMPLETED" || normalized === "SELESAI") {
       return { label, className: styleByGroup.completed };
     }
-    if (normalized === "REJECTED" || normalized === "DITOLAK") {
+    if (normalized === "REJECTED" || normalized === "DITOLAK" || normalized.startsWith("REJECTED")) {
       return { label, className: styleByGroup.rejected };
     }
     if (normalized === "CANCELLED" || normalized === "CANCELED" || normalized === "DIBATALKAN") {

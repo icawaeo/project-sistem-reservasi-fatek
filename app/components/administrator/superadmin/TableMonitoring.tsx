@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { useToast } from "@/app/components/ui/toast";
 import type { MonitoringReservation } from "./types";
 import StatusBadge from "./StatusBadge";
 import MonitoringDetailModal from "./MonitoringDetailModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import { computeReservationStatus } from "./reservationStatus";
+import { computeReservationStatus, resolveReservationStatusGroup } from "./reservationStatus";
 
 const PAGE_SIZE = 10;
 
@@ -44,6 +45,7 @@ export default function TableMonitoring({
   onDeleteSuccess,
   showControls = true,
 }: TableMonitoringProps) {
+  const { pushToast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [tableData, setTableData] = useState<MonitoringReservation[]>(data);
   const [selectedRow, setSelectedRow] = useState<MonitoringReservation | null>(null);
@@ -68,9 +70,10 @@ export default function TableMonitoring({
     const filtered =
       activeFilterStatus === "ALL"
         ? tableData
-        : tableData.filter(
-            (item) => computeReservationStatus(item.status, item.endTime).toUpperCase() === activeFilterStatus
-          );
+        : tableData.filter((item) => {
+            const computed = computeReservationStatus(item.status, item.endTime);
+            return resolveReservationStatusGroup(computed) === activeFilterStatus;
+          });
 
     return [...filtered].sort((a, b) => {
       const left = new Date(a.createdAt).getTime();
@@ -129,6 +132,8 @@ export default function TableMonitoring({
 
       // Close modal
       setDeleteModal({ isOpen: false, item: null });
+
+      pushToast({ type: "success", message: "Pengajuan berhasil dihapus." });
     } finally {
       setIsDeleting(false);
     }
