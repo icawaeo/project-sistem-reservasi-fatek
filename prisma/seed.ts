@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
@@ -22,6 +22,7 @@ type SeedUser = {
   email: string;
   identifier: string;
   userType: "STAFF";
+  role: UserRole;
 };
 
 const dummyPassword = "Admin12345";
@@ -32,12 +33,28 @@ const userSeeds: SeedUser[] = [
     email: "superadmin@unsrat.ac.id",
     identifier: "19870001",
     userType: "STAFF",
+    role: UserRole.SUPERADMIN,
   },
   {
     name: "Admin Dummy",
     email: "admin@unsrat.ac.id",
     identifier: "19870002",
     userType: "STAFF",
+    role: UserRole.ADMIN,
+  },
+  {
+    name: "Admin Dekan Dummy",
+    email: "dekan@unsrat.ac.id",
+    identifier: "19870003",
+    userType: "STAFF",
+    role: UserRole.ADMIN_DEKAN,
+  },
+  {
+    name: "Admin Wakil Dekan 2 Dummy",
+    email: "wd2@unsrat.ac.id",
+    identifier: "19870004",
+    userType: "STAFF",
+    role: UserRole.ADMIN_WD2,
   },
 ];
 
@@ -317,6 +334,7 @@ async function seedUsers() {
         name: user.name,
         identifier: user.identifier,
         userType: user.userType,
+        role: user.role,
         passwordHash,
       },
       create: {
@@ -324,6 +342,7 @@ async function seedUsers() {
         email: user.email.toLowerCase(),
         identifier: user.identifier,
         userType: user.userType,
+        role: user.role,
         passwordHash,
       },
     });
@@ -332,6 +351,8 @@ async function seedUsers() {
   console.log("Dummy users are ready:");
   console.log("- superadmin@unsrat.ac.id / Admin12345");
   console.log("- admin@unsrat.ac.id / Admin12345");
+  console.log("- dekan@unsrat.ac.id / Admin12345");
+  console.log("- wd2@unsrat.ac.id / Admin12345");
 }
 
 async function main() {

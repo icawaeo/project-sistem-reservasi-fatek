@@ -3,6 +3,10 @@ export type AdminRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2";
 export type AdminReservationRecord = {
 	id: string;
 	createdAt: string;
+	processedAt: string | null;
+	waitingDekanAt: string | null;
+	waitingWd2At: string | null;
+	decisionAt: string | null;
 	startTime: string;
 	endTime: string;
 	activityName: string;

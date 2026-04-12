@@ -45,8 +45,6 @@ export default async function SuperadminKelolaGedungPage() {
 						pageTitle="Kelola Gedung"
 						pageSubtitle="Manajemen data gedung dan jadwal operasional"
 						userName={session.user.name || "Superadmin"}
-						userEmail={session.user.email}
-						role="superadmin"
 					/>
 
 					<BuildingManagementContent initialBuildings={initialBuildings} />

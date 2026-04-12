@@ -5,21 +5,19 @@ import { ArrowUpDown, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 
 import {
   computeReservationStatus,
-  resolveReservationStatusGroup,
 } from "@/app/components/administrator/superadmin/reservationStatus";
 import { useToast } from "@/app/components/ui/toast";
 import AdminReservationDetailModal from "@/app/components/administrator/admin/AdminReservationDetailModal";
-import StatusUsulan from "@/app/components/administrator/admin/StatusUsulan";
 import type { AdminReservationRecord, AdminRole } from "./types";
 
 const PAGE_SIZE = 5;
 
-type FilterStatus = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
+type FilterStatus = "ALL" | "SUBMITTED" | "WAITING_APPROVAL" | "APPROVED" | "REJECTED" | "COMPLETED";
 
 type AdminReservationTableProps = {
   data: AdminReservationRecord[];
   adminRole: AdminRole;
-  onStatusUpdated: (id: string, nextStatus: string) => void;
+  onStatusUpdated: (id: string, updates: Partial<AdminReservationRecord>) => void;
 };
 
 function formatDate(dateInput: string) {
@@ -37,20 +35,17 @@ function formatTime(dateInput: string) {
   }).format(new Date(dateInput));
 }
 
-function formatDateTime(dateInput: string) {
-  const date = new Date(dateInput);
-  const dateLabel = new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
+function resolveAdminFilterStatusGroup(status: string, endTimeInput: string): Exclude<FilterStatus, "ALL"> {
+  const computed = computeReservationStatus(status, endTimeInput);
+  const normalized = (computed ?? "").toUpperCase();
 
-  const timeLabel = new Intl.DateTimeFormat("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+  if (normalized === "COMPLETED" || normalized === "SELESAI") return "COMPLETED";
+  if (normalized.startsWith("REJECT") || normalized.includes("DITOLAK")) return "REJECTED";
+  if (normalized === "APPROVED" || normalized === "DISETUJUI") return "APPROVED";
+  if (normalized === "PENDING" || normalized === "PENDING_KABAG") return "SUBMITTED";
+  if (normalized.startsWith("PENDING") || normalized.includes("MENUNGGU")) return "WAITING_APPROVAL";
 
-  return `${dateLabel} • ${timeLabel}`;
+  return "WAITING_APPROVAL";
 }
 
 function isActionableStatusForRole(role: AdminRole, status: string) {
@@ -87,8 +82,7 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
       filterStatus === "ALL"
         ? data
         : data.filter((item) => {
-            const computed = computeReservationStatus(item.status, item.endTime);
-            return resolveReservationStatusGroup(computed) === filterStatus;
+            return resolveAdminFilterStatusGroup(item.status, item.endTime) === filterStatus;
           });
 
     return [...filtered].sort((a, b) => {
@@ -162,14 +156,29 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
         body: JSON.stringify({ action }),
       });
 
-      const payload = (await response.json()) as { status?: string; error?: string };
+      const payload = (await response.json()) as {
+        status?: string;
+        processedAt?: string;
+        waitingDekanAt?: string | null;
+        waitingWd2At?: string | null;
+        decisionAt?: string | null;
+        error?: string;
+      };
 
       if (!response.ok || !payload.status) {
         throw new Error(payload.error || "Gagal memproses pengajuan");
       }
 
-      onStatusUpdated(id, payload.status);
-      setSelectedRow((prev) => (prev && prev.id === id ? { ...prev, status: payload.status as string } : prev));
+      const updates: Partial<AdminReservationRecord> = {
+        status: payload.status,
+        processedAt: payload.processedAt ?? null,
+        waitingDekanAt: payload.waitingDekanAt ?? null,
+        waitingWd2At: payload.waitingWd2At ?? null,
+        decisionAt: payload.decisionAt ?? null,
+      };
+
+      onStatusUpdated(id, updates);
+      setSelectedRow((prev) => (prev && prev.id === id ? { ...prev, ...updates } : prev));
       pushToast({
         type: "success",
         message: action === "APPROVE" ? "Pengajuan berhasil disetujui." : "Pengajuan berhasil ditolak.",
@@ -209,10 +218,11 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
             className="bg-transparent text-sm font-semibold outline-none"
           >
             <option value="ALL">Semua Status</option>
-            <option value="PENDING">Menunggu</option>
+            <option value="SUBMITTED">Diajukan</option>
+            <option value="WAITING_APPROVAL">Menunggu Persetujuan</option>
             <option value="APPROVED">Disetujui</option>
-            <option value="COMPLETED">Selesai</option>
             <option value="REJECTED">Ditolak</option>
+            <option value="COMPLETED">Selesai</option>
           </select>
         </label>
       </div>
@@ -227,7 +237,6 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
                 <th className="px-4 py-3">Nama Kegiatan</th>
                 <th className="w-40 px-3 py-3">Tanggal &amp; Waktu Peminjaman</th>
                 <th className="px-4 py-3">Ruangan</th>
-                <th className="px-4 py-3 text-center">Status Usulan</th>
                 <th className="w-32 px-3 py-3">Tanggal &amp; Waktu Pengajuan</th>
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
@@ -252,9 +261,6 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
                         <p className="font-semibold text-slate-900">{item.room.name}</p>
                         <p className="text-xs text-slate-500">{item.room.building}</p>
                       </td>
-                      <td className="px-2 py-3 text-center align-middle">
-                        <StatusUsulan status={item.status} />
-                      </td>
                       <td className="w-32 px-3 py-3 text-xs text-slate-600">
                         <p className="whitespace-nowrap">{formatDate(item.createdAt)}</p>
                         <p className="whitespace-nowrap">{formatTime(item.createdAt)}</p>
@@ -275,7 +281,7 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-slate-500">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-500">
                     Belum ada data pengajuan.
                   </td>
                 </tr>

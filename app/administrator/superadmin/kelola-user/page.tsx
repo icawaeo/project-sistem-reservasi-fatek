@@ -75,8 +75,6 @@ export default async function SuperadminKelolaUserPage() {
             pageTitle="Kelola User"
             pageSubtitle="Manajemen akun user dan role akses sistem"
             userName={session.user.name || "Superadmin"}
-            userEmail={session.user.email}
-            role="superadmin"
           />
 
           <UserManagementContent initialUsers={initialUsers} />

@@ -42,8 +42,8 @@ export default function AdminDashboardContent({ initialData, adminRole }: AdminD
     };
   }, [tableData]);
 
-  const handleStatusUpdated = (id: string, nextStatus: string) => {
-    setTableData((prev) => prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)));
+  const handleStatusUpdated = (id: string, updates: Partial<AdminReservationRecord>) => {
+    setTableData((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)));
   };
 
   return (

@@ -60,6 +60,10 @@ export default async function AdminDashboardPage() {
 		return {
 			id: item.res_id,
 			createdAt: item.res_date.toISOString(),
+			processedAt: item.res_processedAt ? item.res_processedAt.toISOString() : null,
+			waitingDekanAt: item.res_waitingDekanAt ? item.res_waitingDekanAt.toISOString() : null,
+			waitingWd2At: item.res_waitingWd2At ? item.res_waitingWd2At.toISOString() : null,
+			decisionAt: item.res_decisionAt ? item.res_decisionAt.toISOString() : null,
 			startTime: item.res_startTime.toISOString(),
 			endTime: item.res_endTime.toISOString(),
 			activityName: parsedPurpose.activityName,
@@ -97,8 +101,6 @@ export default async function AdminDashboardPage() {
 						pageTitle="Dashboard Admin"
 						pageSubtitle="Monitoring pengajuan peminjaman ruangan"
 						userName={session.user.name || "Admin"}
-						userEmail={session.user.email}
-						role="admin"
 					/>
 
 					<AdminDashboardContent initialData={tableData} adminRole={adminRole} lastSync={lastSync} />

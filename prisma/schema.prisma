@@ -36,11 +36,13 @@ model User {
   identifier   String?   // NIM/NIP - nullable for PUBLIC users
   userType     UserType
   role         UserRole  @default(USER)
+  signatureUrl String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   
   reservations Reservation[]
   passwordSetupTokens PasswordSetupToken[]
+  emailChangeTokens EmailChangeToken[]
 }
 
 model PasswordSetupToken {
@@ -54,6 +56,21 @@ model PasswordSetupToken {
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model EmailChangeToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  newEmail  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([newEmail])
 }
 
 model Room {
@@ -102,6 +119,11 @@ model Reservation {
   // Tracking Admin/System processing
   res_processedBy String?
   res_processedAt DateTime?
+
+  // Per-step progress timestamps
+  res_waitingDekanAt DateTime?
+  res_waitingWd2At   DateTime?
+  res_decisionAt     DateTime?
 
   // Foreign Keys
   user_id String

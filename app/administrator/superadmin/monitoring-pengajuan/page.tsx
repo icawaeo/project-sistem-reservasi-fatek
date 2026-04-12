@@ -112,8 +112,6 @@ export default async function SuperadminMonitoringPengajuanPage() {
 						pageTitle="Monitoring Pengajuan"
 						pageSubtitle="Pantau seluruh status pengajuan reservasi ruangan"
 						userName={session.user.name || "Superadmin"}
-						userEmail={session.user.email}
-						role="superadmin"
 					/>
 
 					<SuperadminMonitoringContent

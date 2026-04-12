@@ -65,6 +65,10 @@ export default async function AdminMonitoringPengajuanPage() {
 		return {
 			id: item.res_id,
 			createdAt: item.res_date.toISOString(),
+			processedAt: item.res_processedAt ? item.res_processedAt.toISOString() : null,
+			waitingDekanAt: item.res_waitingDekanAt ? item.res_waitingDekanAt.toISOString() : null,
+			waitingWd2At: item.res_waitingWd2At ? item.res_waitingWd2At.toISOString() : null,
+			decisionAt: item.res_decisionAt ? item.res_decisionAt.toISOString() : null,
 			startTime: item.res_startTime.toISOString(),
 			endTime: item.res_endTime.toISOString(),
 			activityName: parsedPurpose.activityName,
@@ -102,8 +106,6 @@ export default async function AdminMonitoringPengajuanPage() {
 						pageTitle="Monitoring Pengajuan"
 						pageSubtitle="Pantau seluruh status pengajuan reservasi ruangan"
 						userName={session.user.name || "Admin"}
-						userEmail={session.user.email}
-						role="admin"
 					/>
 
 					<AdminMonitoringContent initialData={tableData} adminRole={adminRole} lastSync={lastSync} />
