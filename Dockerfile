@@ -4,6 +4,11 @@ FROM node:20-bookworm-slim AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Prisma engines require OpenSSL at runtime/build time.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies (including devDeps; we keep them so Prisma CLI is available for migrate deploy).
 FROM base AS deps
 ARG PRISMA_GENERATE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
@@ -32,7 +37,7 @@ ENV PORT=3000
 
 # Needed for DOCX -> PDF preview (soffice)
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends libreoffice ca-certificates \
+  && apt-get install -y --no-install-recommends libreoffice \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/package.json ./package.json

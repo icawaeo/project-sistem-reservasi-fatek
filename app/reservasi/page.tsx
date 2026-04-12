@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -48,7 +48,7 @@ type ReservationDraft = {
     documentDataUrl?: string | null;
 };
 
-export default function ReservasiPage() {
+function ReservasiContent() {
     const { data: session } = useSession();
     const publicSessionUser = session?.user?.userType === "STAFF" ? null : session?.user;
     const router = useRouter();
@@ -443,5 +443,13 @@ export default function ReservasiPage() {
                 <p className="text-xs text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
             </footer>
         </div>
+    );
+}
+
+export default function ReservasiPage() {
+    return (
+        <Suspense fallback={null}>
+            <ReservasiContent />
+        </Suspense>
     );
 }

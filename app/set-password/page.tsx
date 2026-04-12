@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-export default function SetPasswordPage() {
+function SetPasswordContent() {
   const params = useSearchParams();
   const router = useRouter();
   const token = params.get("token") ?? "";
@@ -196,5 +196,13 @@ export default function SetPasswordPage() {
         </form>
       </section>
     </main>
+  );
+}
+
+export default function SetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <SetPasswordContent />
+    </Suspense>
   );
 }
