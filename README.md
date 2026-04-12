@@ -30,6 +30,34 @@ Fitur preview template surat mengonversi file `.docx` menjadi `.pdf` menggunakan
 
 - Pastikan LibreOffice sudah terpasang dan `soffice` tersedia di PATH, atau set environment variable `LIBREOFFICE_PATH` ke path executable `soffice` (mis. `C:\Program Files\LibreOffice\program\soffice.exe`).
 
+## Deploy di Dokploy (Dockerfile)
+
+Repo ini sudah disiapkan untuk dibuild lewat Dockerfile: `Dockerfile`, `.dockerignore`, dan `docker-entrypoint.sh`.
+
+### Tahap di Dokploy
+
+1. **Buat App baru** → pilih source repo Git.
+2. **Build mode** → `Dockerfile` (path: `Dockerfile`, context: root repo).
+3. **Expose port** → `3000` (atau set env `PORT`).
+4. **Set environment variables** (lihat daftar di bawah).
+5. **Tambah database** (Postgres) di Dokploy, lalu set `DATABASE_URL`.
+6. **Mount volume untuk file upload** (wajib jika ingin data tidak hilang saat redeploy):
+	- `/app/uploads` (template surat + metadata `uploads/templates/templates.json`)
+	- `/app/public/uploads` (ttd admin tersimpan di `public/uploads/signatures`)
+7. Deploy. Saat container start, `docker-entrypoint.sh` menjalankan `prisma migrate deploy` (bisa dimatikan dengan `RUN_MIGRATIONS=0`).
+
+### Environment variables minimal
+
+- `DATABASE_URL` (PostgreSQL)
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL` (contoh: `https://domain-anda.com`)
+
+### Environment variables opsional (fitur tertentu)
+
+- Email (reset/verification): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`
+- Firebase Storage (jika dipakai di fitur upload tertentu): `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_STORAGE_BUCKET`
+- LibreOffice path (umumnya tidak perlu di Linux container karena `soffice` sudah ada di PATH): `LIBREOFFICE_PATH` / `SOFFICE_PATH`
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
