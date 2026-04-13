@@ -216,10 +216,10 @@ export default function BuildingPage() {
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pb-12">
-                    <h1 className="text-white text-3xl md:text-4xl font-black tracking-tight">
+                    <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">
                         {buildingName}
                     </h1>
-                    <p className="text-white/70 mt-2 text-sm max-w-md">
+                    <p className="text-white/70 mt-2 text-sm lg:text-base max-w-md">
                         Cek ketersediaan dan reservasi ruangan di gedung ini.
                     </p>
                 </div>
@@ -228,10 +228,10 @@ export default function BuildingPage() {
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-full max-w-4xl px-4">
                     <div className="bg-white rounded-2xl shadow-2xl px-6 py-6 border border-slate-100">
                         <div className="mb-4 flex flex-wrap items-center gap-4">
-                            <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                            <span className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
                                 Reservation Mode
                             </span>
-                            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <label className="inline-flex items-center gap-2 text-sm lg:text-base text-slate-700">
                                 <input
                                     type="radio"
                                     name="reservation-mode"
@@ -246,7 +246,7 @@ export default function BuildingPage() {
                                 />
                                 Per Day
                             </label>
-                            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <label className="inline-flex items-center gap-2 text-sm lg:text-base text-slate-700">
                                 <input
                                     type="radio"
                                     name="reservation-mode"
@@ -264,7 +264,7 @@ export default function BuildingPage() {
 
                         <div className="flex flex-col md:flex-row md:items-end gap-4">
                             <div className="flex-1 min-w-0">
-                                <label className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                                <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
                                     {reservationMode === "per-day" ? "Date" : "Start Date"}
                                 </label>
                                 <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
@@ -276,14 +276,14 @@ export default function BuildingPage() {
                                             setStartDate(e.target.value);
                                             setValidationError("");
                                         }}
-                                        className="text-sm text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+                                        className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                     />
                                 </div>
                             </div>
 
                             {reservationMode === "date-range" && (
                                 <div className="flex-1 min-w-0">
-                                    <label className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                                    <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
                                         End Date
                                     </label>
                                     <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
@@ -295,14 +295,14 @@ export default function BuildingPage() {
                                                 setEndDate(e.target.value);
                                                 setValidationError("");
                                             }}
-                                            className="text-sm text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+                                            className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                         />
                                     </div>
                                 </div>
                             )}
 
                             <div className="flex-1 min-w-0">
-                                <label className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                                <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
                                     Start Time
                                 </label>
                                 <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
@@ -314,13 +314,13 @@ export default function BuildingPage() {
                                             setStartTime(e.target.value);
                                             setValidationError("");
                                         }}
-                                        className="text-sm text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+                                        className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                     />
                                 </div>
                             </div>
 
                             <div className="flex-1 min-w-0">
-                                <label className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                                <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
                                     End Time
                                 </label>
                                 <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
@@ -332,7 +332,7 @@ export default function BuildingPage() {
                                             setEndTime(e.target.value);
                                             setValidationError("");
                                         }}
-                                        className="text-sm text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+                                        className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                     />
                                 </div>
                             </div>
@@ -341,7 +341,7 @@ export default function BuildingPage() {
                                 <button
                                     onClick={handleSearch}
                                     disabled={isSearching}
-                                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 whitespace-nowrap disabled:cursor-not-allowed disabled:bg-slate-500"
+                                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl px-6 py-3 text-sm lg:text-base font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 whitespace-nowrap disabled:cursor-not-allowed disabled:bg-slate-500"
                                 >
                                     <Search size={15} />
                                     {isSearching ? "Mencari..." : "Cek Ketersediaan"}
@@ -350,7 +350,7 @@ export default function BuildingPage() {
                         </div>
 
                         {validationError && (
-                            <p className="mt-3 text-xs font-medium text-red-600">{validationError}</p>
+                            <p className="mt-3 text-xs lg:text-sm font-medium text-red-600">{validationError}</p>
                         )}
                     </div>
                 </div>
@@ -359,7 +359,7 @@ export default function BuildingPage() {
             {/* Main Content */}
             <div className="mt-64 md:mt-48 px-6 md:px-8 max-w-5xl mx-auto">
                 {/* Breadcrumb */}
-                <nav className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-6">
+                <nav className="flex items-center gap-1.5 text-[11px] lg:text-xs text-slate-500 mb-6">
                     <Link
                         href="/landingpage"
                         className="hover:text-slate-800 flex items-center gap-1 transition-colors"
@@ -374,11 +374,11 @@ export default function BuildingPage() {
                 {/* Section Header */}
                 <div className="flex flex-wrap items-center gap-3 mb-6">
                     <div className="w-1 h-6 bg-slate-900 rounded-full" />
-                    <h2 className="text-sm font-bold tracking-widest text-slate-900 uppercase">
+                    <h2 className="text-sm lg:text-base font-bold tracking-widest text-slate-900 uppercase">
                         Daftar Ruangan
                     </h2>
                     {hasSearched && searchScheduleLabel && (
-                        <span className="text-[11px] text-slate-500 font-medium bg-slate-100 rounded-full px-3 py-0.5">
+                        <span className="text-[11px] lg:text-xs text-slate-500 font-medium bg-slate-100 rounded-full px-3 py-0.5">
                             {searchScheduleLabel}
                         </span>
                     )}
@@ -398,7 +398,7 @@ export default function BuildingPage() {
                                     setIsLoading(false);
                                 }
                             }}
-                            className="ml-auto text-[11px] font-semibold text-slate-500 hover:text-slate-800 underline underline-offset-2 transition-colors"
+                            className="ml-auto text-[11px] lg:text-xs font-semibold text-slate-500 hover:text-slate-800 underline underline-offset-2 transition-colors"
                         >
                             Reset
                         </button>
@@ -425,7 +425,7 @@ export default function BuildingPage() {
                 ) : rooms.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-12 text-center">
                         <Building2 size={32} className="mx-auto text-slate-300 mb-3" />
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-sm lg:text-base font-medium text-slate-600">
                             {hasSearched
                                 ? "Tidak ada ruangan tersedia untuk jadwal yang dipilih."
                                 : "Tidak ada ruangan ditemukan untuk gedung ini."}
@@ -466,30 +466,30 @@ export default function BuildingPage() {
                                 <div className="flex flex-1 flex-col sm:flex-row sm:items-center p-4 gap-4">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                                            <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                                            <h3 className="text-lg lg:text-xl font-bold text-slate-900 leading-tight">
                                                 {room.room_name}
                                             </h3>
                                             {room.isCurrentlyOccupied ? (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-600 uppercase tracking-wider">
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] lg:text-[11px] font-bold text-red-600 uppercase tracking-wider">
                                                     <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
                                                     Sedang Digunakan
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] lg:text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
                                                     Tersedia
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+                                        <div className="flex items-center gap-1.5 text-xs lg:text-sm text-slate-500 mb-1">
                                             <MapPin size={11} className="shrink-0" />
                                             <span className="truncate">{room.room_building}</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+                                        <div className="flex items-center gap-1.5 text-xs lg:text-sm text-slate-500 mb-1">
                                             <Users size={11} className="shrink-0" />
                                             <span>Kapasitas: {room.room_capacity} Orang</span>
                                         </div>
                                         {room.room_locDetail && (
-                                            <p className="text-xs italic text-slate-400 mt-0.5 truncate">
+                                            <p className="text-xs lg:text-sm italic text-slate-400 mt-0.5 truncate">
                                                 {room.room_locDetail}
                                             </p>
                                         )}
@@ -500,7 +500,7 @@ export default function BuildingPage() {
                                         <button
                                             onClick={() => handleReservasi(room)}
                                             disabled={room.isCurrentlyOccupied}
-                                            className="w-full sm:w-auto rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors uppercase tracking-wide disabled:bg-slate-300 disabled:cursor-not-allowed"
+                                            className="w-full sm:w-auto rounded-xl bg-slate-900 px-5 py-2.5 text-sm lg:text-base font-semibold text-white hover:bg-slate-700 transition-colors uppercase tracking-wide disabled:bg-slate-300 disabled:cursor-not-allowed"
                                         >
                                             Pilih Ruangan
                                         </button>
@@ -525,7 +525,7 @@ export default function BuildingPage() {
                             <button
                                 key={page}
                                 onClick={() => setCurrentPage(page)}
-                                className={`h-9 w-9 rounded-lg border text-sm font-semibold transition-all ${
+                                className={`h-9 w-9 rounded-lg border text-sm lg:text-base font-semibold transition-all ${
                                     currentPage === page
                                         ? "border-slate-900 bg-slate-900 text-white"
                                         : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
@@ -550,7 +550,7 @@ export default function BuildingPage() {
                 <section className="mt-16 py-12 px-6 md:px-8 max-w-5xl mx-auto">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-1 h-6 bg-slate-900 rounded-full" />
-                        <h2 className="text-sm font-bold tracking-widest text-slate-900 uppercase">
+                        <h2 className="text-sm lg:text-base font-bold tracking-widest text-slate-900 uppercase">
                             Lokasi Gedung
                         </h2>
                     </div>
@@ -571,7 +571,7 @@ export default function BuildingPage() {
                             href={buildingMap.shortUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-xs lg:text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
                         >
                             Buka di Google Maps
                             <ExternalLink size={13} />
@@ -582,7 +582,7 @@ export default function BuildingPage() {
 
             {/* Footer */}
             <footer className="bg-slate-900 py-5 text-center mt-12">
-                <p className="text-xs text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
+                <p className="text-xs lg:text-sm text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
             </footer>
         </div>
     );

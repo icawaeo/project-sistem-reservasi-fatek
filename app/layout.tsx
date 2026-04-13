@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Assistant, Geist_Mono } from "next/font/google";
-import "@/app/globals.css";
+import "./globals.css";
 import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
 
 const assistant = Assistant({
@@ -8,10 +8,10 @@ const assistant = Assistant({
   subsets: ["latin"],
 });
 
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${assistant.variable} ${assistant.variable} antialiased`}
+        className={`${assistant.variable} ${geistMono.variable} antialiased`}
       >
         <NextAuthProvider>
           {children}

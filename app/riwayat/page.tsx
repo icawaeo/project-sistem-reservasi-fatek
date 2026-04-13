@@ -234,15 +234,15 @@ export default function RiwayatPeminjamanPage() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center px-4">
-          <h1 className="text-white text-3xl md:text-4xl font-black tracking-tight">Riwayat Peminjaman</h1>
-          <p className="text-white/75 mt-2 text-sm max-w-md">
+          <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">Riwayat Peminjaman</h1>
+          <p className="text-white/75 mt-2 text-sm lg:text-base max-w-md">
             Lacak status pengajuan terbaru dan seluruh histori peminjaman ruangan Anda.
           </p>
         </div>
       </section>
 
       <main className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-8 pb-14 flex-1">
-        <nav className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-5 px-1">
+        <nav className="flex items-center gap-1.5 text-[11px] lg:text-xs text-slate-500 mb-5 px-1">
           <Link href="/landingpage" className="hover:text-slate-800 flex items-center gap-1 transition-colors">
             <Home size={12} />
             Beranda
@@ -252,64 +252,64 @@ export default function RiwayatPeminjamanPage() {
         </nav>
 
         <section className="mb-8">
-          <h2 className="text-slate-900 text-2xl font-black tracking-tight flex items-center gap-2">
+          <h2 className="text-slate-900 text-2xl lg:text-3xl font-black tracking-tight flex items-center gap-2">
             <FileCheck2 size={20} className="text-slate-700" />
             Status Pengajuan Terkini
           </h2>
 
           <div className="mt-3 rounded-2xl border border-slate-200 bg-white shadow-md p-4 sm:p-5">
             {loading ? (
-              <p className="text-sm text-slate-500">Memuat status pengajuan...</p>
+              <p className="text-sm lg:text-base text-slate-500">Memuat status pengajuan...</p>
             ) : latestActiveSubmission ? (
               <div className="space-y-4">
                 <div>
-                  <p className="text-lg font-bold text-slate-900">{latestActiveSubmission.room.room_name}</p>
-                  <p className="text-sm text-slate-500">{latestActiveSubmission.room.room_building}</p>
+                  <p className="text-lg lg:text-xl font-bold text-slate-900">{latestActiveSubmission.room.room_name}</p>
+                  <p className="text-sm lg:text-base text-slate-500">{latestActiveSubmission.room.room_building}</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-700 flex items-center gap-2">
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
                     <Calendar size={15} className="text-slate-500" />
                     {formatDateRange(latestActiveSubmission.res_startTime, latestActiveSubmission.res_endTime)}
                   </div>
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-700 flex items-center gap-2">
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
                     <Clock size={15} className="text-slate-500" />
                     {formatTime(latestActiveSubmission.res_startTime, latestActiveSubmission.res_endTime)}
                   </div>
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-700 flex items-center gap-2">
+                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
                     <Hourglass size={15} className="text-amber-600" />
                     Menunggu Persetujuan
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                  <p className="text-[11px] uppercase tracking-widest font-bold text-slate-500">Detail Data Peminjaman</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <p className="text-[11px] lg:text-xs uppercase tracking-widest font-bold text-slate-500">Detail Data Peminjaman</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm lg:text-base">
                     <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                      <p className="text-[11px] text-slate-500 mb-1">Detail Ruangan</p>
+                      <p className="text-[11px] lg:text-xs text-slate-500 mb-1">Detail Ruangan</p>
                       <p className="font-semibold text-slate-900">{latestActiveSubmission.room.room_name}</p>
-                      <p className="text-slate-600 text-xs mt-1">{latestActiveSubmission.room.room_building}</p>
+                      <p className="text-slate-600 text-xs lg:text-sm mt-1">{latestActiveSubmission.room.room_building}</p>
                     </div>
 
                     <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                      <p className="text-[11px] text-slate-500 mb-1">Nama Kegiatan</p>
+                      <p className="text-[11px] lg:text-xs text-slate-500 mb-1">Nama Kegiatan</p>
                       <p className="font-semibold text-slate-900">{latestPurpose}</p>
                     </div>
 
                     <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 md:col-span-2">
-                      <p className="text-[11px] text-slate-500 mb-1">Tujuan Kegiatan</p>
+                      <p className="text-[11px] lg:text-xs text-slate-500 mb-1">Tujuan Kegiatan</p>
                       <p className="text-slate-800 leading-relaxed">{latestReason}</p>
                     </div>
 
                     <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 md:col-span-2">
-                      <p className="text-[11px] text-slate-500 mb-2">Surat Pengantar</p>
+                      <p className="text-[11px] lg:text-xs text-slate-500 mb-2">Surat Pengantar</p>
                       {latestDraftSnapshot?.documentDataUrl ? (
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3">
                           <FileText className="text-red-400" size={24} />
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-slate-900 text-sm truncate">{latestDocumentName}</div>
+                            <div className="font-semibold text-slate-900 text-sm lg:text-base truncate">{latestDocumentName}</div>
                             {latestDraftSnapshot.documentDataUrl ? (
-                              <div className="text-xs text-slate-500">Dokumen • Upload</div>
+                              <div className="text-xs lg:text-sm text-slate-500">Dokumen • Upload</div>
                             ) : null}
                           </div>
                           <button
@@ -326,51 +326,51 @@ export default function RiwayatPeminjamanPage() {
                           href={latestActiveSubmission.res_documentUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs lg:text-sm font-semibold text-slate-700 hover:bg-slate-50"
                         >
                           <FileText size={13} />
                           Lihat Surat Pengantar
                         </a>
                       ) : (
-                        <p className="text-slate-600 text-xs">{latestDocumentName}</p>
+                        <p className="text-slate-600 text-xs lg:text-sm">{latestDocumentName}</p>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-sm font-medium text-slate-500">Belum ada pengajuan</p>
+              <p className="text-sm lg:text-base font-medium text-slate-500">Belum ada pengajuan</p>
             )}
           </div>
         </section>
 
         <section>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-            <h2 className="text-slate-900 text-2xl font-black tracking-tight flex items-center gap-2">
+            <h2 className="text-slate-900 text-2xl lg:text-3xl font-black tracking-tight flex items-center gap-2">
               <History size={20} className="text-slate-700" />
               Riwayat Peminjaman
             </h2>
 
             <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 w-fit">
+              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm lg:text-base text-slate-700 w-fit">
                 <ArrowUpDown size={14} className="text-slate-500" />
                 <span>Urutkan</span>
                 <select
                   value={sortOrder}
                   onChange={(event) => setSortOrder(event.target.value as "newest" | "oldest")}
-                  className="bg-transparent text-sm font-semibold outline-none"
+                  className="bg-transparent text-sm lg:text-base font-semibold outline-none"
                 >
                   <option value="newest">Terbaru</option>
                   <option value="oldest">Terlama</option>
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 w-fit">
+              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm lg:text-base text-slate-700 w-fit">
                 <span>Filter Status</span>
                 <select
                   value={filterStatus}
                   onChange={(event) => setFilterStatus(event.target.value as "ALL" | ReservationStatus)}
-                  className="bg-transparent text-sm font-semibold outline-none"
+                  className="bg-transparent text-sm lg:text-base font-semibold outline-none"
                 >
                   <option value="ALL">Semua Status</option>
                   <option value="PENDING">Menunggu</option>
@@ -383,14 +383,14 @@ export default function RiwayatPeminjamanPage() {
 
           <div className="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
             {loading ? (
-              <div className="p-5 text-sm text-slate-500">Memuat riwayat peminjaman...</div>
+              <div className="p-5 text-sm lg:text-base text-slate-500">Memuat riwayat peminjaman...</div>
             ) : error ? (
-              <div className="p-5 text-sm text-red-600">{error}</div>
+              <div className="p-5 text-sm lg:text-base text-red-600">{error}</div>
             ) : historyItems.length === 0 ? (
-              <div className="p-5 text-sm font-medium text-slate-500">Belum ada riwayat peminjaman</div>
+              <div className="p-5 text-sm lg:text-base font-medium text-slate-500">Belum ada riwayat peminjaman</div>
             ) : (
               <>
-                <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 bg-slate-50 border-b border-slate-200 px-5 py-3 text-[11px] uppercase tracking-widest font-bold text-slate-500">
+                <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 bg-slate-50 border-b border-slate-200 px-5 py-3 text-[11px] lg:text-xs uppercase tracking-widest font-bold text-slate-500">
                   <span>Nama Kegiatan</span>
                   <span>Ruangan</span>
                   <span>Tanggal</span>
@@ -412,25 +412,25 @@ export default function RiwayatPeminjamanPage() {
                     return (
                       <article key={item.res_id} className="px-4 md:px-5 py-4">
                         <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1.1fr_1.2fr_0.9fr_1.4fr] gap-3 items-center">
-                          <p className="text-sm font-bold text-slate-900 text-left">{item.res_purpose}</p>
+                          <p className="text-sm lg:text-base font-bold text-slate-900 text-left">{item.res_purpose}</p>
 
                           <div className="text-left">
-                            <p className="text-sm font-bold text-slate-900">{item.room.room_name}</p>
-                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                            <p className="text-sm lg:text-base font-bold text-slate-900">{item.room.room_name}</p>
+                            <p className="text-xs lg:text-sm text-slate-500 flex items-center gap-1 mt-1">
                               <Building2 size={12} />
                               {item.room.room_building}
                             </p>
                           </div>
 
-                          <p className="text-sm text-slate-700 text-center">{formatDate(item.res_startTime)}</p>
-                          <p className="text-sm text-slate-700 text-center">{formatTime(item.res_startTime, item.res_endTime)}</p>
+                          <p className="text-sm lg:text-base text-slate-700 text-center">{formatDate(item.res_startTime)}</p>
+                          <p className="text-sm lg:text-base text-slate-700 text-center">{formatTime(item.res_startTime, item.res_endTime)}</p>
 
-                          <span className={`inline-flex w-fit items-center gap-1 border rounded-full px-2.5 py-1 text-xs font-semibold justify-center mx-auto ${status.badge}`}>
+                          <span className={`inline-flex w-fit items-center gap-1 border rounded-full px-2.5 py-1 text-xs lg:text-sm font-semibold justify-center mx-auto ${status.badge}`}>
                             <StatusIcon size={12} />
                             {status.label}
                           </span>
 
-                          <div className="flex items-center justify-center gap-2 text-xs">
+                          <div className="flex items-center justify-center gap-2 text-xs lg:text-sm">
                             {item.res_documentUrl ? (
                               <a
                                 href={item.res_documentUrl}
@@ -540,7 +540,7 @@ export default function RiwayatPeminjamanPage() {
       </main>
 
       <footer className="bg-slate-900 py-5 text-center">
-        <p className="text-xs text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
+        <p className="text-xs lg:text-sm text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
       </footer>
     </div>
   );

@@ -25,8 +25,8 @@ function AccordionHeader(props: {
                 <span className="text-slate-900">{props.icon}</span>
             </div>
             <div>
-                <div className="font-extrabold text-slate-900">{props.title}</div>
-                <div className="text-xs text-slate-700/80">{props.subtitle}</div>
+                <div className="text-base lg:text-lg font-extrabold text-slate-900">{props.title}</div>
+                <div className="text-xs lg:text-sm text-slate-700/80">{props.subtitle}</div>
             </div>
         </div>
         <div className="text-slate-500 transition-transform duration-300">
@@ -111,14 +111,14 @@ export default function RegisterView() {
 
   return (
     <div>
-      <h2 className="text-3xl font-extrabold text-slate-900">Buat Akun Baru</h2>
-      <p className="mt-2 text-sm text-slate-700/80">
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900">Buat Akun Baru</h2>
+            <p className="mt-2 text-sm lg:text-base text-slate-700/80">
         Pilih tipe akun Anda untuk melanjutkan pendaftaran.
       </p>
 
       {error && (
         <div className="mt-4 rounded-2xl bg-red-100/80 border border-red-300 p-4">
-          <p className="text-sm font-semibold text-red-800">{error}</p>
+                    <p className="text-sm lg:text-base font-semibold text-red-800">{error}</p>
         </div>
       )}
 
@@ -139,7 +139,7 @@ export default function RegisterView() {
                 <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20 transition-all duration-300 ease-in-out animate-[fadeIn_0.3s_ease-in-out]">
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                             NAMA LENGKAP
                         </label>
                         <input
@@ -148,12 +148,12 @@ export default function RegisterView() {
                             onChange={handleChange}
                             required
                             placeholder="Masukkan nama lengkap Anda"
-                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                         />
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                             NIM / NIP
                         </label>
                         <input
@@ -162,12 +162,12 @@ export default function RegisterView() {
                             onChange={handleChange}
                             required 
                             placeholder="Masukkan NIM/NIP Anda"
-                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                         />
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                             {emailLabel}
                         </label>
                         <input
@@ -177,13 +177,13 @@ export default function RegisterView() {
                             onChange={handleChange} 
                             required
                             placeholder="Masukkan alamat email Anda"
-                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                         />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                             KATA SANDI
                         </label>
                         <div className="relative mt-2">
@@ -194,7 +194,7 @@ export default function RegisterView() {
                                 required
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Masukkan kata sandi"
-                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                             />
                             <button
                                 type="button"
@@ -206,7 +206,7 @@ export default function RegisterView() {
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                             KONFIRMASI
                         </label>
                         <div className="relative mt-2">
@@ -217,7 +217,7 @@ export default function RegisterView() {
                                 required
                                 type={showConfirmPassword ? "text" : "password"}
                                 placeholder="Konfirmasi kata sandi"
-                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                             />
                             <button
                                 type="button"
@@ -233,7 +233,7 @@ export default function RegisterView() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 font-semibold text-white disabled:opacity-70"
+                        className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 text-sm lg:text-base font-semibold text-white disabled:opacity-70"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : "Daftar Sebagai Civitas"}
                     </button>
@@ -245,7 +245,7 @@ export default function RegisterView() {
         {/* separator */}
         <div className="flex items-center gap-4 px-2">
             <div className="h-px flex-1 bg-white/30" />
-            <div className="text-xs font-bold tracking-widest text-slate-700/80">
+            <div className="text-xs lg:text-sm font-bold tracking-widest text-slate-700/80">
                 ATAU
             </div>
             <div className="h-px flex-1 bg-white/30" />
@@ -267,7 +267,7 @@ export default function RegisterView() {
                 <div className="mt-4 rounded-3xl bg-white/35 p-5 ring-1 ring-white/20 transition-all duration-300 ease-in-out animate-[fadeIn_0.3s_ease-in-out]">
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
-                    <label className="text-xs font-bold tracking-wider text-slate-700">
+                    <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                         NAMA LENGKAP
                     </label>
                     <input
@@ -276,12 +276,12 @@ export default function RegisterView() {
                         onChange={handleChange}
                         required
                         placeholder="Masukkan nama lengkap Anda"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                     />
                     </div>
 
                     <div>
-                    <label className="text-xs font-bold tracking-wider text-slate-700">
+                    <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                         ALAMAT EMAIL
                     </label>
                     <input
@@ -291,13 +291,13 @@ export default function RegisterView() {
                         onChange={handleChange}
                         required
                         placeholder="Masukkan alamat email Anda"
-                        className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                            className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                     />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                         KATA SANDI
                         </label>
                         <div className="relative mt-2">
@@ -308,7 +308,7 @@ export default function RegisterView() {
                                 required
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Masukkan kata sandi"
-                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                             />
                             <button
                                 type="button"
@@ -320,7 +320,7 @@ export default function RegisterView() {
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-bold tracking-wider text-slate-700">
+                        <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                         KONFIRMASI
                         </label>
                         <div className="relative mt-2">
@@ -331,7 +331,7 @@ export default function RegisterView() {
                                 required
                                 type={showConfirmPassword ? "text" : "password"}
                                 placeholder="Konfirmasi kata sandi"
-                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                                className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                             />
                             <button
                                 type="button"
@@ -347,7 +347,7 @@ export default function RegisterView() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 font-semibold text-white disabled:opacity-70"
+                        className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 text-sm lg:text-base font-semibold text-white disabled:opacity-70"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : "Daftar Sebagai Umum"}
                     </button>
@@ -356,7 +356,7 @@ export default function RegisterView() {
             )}
         </div>
 
-        <p className="pt-2 text-center text-sm text-slate-700">
+        <p className="pt-2 text-center text-sm lg:text-base text-slate-700">
             Sudah memiliki akun?{" "}
             <Link className="font-semibold hover:underline" href="/?tab=login">
                 Masuk di sini

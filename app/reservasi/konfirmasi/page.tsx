@@ -144,13 +144,49 @@ export default function KonfirmasiReservasiPage() {
 
   const handlePreviewDocument = () => {
     if (!reservation.documentDataUrl) return;
-    
-    sessionStorage.setItem("previewDocumentData", JSON.stringify({
+
+    // Avoid duplicating large base64 data in sessionStorage (can exceed quota).
+    sessionStorage.removeItem("previewDocumentData");
+
+    const previewWindow = window.open("/reservasi/preview", "_blank");
+    if (!previewWindow) return;
+
+    const payload = {
+      type: "RESERVASI_PREVIEW_DOCUMENT" as const,
       dataUrl: reservation.documentDataUrl,
       name: reservation.documentName,
-    }));
+    };
 
-    window.open("/reservasi/preview", "_blank");
+    const origin = window.location.origin;
+
+    const sendPayload = () => {
+      try {
+        previewWindow.postMessage(payload, origin);
+      } catch {
+        // ignore
+      }
+    };
+
+    // Send immediately + retry (listener might not be ready yet), plus handshake support.
+    sendPayload();
+    window.setTimeout(sendPayload, 200);
+    window.setTimeout(sendPayload, 800);
+
+    let cleanupTimeout = 0;
+
+    const onReady = (event: MessageEvent) => {
+      if (event.origin !== origin) return;
+      if (!event.data || event.data.type !== "RESERVASI_PREVIEW_READY") return;
+      sendPayload();
+      window.removeEventListener("message", onReady);
+      window.clearTimeout(cleanupTimeout);
+    };
+
+    window.addEventListener("message", onReady);
+
+    cleanupTimeout = window.setTimeout(() => {
+      window.removeEventListener("message", onReady);
+    }, 2000);
   };
 
   return (
@@ -164,15 +200,15 @@ export default function KonfirmasiReservasiPage() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center px-4">
-          <h1 className="text-white text-3xl md:text-4xl font-black tracking-tight">Konfirmasi Reservasi</h1>
-          <p className="text-white/75 mt-2 text-sm max-w-md">
+          <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">Konfirmasi Reservasi</h1>
+          <p className="text-white/75 mt-2 text-sm lg:text-base max-w-md">
             Periksa kembali seluruh data sebelum reservasi diproses.
           </p>
         </div>
       </section>
 
       <main className="max-w-5xl mx-auto px-4 md:px-8 pt-8 pb-16">
-        <nav className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-5 px-1">
+        <nav className="flex items-center gap-1.5 text-[11px] lg:text-xs text-slate-500 mb-5 px-1">
           <Link href="/landingpage" className="hover:text-slate-800 flex items-center gap-1 transition-colors">
             <Home size={12} />
             Gedung
@@ -187,17 +223,17 @@ export default function KonfirmasiReservasiPage() {
 
         <section className="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 md:p-7">
           {error && (
-            <div className="mb-4 text-sm text-red-600 font-semibold text-center">{error}</div>
+            <div className="mb-4 text-sm lg:text-base text-red-600 font-semibold text-center">{error}</div>
           )}
 
           <div className="flex items-start justify-between gap-2 mb-6">
             <div>
-              <h2 className="text-xl font-black tracking-tight text-slate-900">Ringkasan Reservasi</h2>
-              <p className="text-sm text-slate-500 mt-1">Pastikan data ruangan, jadwal, dan identitas sudah benar.</p>
+              <h2 className="text-xl lg:text-2xl font-black tracking-tight text-slate-900">Ringkasan Reservasi</h2>
+              <p className="text-sm lg:text-base text-slate-500 mt-1">Pastikan data ruangan, jadwal, dan identitas sudah benar.</p>
             </div>
             {!submitted && (
               <button
-                className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+                className="flex items-center gap-1 text-xs lg:text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
                 onClick={handleEditData}
               >
                 <ArrowLeft size={13} /> Ubah Data
@@ -209,24 +245,24 @@ export default function KonfirmasiReservasiPage() {
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 size={16} className="text-slate-700" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Ruangan Terpilih</span>
+                <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Ruangan Terpilih</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <div className="text-[11px] text-slate-500">Nama Ruangan</div>
-                  <div className="text-sm font-semibold text-slate-900">{submitted ? submitted.room.room_name : reservation.room_name}</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Nama Ruangan</div>
+                  <div className="text-sm lg:text-base font-semibold text-slate-900">{submitted ? submitted.room.room_name : reservation.room_name}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Gedung</div>
-                  <div className="text-sm font-semibold text-slate-900">{submitted ? submitted.room.room_building : reservation.room_building}</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Gedung</div>
+                  <div className="text-sm lg:text-base font-semibold text-slate-900">{submitted ? submitted.room.room_building : reservation.room_building}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Kapasitas</div>
-                  <div className="text-sm font-semibold text-slate-900">{reservation.room_capacity ? `${reservation.room_capacity} Orang` : "-"}</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Kapasitas</div>
+                  <div className="text-sm lg:text-base font-semibold text-slate-900">{reservation.room_capacity ? `${reservation.room_capacity} Orang` : "-"}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Detail Lokasi</div>
-                  <div className="text-sm font-semibold text-slate-900">{reservation.room_locDetail || "-"}</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Detail Lokasi</div>
+                  <div className="text-sm lg:text-base font-semibold text-slate-900">{reservation.room_locDetail || "-"}</div>
                 </div>
               </div>
             </div>
@@ -234,14 +270,14 @@ export default function KonfirmasiReservasiPage() {
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar size={16} className="text-slate-700" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Jadwal Reservasi</span>
+                <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Jadwal Reservasi</span>
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-slate-700">
+                <div className="flex items-center gap-2 text-sm lg:text-base text-slate-700">
                   <Calendar size={14} />
                   <span className="font-semibold">{submitted ? new Date(submitted.res_startTime).toLocaleDateString() : reservationDate}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-700">
+                <div className="flex items-center gap-2 text-sm lg:text-base text-slate-700">
                   <Clock size={14} />
                   <span className="font-semibold">
                     {submitted
@@ -257,23 +293,23 @@ export default function KonfirmasiReservasiPage() {
             <div className="rounded-xl border border-slate-200 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <User size={16} className="text-slate-700" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Identitas Penanggung Jawab</span>
+                <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Identitas Penanggung Jawab</span>
               </div>
-              <div className="grid grid-cols-1 gap-3 text-sm">
+              <div className="grid grid-cols-1 gap-3 text-sm lg:text-base">
                 <div>
-                  <div className="text-[11px] text-slate-500">Nama Lengkap</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Nama Lengkap</div>
                   <div className="font-semibold text-slate-900">{reservation.name}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">{reservation.identifierLabel}</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">{reservation.identifierLabel}</div>
                   <div className="font-semibold text-slate-900">{reservation.identifier || "-"}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Alamat Email</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Alamat Email</div>
                   <div className="font-semibold text-slate-900 break-all">{reservation.email}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Nomor Telepon</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Nomor Telepon</div>
                   <div className="font-semibold text-slate-900">{reservation.phone}</div>
                 </div>
               </div>
@@ -282,16 +318,16 @@ export default function KonfirmasiReservasiPage() {
             <div className="rounded-xl border border-slate-200 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Users size={16} className="text-slate-700" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Detail Kegiatan</span>
+                <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Detail Kegiatan</span>
               </div>
               <div className="space-y-3">
                 <div>
-                  <div className="text-[11px] text-slate-500">Nama Kegiatan</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Nama Kegiatan</div>
                   <div className="font-semibold text-slate-900">{reservation.purpose}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500">Alasan Peminjaman</div>
-                  <div className="text-sm text-slate-800 leading-relaxed">{reservation.reason}</div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Alasan Peminjaman</div>
+                  <div className="text-sm lg:text-base text-slate-800 leading-relaxed">{reservation.reason}</div>
                 </div>
               </div>
             </div>
@@ -300,14 +336,14 @@ export default function KonfirmasiReservasiPage() {
           <div className="mt-4 rounded-xl border border-slate-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <File size={16} className="text-slate-700" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Surat Pengantar</span>
+              <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Surat Pengantar</span>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
               <FileText className="text-red-400" size={24} />
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-slate-900 text-sm truncate">{reservation.documentName}</div>
-                <div className="text-xs text-slate-500">
+                <div className="font-semibold text-slate-900 text-sm lg:text-base truncate">{reservation.documentName}</div>
+                <div className="text-xs lg:text-sm text-slate-500">
                   {reservation.documentType || "File"} • {formatFileSize(reservation.documentSize)}
                 </div>
               </div>
@@ -325,7 +361,7 @@ export default function KonfirmasiReservasiPage() {
 
           {!submitted && (
             <button
-              className="w-full mt-6 bg-slate-900 text-white rounded-xl px-6 py-3 text-base font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 disabled:cursor-not-allowed disabled:bg-slate-500"
+              className="w-full mt-6 bg-slate-900 text-white rounded-xl px-6 py-3 text-base lg:text-lg font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 disabled:cursor-not-allowed disabled:bg-slate-500"
               disabled={loading}
               onClick={async () => {
                 setLoading(true);
@@ -375,26 +411,26 @@ export default function KonfirmasiReservasiPage() {
           )}
 
           {submitted && (
-            <div className="mt-6 text-center text-green-700 font-semibold text-sm space-y-3">
+            <div className="mt-6 text-center text-green-700 font-semibold text-sm lg:text-base space-y-3">
               <p>Reservasi berhasil disimpan!</p>
               <button
                 type="button"
                 onClick={() => router.push("/riwayat")}
-                className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition-colors"
+                className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-4 py-2 text-xs lg:text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
               >
                 Lihat Riwayat Peminjaman <ChevronRight size={14} />
               </button>
             </div>
           )}
 
-          <div className="mt-4 text-[11px] text-slate-400 text-center">
+          <div className="mt-4 text-[11px] lg:text-xs text-slate-400 text-center">
             Dengan menklik konfirmasi, Anda menyetujui seluruh tata tertib penggunaan fasilitas kampus FATEK UNSRAT yang berlaku secara akademik dan administratif.
           </div>
         </section>
       </main>
 
       <footer className="bg-slate-900 py-5 text-center">
-        <p className="text-xs text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
+        <p className="text-xs lg:text-sm text-slate-400">© 2026 FATEK UNSRAT · Website Reservasi Ruangan</p>
       </footer>
     </div>
   );
