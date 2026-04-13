@@ -1,15 +1,4 @@
--- CreateTable
-CREATE TABLE "Building" (
-	"building_id" TEXT NOT NULL,
-	"building_name" TEXT NOT NULL,
-	"operational_days" TEXT[] DEFAULT ARRAY[]::TEXT[],
-	"open_time" TEXT NOT NULL,
-	"close_time" TEXT NOT NULL,
-	"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"updatedAt" TIMESTAMP(3) NOT NULL,
-
-	CONSTRAINT "Building_pkey" PRIMARY KEY ("building_id")
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "Building_building_name_key" ON "Building"("building_name");
+-- This migration was superseded by `20260404093000_add_building_model`.
+-- It previously attempted to alter the `Building` table before it existed,
+-- which can fail on a fresh database. Keep it as a no-op for deploy safety.
+SELECT 1;
