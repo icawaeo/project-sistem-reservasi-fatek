@@ -132,7 +132,7 @@ export default function RiwayatPeminjamanPage() {
 
   useEffect(() => {
     if (status === "unauthenticated" || (status === "authenticated" && isPrivilegedStaff)) {
-      router.push("/auth");
+      router.push("/?tab=login");
     }
   }, [status, isPrivilegedStaff, router]);
 

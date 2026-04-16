@@ -70,8 +70,8 @@ export default function BuildingPage() {
     const params = useParams();
     const router = useRouter();
     const buildingName = decodeURIComponent(params.building as string);
-    const { data: session } = useSession();
-    const isPrivilegedStaff = session?.user?.userType === "STAFF";
+    const { data: session, status: sessionStatus } = useSession();
+    const isPrivilegedStaff = sessionStatus === "authenticated" && session?.user?.userType === "STAFF";
 
     const [rooms, setRooms] = useState<RoomWithStatus[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -177,26 +177,53 @@ export default function BuildingPage() {
     };
 
     const handleReservasi = (room: RoomWithStatus) => {
-        if (!session?.user || isPrivilegedStaff) {
-            router.push("/auth?tab=login");
+        if (sessionStatus === "loading") {
             return;
         }
+
+        if (sessionStatus !== "authenticated" || isPrivilegedStaff) {
+            router.push("/?tab=login");
+            return;
+        }
+
         if (!hasSearched) {
             setValidationError("Silakan cek ketersediaan terlebih dahulu sebelum melakukan reservasi.");
             return;
         }
+        const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
+
+        try {
+            sessionStorage.setItem(
+                "reservationDraft",
+                JSON.stringify({
+                    room_id: room.room_id,
+                    room_name: room.room_name,
+                    room_building: room.room_building,
+                    room_capacity: String(room.room_capacity),
+                    room_locDetail: room.room_locDetail,
+                    room_imageUrl: room.room_imageUrl ?? "",
+                    startDate,
+                    endDate: effectiveEndDate,
+                    startTime,
+                    endTime,
+                }),
+            );
+        } catch {
+            // ignore (e.g. storage quota)
+        }
+
         const qp = new URLSearchParams({
             room_id: room.room_id,
             room_name: room.room_name,
             room_building: room.room_building,
             room_capacity: String(room.room_capacity),
             room_locDetail: room.room_locDetail,
-            room_imageUrl: room.room_imageUrl ?? "",
             startDate,
-            endDate: reservationMode === "date-range" ? endDate : startDate,
+            endDate: effectiveEndDate,
             startTime,
             endTime,
         });
+
         router.push(`/reservasi?${qp.toString()}`);
     };
 

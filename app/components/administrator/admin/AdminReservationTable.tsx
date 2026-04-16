@@ -66,6 +66,14 @@ function isActionableStatusForRole(role: AdminRole, status: string) {
     return normalized === "PENDING_WD2" || normalized === "PENDING_WAKIL_DEKAN_2";
   }
 
+  if (role === "KAJUR") {
+    return normalized === "PENDING_KAJUR";
+  }
+
+  if (role === "KEPALA_LAB") {
+    return normalized === "PENDING_KEPALA_LAB";
+  }
+
   return false;
 }
 
@@ -161,6 +169,8 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
         processedAt?: string;
         waitingDekanAt?: string | null;
         waitingWd2At?: string | null;
+        waitingKajurAt?: string | null;
+        waitingKepalaLabAt?: string | null;
         decisionAt?: string | null;
         error?: string;
       };
@@ -174,6 +184,8 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
         processedAt: payload.processedAt ?? null,
         waitingDekanAt: payload.waitingDekanAt ?? null,
         waitingWd2At: payload.waitingWd2At ?? null,
+        waitingKajurAt: payload.waitingKajurAt ?? null,
+        waitingKepalaLabAt: payload.waitingKepalaLabAt ?? null,
         decisionAt: payload.decisionAt ?? null,
       };
 

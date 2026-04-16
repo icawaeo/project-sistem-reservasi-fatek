@@ -13,7 +13,7 @@ import {
   Users,
   Mail,
   Phone,
-  File,
+  File as FileIcon,
   ChevronRight,
   ArrowLeft,
   Building2,
@@ -31,6 +31,10 @@ const buildingColorMap = {
   "Gedung Jurusan Teknik Mesin": "from-indigo-900 to-indigo-700",
   "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
 };
+
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
 type ReservationDraft = {
   room_id?: string;
@@ -50,10 +54,21 @@ type ReservationDraft = {
   phone: string;
   purpose: string;
   reason: string;
+	res_flow?: ReservationFlow;
   documentName: string;
   documentSize: number | null;
   documentType: string | null;
   documentDataUrl?: string | null;
+};
+
+type SubmittedReservation = {
+  res_id: string;
+  res_startTime: string;
+  res_endTime: string;
+  room: {
+    room_name: string;
+    room_building: string;
+  };
 };
 
 const fallbackReservation: ReservationDraft = {
@@ -70,6 +85,7 @@ const fallbackReservation: ReservationDraft = {
   phone: "-",
   purpose: "-",
   reason: "-",
+  res_flow: "GENERAL",
   documentName: "Belum ada dokumen",
   documentSize: null,
   documentType: null,
@@ -81,9 +97,33 @@ export default function KonfirmasiReservasiPage() {
   const { data: session } = useSession();
   const isPrivilegedStaff = session?.user?.userType === "STAFF";
   const [reservation, setReservation] = useState<ReservationDraft | null>(null);
-  const [submitted, setSubmitted] = useState<any>(null);
+  const [submitted, setSubmitted] = useState<SubmittedReservation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const uploadSupportingDocument = async () => {
+    if (!reservation?.documentDataUrl) return null;
+
+    const response = await fetch(reservation.documentDataUrl);
+    const blob = await response.blob();
+    const fileName = reservation.documentName && reservation.documentName !== "Belum ada dokumen" ? reservation.documentName : "dokumen";
+    const fileType = reservation.documentType || blob.type || "application/octet-stream";
+    const file = new File([blob], fileName, { type: fileType });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const uploadRes = await fetch("/api/reservasi/document", {
+      method: "POST",
+      body: formData,
+    });
+    const uploadData = await uploadRes.json();
+    if (!uploadRes.ok || !uploadData?.documentUrl) {
+      throw new Error(uploadData?.error || "Gagal mengupload dokumen.");
+    }
+
+    return uploadData.documentUrl as string;
+  };
 
   const handleEditData = () => {
     if (!reservation) {
@@ -92,21 +132,7 @@ export default function KonfirmasiReservasiPage() {
     }
 
     sessionStorage.setItem("reservationDraft", JSON.stringify(reservation));
-
-    const params = new URLSearchParams({
-      room_id: reservation.room_id || "",
-      room_name: reservation.room_name,
-      room_building: reservation.room_building,
-      room_capacity: reservation.room_capacity || "",
-      room_locDetail: reservation.room_locDetail || "",
-      room_imageUrl: reservation.room_imageUrl || "",
-      startDate: reservation.startDate,
-      endDate: reservation.endDate,
-      startTime: reservation.startTime,
-      endTime: reservation.endTime,
-    });
-
-    router.push(`/reservasi?${params.toString()}`);
+    router.push("/reservasi");
   };
 
   useEffect(() => {
@@ -241,7 +267,7 @@ export default function KonfirmasiReservasiPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 size={16} className="text-slate-700" />
@@ -335,7 +361,7 @@ export default function KonfirmasiReservasiPage() {
 
           <div className="mt-4 rounded-xl border border-slate-200 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <File size={16} className="text-slate-700" />
+              <FileIcon size={16} className="text-slate-700" />
               <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Surat Pengantar</span>
             </div>
 
@@ -384,9 +410,27 @@ export default function KonfirmasiReservasiPage() {
                     res_endTime: Number.isNaN(endDateTime.getTime())
                       ? new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString()
                       : endDateTime.toISOString(),
-                    res_purpose: reservation.purpose,
-                    res_documentUrl: null,
+					res_purpose: reservation.reason && reservation.reason !== "-" ? `${reservation.purpose} - ${reservation.reason}` : reservation.purpose,
+          res_flow: reservation.res_flow ?? "GENERAL",
+          res_documentUrl: null as string | null,
                   };
+
+          const isLab = reservation.room_building === LAB_BUILDING_NAME;
+          if (isLab) {
+            if (payload.res_flow !== "LAB_SKRIPSI" && payload.res_flow !== "LAB_LAINNYA") {
+              setError("Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya). Silakan kembali dan lengkapi data.");
+              setLoading(false);
+              return;
+            }
+            if (!reservation.documentDataUrl) {
+              setError("Dokumen pendukung wajib diunggah untuk peminjaman lab.");
+              setLoading(false);
+              return;
+            }
+          }
+
+          const uploadedDocumentUrl = await uploadSupportingDocument();
+          payload.res_documentUrl = uploadedDocumentUrl;
 
                   const res = await fetch("/api/reservasi", {
                     method: "POST",

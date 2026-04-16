@@ -11,13 +11,36 @@ type ReservationProgressBarProps = {
 	data: AdminReservationRecord;
 };
 
-const steps = [
-	{ key: "SUBMITTED", label: "Diajukan" },
-	{ key: "WAITING_DEKAN", label: "Menunggu Persetujuan Dekan" },
-	{ key: "WAITING_WD2", label: "Menunggu Persetujuan Wakil Dekan 2" },
-	{ key: "DECISION", label: "Disetujui/Ditolak" },
-	{ key: "COMPLETED", label: "Selesai" },
-] as const;
+type Step = { key: string; label: string };
+
+function resolveSteps(flow: AdminReservationRecord["flow"]): Step[] {
+	if (flow === "LAB_SKRIPSI") {
+		return [
+			{ key: "SUBMITTED", label: "Diajukan" },
+			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab" },
+			{ key: "DECISION", label: "Disetujui/Ditolak" },
+			{ key: "COMPLETED", label: "Selesai" },
+		];
+	}
+
+	if (flow === "LAB_LAINNYA") {
+		return [
+			{ key: "SUBMITTED", label: "Diajukan" },
+			{ key: "WAITING_KAJUR", label: "Menunggu Persetujuan Kajur" },
+			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab" },
+			{ key: "DECISION", label: "Disetujui/Ditolak" },
+			{ key: "COMPLETED", label: "Selesai" },
+		];
+	}
+
+	return [
+		{ key: "SUBMITTED", label: "Diajukan" },
+		{ key: "WAITING_DEKAN", label: "Menunggu Persetujuan Dekan" },
+		{ key: "WAITING_WD2", label: "Menunggu Persetujuan Wakil Dekan 2" },
+		{ key: "DECISION", label: "Disetujui/Ditolak" },
+		{ key: "COMPLETED", label: "Selesai" },
+	];
+}
 
 function formatProgressDateTime(dateInput: string) {
 	try {
@@ -50,25 +73,57 @@ function resolveDecisionLabel(statusRaw: string) {
 	return "Disetujui/Ditolak";
 }
 
-function resolveProgressState(statusRaw: string) {
+function resolveProgressState(statusRaw: string, flow: AdminReservationRecord["flow"], steps: Step[]) {
 	const status = normalizeReservationStatus(statusRaw);
 
 	const isCompleted = status === "COMPLETED" || status === "SELESAI";
 	const isApproved = status === "APPROVED" || status === "DISETUJUI";
 	const isRejected = status.startsWith("REJECT") || status.includes("DITOLAK");
 
+	const lastIndex = Math.max(0, steps.length - 1);
+
 	if (isCompleted) {
-		return { currentIndex: 4, isComplete: true, rejectedIndex: null as number | null };
+		return { currentIndex: lastIndex, isComplete: true, rejectedIndex: null as number | null };
 	}
 
 	// Jika ditolak, berhenti di step "Disetujui/Ditolak".
 	if (isRejected) {
-		return { currentIndex: 3, isComplete: false, rejectedIndex: 3 };
+		const decisionIndex = Math.max(0, steps.findIndex((step) => step.key === "DECISION"));
+		return { currentIndex: decisionIndex, isComplete: false, rejectedIndex: decisionIndex };
 	}
 
 	// Jika sudah disetujui tapi belum selesai, proses lanjut ke tahap "Selesai".
 	if (isApproved) {
-		return { currentIndex: 3, isComplete: false, rejectedIndex: null as number | null };
+		const decisionIndex = Math.max(0, steps.findIndex((step) => step.key === "DECISION"));
+		return { currentIndex: decisionIndex, isComplete: false, rejectedIndex: null as number | null };
+	}
+
+	if (flow === "LAB_SKRIPSI") {
+		if (status === "PENDING_KEPALA_LAB") {
+			return { currentIndex: 1, isComplete: false, rejectedIndex: null };
+		}
+
+		if (status === "PENDING" || status === "PENDING_KABAG") {
+			return { currentIndex: 0, isComplete: false, rejectedIndex: null };
+		}
+
+		return { currentIndex: 0, isComplete: false, rejectedIndex: null };
+	}
+
+	if (flow === "LAB_LAINNYA") {
+		if (status === "PENDING_KEPALA_LAB") {
+			return { currentIndex: 2, isComplete: false, rejectedIndex: null };
+		}
+
+		if (status === "PENDING_KAJUR") {
+			return { currentIndex: 1, isComplete: false, rejectedIndex: null };
+		}
+
+		if (status === "PENDING" || status === "PENDING_KABAG") {
+			return { currentIndex: 0, isComplete: false, rejectedIndex: null };
+		}
+
+		return { currentIndex: 0, isComplete: false, rejectedIndex: null };
 	}
 
 	if (status === "PENDING_WD2" || status === "PENDING_WAKIL_DEKAN_2") {
@@ -95,7 +150,7 @@ function resolveStepState(params: { stepIndex: number; currentIndex: number; rej
 	return "pending";
 }
 
-function resolveSecondaryText(params: { stepIndex: number; state: StepState; data: AdminReservationRecord; status: string }) {
+function resolveSecondaryText(params: { stepIndex: number; state: StepState; data: AdminReservationRecord; status: string; steps: Step[] }) {
 	const { stepIndex, state, data, status } = params;
 
 	if (state === "pending") return { text: "---", className: "text-slate-400" };
@@ -106,11 +161,15 @@ function resolveSecondaryText(params: { stepIndex: number; state: StepState; dat
 	const isRejected = normalizedStatus.startsWith("REJECT") || normalizedStatus.includes("DITOLAK");
 
 	const dateValue = (() => {
-		if (stepIndex === 0) return data.createdAt;
-		if (stepIndex === 1) return data.waitingDekanAt;
-		if (stepIndex === 2) return data.waitingWd2At;
-		if (stepIndex === 3) return data.decisionAt;
-		if (stepIndex === 4) {
+		const step = params.steps[stepIndex];
+		if (!step) return null;
+		if (step.key === "SUBMITTED") return data.createdAt;
+		if (step.key === "WAITING_DEKAN") return data.waitingDekanAt;
+		if (step.key === "WAITING_WD2") return data.waitingWd2At;
+		if (step.key === "WAITING_KAJUR") return data.waitingKajurAt;
+		if (step.key === "WAITING_KEPALA_LAB") return data.waitingKepalaLabAt;
+		if (step.key === "DECISION") return data.decisionAt;
+		if (step.key === "COMPLETED") {
 			// Selesai ditampilkan hanya jika sudah disetujui / sudah selesai.
 			if (isCompleted || isApproved) return data.endTime;
 			if (isRejected) return null;
@@ -148,7 +207,8 @@ function labelClass(state: StepState) {
 
 export default function ReservationProgressBar({ data }: ReservationProgressBarProps) {
 	const computedStatus = computeReservationStatus(data.status, data.endTime);
-	const progress = resolveProgressState(computedStatus);
+	const steps = resolveSteps(data.flow);
+	const progress = resolveProgressState(computedStatus, data.flow, steps);
 
 	const totalSteps = steps.length;
 	const current = Math.min(Math.max(progress.currentIndex, 0), totalSteps - 1);
@@ -226,7 +286,7 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 				style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
 			>
 				{steps.map((step, index) => {
-					const label = index === 3 ? resolveDecisionLabel(computedStatus) : step.label;
+					const label = step.key === "DECISION" ? resolveDecisionLabel(computedStatus) : step.label;
 					const state = resolveStepState({
 						stepIndex: index,
 						currentIndex: current,
@@ -234,7 +294,7 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 						isComplete: progress.isComplete,
 					});
 
-					const secondary = resolveSecondaryText({ stepIndex: index, state, data, status: computedStatus });
+					const secondary = resolveSecondaryText({ stepIndex: index, state, data, status: computedStatus, steps });
 
 					return (
 						<div key={step.key} className="px-2 text-center">

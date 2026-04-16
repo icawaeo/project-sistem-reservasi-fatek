@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 type PreviewData = {
   dataUrl: string;
@@ -37,41 +37,44 @@ function inferMimeType(input: { dataUrl?: string; documentType?: string | null }
   return dataUrl.slice("data:".length, cutIndex);
 }
 
+let hasHydrated = false;
+const hydrateListeners = new Set<() => void>();
+
+function subscribeHydration(listener: () => void) {
+  hydrateListeners.add(listener);
+
+  if (!hasHydrated && typeof window !== "undefined") {
+    hasHydrated = true;
+    queueMicrotask(() => {
+      for (const cb of hydrateListeners) cb();
+    });
+  }
+
+  return () => {
+    hydrateListeners.delete(listener);
+  };
+}
+
+function getHydrationSnapshot() {
+  return hasHydrated;
+}
+
+function getHydrationServerSnapshot() {
+  return false;
+}
+
+function useHydrated() {
+  return useSyncExternalStore(subscribeHydration, getHydrationSnapshot, getHydrationServerSnapshot);
+}
+
 export default function PreviewPage() {
-  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
-  const [mimeType, setMimeType] = useState<string>("");
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  const [objectUrlStatus, setObjectUrlStatus] = useState<"idle" | "loading" | "ready" | "failed">("idle");
-  const [loading, setLoading] = useState(true);
+  const hydrated = useHydrated();
 
-  useEffect(() => {
-    const origin = window.location.origin;
+  const origin = hydrated ? window.location.origin : "";
+  const hasOpener = hydrated && window.opener != null;
 
-    const onMessage = (event: MessageEvent) => {
-      if (event.origin !== origin) return;
-
-      const data = event.data as PreviewMessage | undefined;
-      if (!data || data.type !== "RESERVASI_PREVIEW_DOCUMENT") return;
-
-      if (typeof data.dataUrl !== "string" || data.dataUrl.length === 0) {
-        setPreviewData(null);
-        setLoading(false);
-        return;
-      }
-
-      setPreviewData({ dataUrl: data.dataUrl, name: data.name || "Dokumen" });
-      setMimeType(inferMimeType({ dataUrl: data.dataUrl }));
-      setLoading(false);
-    };
-
-    window.addEventListener("message", onMessage);
-
-    // Let the opener know we're ready to receive the payload.
-    try {
-      window.opener?.postMessage(({ type: "RESERVASI_PREVIEW_READY" } satisfies PreviewMessage), origin);
-    } catch {
-      // ignore
-    }
+  const initialPreview = useMemo(() => {
+    if (!hydrated) return { preview: null as PreviewData | null, mime: "" };
 
     let initial: PreviewData | null = null;
     let initialMime = "";
@@ -105,14 +108,50 @@ export default function PreviewPage() {
       }
     }
 
-    setPreviewData(initial);
-    setMimeType(initialMime);
-    setLoading(false);
+    return { preview: initial, mime: initialMime };
+  }, [hydrated]);
+
+  const [previewOverride, setPreviewOverride] = useState<PreviewData | null | undefined>(undefined);
+  const [mimeOverride, setMimeOverride] = useState<string | undefined>(undefined);
+
+  const previewData = previewOverride !== undefined ? previewOverride : initialPreview.preview;
+  const mimeType = mimeOverride ?? initialPreview.mime;
+
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [objectUrlStatus, setObjectUrlStatus] = useState<"idle" | "loading" | "ready" | "failed">("idle");
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== origin) return;
+
+      const data = event.data as PreviewMessage | undefined;
+      if (!data || data.type !== "RESERVASI_PREVIEW_DOCUMENT") return;
+
+      if (typeof data.dataUrl !== "string" || data.dataUrl.length === 0) {
+        setPreviewOverride(null);
+        setMimeOverride("");
+        return;
+      }
+
+      setPreviewOverride({ dataUrl: data.dataUrl, name: data.name || "Dokumen" });
+      setMimeOverride(inferMimeType({ dataUrl: data.dataUrl }));
+    };
+
+    window.addEventListener("message", onMessage);
+
+    // Let the opener know we're ready to receive the payload.
+    try {
+      window.opener?.postMessage(({ type: "RESERVASI_PREVIEW_READY" } satisfies PreviewMessage), origin);
+    } catch {
+      // ignore
+    }
 
     return () => {
       window.removeEventListener("message", onMessage);
     };
-  }, []);
+  }, [hydrated, origin]);
 
   useEffect(() => {
     let alive = true;
@@ -138,7 +177,7 @@ export default function PreviewPage() {
         }
 
         if (!mimeType && blob.type) {
-          setMimeType(blob.type);
+          setMimeOverride(blob.type);
         }
         setObjectUrl(url);
         setObjectUrlStatus("ready");
@@ -158,7 +197,34 @@ export default function PreviewPage() {
     };
   }, [previewData, mimeType]);
 
-  if (loading) {
+  if (!hydrated) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          backgroundColor: "#0f172a",
+          color: "#e2e8f0",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <p style={{ marginBottom: "12px", fontSize: "clamp(14px, 1.2vw, 18px)" }}>
+            Memuat preview dokumen...
+          </p>
+          <p style={{ fontSize: "clamp(12px, 1.1vw, 16px)", color: "#cbd5e1" }}>
+            Jika tidak muncul, kembali ke konfirmasi lalu coba lagi.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isWaitingForPayload = !previewData && hasOpener;
+
+  if (isWaitingForPayload) {
     return (
       <div
         style={{

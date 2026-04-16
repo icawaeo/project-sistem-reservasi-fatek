@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import { createTemplateFromDocx, listTemplates } from "@/lib/template-store";
+import { createTemplateFromDocx, listTemplates, type DecisionLetterTemplateType } from "@/lib/template-store";
 
 export const runtime = "nodejs";
 
@@ -23,6 +23,7 @@ const ensureSuperadmin = async () => {
 
 const toSummary = (template: Awaited<ReturnType<typeof listTemplates>>[number]) => ({
   id: template.id,
+  templateType: template.templateType,
   name: template.name,
   originalFilename: template.originalFilename,
   pdfOriginalFilename: template.pdfOriginalFilename ?? null,
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const file = formData.get("file");
   const nameInput = formData.get("name");
+  const templateTypeInput = formData.get("templateType");
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "File wajib diunggah." }, { status: 400 });
@@ -71,8 +73,18 @@ export async function POST(request: NextRequest) {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
+  const resolvedTemplateType = (
+    typeof templateTypeInput === "string" ? templateTypeInput.trim() : ""
+  ) as DecisionLetterTemplateType;
+
+  const templateType: DecisionLetterTemplateType =
+    resolvedTemplateType === "LAB_SKRIPSI" || resolvedTemplateType === "LAB_LAINNYA" || resolvedTemplateType === "GENERAL"
+      ? resolvedTemplateType
+      : "GENERAL";
+
   try {
     const created = await createTemplateFromDocx({
+      templateType,
       name,
       originalFilename,
       mimeType: file.type || "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

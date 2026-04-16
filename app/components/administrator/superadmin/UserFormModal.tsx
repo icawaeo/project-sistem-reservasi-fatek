@@ -18,7 +18,7 @@ type FormState = {
   name: string;
   email: string;
   userCategory: "umum" | "unsrat";
-  role: "USER" | "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "SUPERADMIN";
+  role: UserPayload["role"];
 };
 
 const initialState: FormState = {
@@ -167,7 +167,7 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
-                    role: event.target.value as "USER" | "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "SUPERADMIN",
+                    role: event.target.value as "USER" | "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2",
                   }))
                 }
                 className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"

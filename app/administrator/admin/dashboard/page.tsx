@@ -15,7 +15,8 @@ export default async function AdminDashboardPage() {
 	}
 
 	const role = (session.user.role || "ADMIN").toUpperCase();
-	const adminRole: AdminRole = role === "ADMIN_DEKAN" || role === "ADMIN_WD2" ? (role as AdminRole) : "ADMIN";
+	const adminRole: AdminRole =
+		role === "ADMIN_DEKAN" || role === "ADMIN_WD2" || role === "KAJUR" || role === "KEPALA_LAB" ? (role as AdminRole) : "ADMIN";
 
 	const splitReservationPurpose = (value: string | null) => {
 		if (!value) {
@@ -63,7 +64,10 @@ export default async function AdminDashboardPage() {
 			processedAt: item.res_processedAt ? item.res_processedAt.toISOString() : null,
 			waitingDekanAt: item.res_waitingDekanAt ? item.res_waitingDekanAt.toISOString() : null,
 			waitingWd2At: item.res_waitingWd2At ? item.res_waitingWd2At.toISOString() : null,
+			waitingKajurAt: item.res_waitingKajurAt ? item.res_waitingKajurAt.toISOString() : null,
+			waitingKepalaLabAt: item.res_waitingKepalaLabAt ? item.res_waitingKepalaLabAt.toISOString() : null,
 			decisionAt: item.res_decisionAt ? item.res_decisionAt.toISOString() : null,
+			flow: item.res_flow,
 			startTime: item.res_startTime.toISOString(),
 			endTime: item.res_endTime.toISOString(),
 			activityName: parsedPurpose.activityName,

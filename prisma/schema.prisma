@@ -25,7 +25,32 @@ enum UserRole {
   ADMIN
   ADMIN_DEKAN
   ADMIN_WD2
+  KAJUR
+  KEPALA_LAB
   SUPERADMIN
+}
+
+enum LabProgram {
+  IT
+  ELEKTRO
+  ARSITEKTUR
+  PWK
+  SIPIL
+  LINGKUNGAN
+  MESIN
+}
+
+enum LabDepartment {
+  ELEKTRO
+  ARSITEKTUR
+  SIPIL
+  MESIN
+}
+
+enum ReservationFlow {
+  GENERAL
+  LAB_SKRIPSI
+  LAB_LAINNYA
 }
 
 model User {
@@ -36,6 +61,8 @@ model User {
   identifier   String?   // NIM/NIP - nullable for PUBLIC users
   userType     UserType
   role         UserRole  @default(USER)
+  departmentScope LabDepartment?
+  programScope    LabProgram?
   signatureUrl String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -82,6 +109,9 @@ model Room {
   room_imageUrl  String?
   room_isActive  Boolean @default(true)
 
+  labProgram     LabProgram?
+  labDepartment  LabDepartment?
+
   // Relasi: Satu ruangan bisa ada di banyak reservasi
   reservations Reservation[]
 }
@@ -113,8 +143,12 @@ model Reservation {
   res_startTime   DateTime
   res_endTime     DateTime
   res_purpose     String
+  res_flow        ReservationFlow @default(GENERAL)
   res_status      String   @default("PENDING") // e.g., "PENDING", "APPROVED", "REJECTED"
   res_documentUrl String?
+
+  res_labProgram    LabProgram?
+  res_labDepartment LabDepartment?
 
   // Tracking Admin/System processing
   res_processedBy String?
@@ -123,6 +157,8 @@ model Reservation {
   // Per-step progress timestamps
   res_waitingDekanAt DateTime?
   res_waitingWd2At   DateTime?
+  res_waitingKajurAt DateTime?
+  res_waitingKepalaLabAt DateTime?
   res_decisionAt     DateTime?
 
   // Foreign Keys

@@ -1,4 +1,4 @@
-export type AdminRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2";
+export type AdminRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "KEPALA_LAB";
 
 export type AdminReservationRecord = {
 	id: string;
@@ -6,7 +6,10 @@ export type AdminReservationRecord = {
 	processedAt: string | null;
 	waitingDekanAt: string | null;
 	waitingWd2At: string | null;
+	waitingKajurAt: string | null;
+	waitingKepalaLabAt: string | null;
 	decisionAt: string | null;
+	flow: "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 	startTime: string;
 	endTime: string;
 	activityName: string;

@@ -100,9 +100,10 @@ export default function RegisterView() {
           confirmPassword: ""
         });
         
-        router.push("/auth?tab=login");
-    } catch (err: any) {
-        setError(err.message);
+        router.push("/?tab=login");
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar.";
+        setError(message);
         console.error("Registration error:", err);
     } finally {
         setLoading(false);

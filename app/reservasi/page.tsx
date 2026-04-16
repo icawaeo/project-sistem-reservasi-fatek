@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -28,6 +28,10 @@ const buildingColorMap: Record<string, string> = {
     "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
 };
 
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
+
 type ReservationDraft = {
     room_id?: string;
     room_name?: string;
@@ -45,8 +49,32 @@ type ReservationDraft = {
     phone?: string;
     purpose?: string;
     reason?: string;
+    res_flow?: ReservationFlow;
+    documentName?: string;
+    documentSize?: number | null;
+    documentType?: string | null;
     documentDataUrl?: string | null;
 };
+
+function useSessionStorageItem(key: string) {
+    return useSyncExternalStore(
+        (onStoreChange) => {
+            if (typeof window === "undefined") return () => {};
+
+            const handler = () => onStoreChange();
+            window.addEventListener("storage", handler);
+
+            // Ensure a re-check after hydration even if nothing triggers a storage event.
+            Promise.resolve().then(onStoreChange);
+
+            return () => {
+                window.removeEventListener("storage", handler);
+            };
+        },
+        () => (typeof window === "undefined" ? null : sessionStorage.getItem(key)),
+        () => null,
+    );
+}
 
 function ReservasiContent() {
     const { data: session } = useSession();
@@ -54,18 +82,15 @@ function ReservasiContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [storedDraft, setStoredDraft] = useState<ReservationDraft | null>(null);
-
-    useEffect(() => {
-        const rawDraft = sessionStorage.getItem("reservationDraft");
-        if (!rawDraft) return;
-
+    const rawDraft = useSessionStorageItem("reservationDraft");
+    const storedDraft = useMemo(() => {
+        if (!rawDraft) return null;
         try {
-            setStoredDraft(JSON.parse(rawDraft) as ReservationDraft);
+            return JSON.parse(rawDraft) as ReservationDraft;
         } catch {
-            setStoredDraft(null);
+            return null;
         }
-    }, []);
+    }, [rawDraft]);
 
     const roomId = searchParams.get("room_id") ?? storedDraft?.room_id ?? "";
     const roomName = searchParams.get("room_name") ?? storedDraft?.room_name ?? "Ruangan";
@@ -80,35 +105,29 @@ function ReservasiContent() {
     const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
     const isCivitas = publicSessionUser?.userType === "STUDENT";
+    const isLabBuilding = roomBuilding === LAB_BUILDING_NAME;
 
-    const [borrowerName, setBorrowerName] = useState("");
-    const [identifier, setIdentifier] = useState("");
-    const [email, setEmail] = useState("");
-
-    useEffect(() => {
-        if (!storedDraft) return;
-        setBorrowerName(storedDraft.name ?? "");
-        setIdentifier(storedDraft.identifier ?? "");
-        setEmail(storedDraft.email ?? "");
-        setPhone(storedDraft.phone ?? "");
-        setPurposeTitle(storedDraft.purpose ?? "");
-        setPurposeDetail(storedDraft.reason ?? "");
-    }, [storedDraft]);
-
-    useEffect(() => {
-        if (!publicSessionUser) return;
-        setBorrowerName((prev) => prev || publicSessionUser.name || "");
-        setEmail((prev) => prev || publicSessionUser.email || "");
-        if (isCivitas) {
-            setIdentifier((prev) => prev || publicSessionUser.identifier || "");
-        }
-    }, [publicSessionUser, isCivitas]);
-    const [phone, setPhone] = useState("");
-    const [purposeTitle, setPurposeTitle] = useState("");
-    const [purposeDetail, setPurposeDetail] = useState("");
+    const [borrowerName, setBorrowerName] = useState<string | null>(null);
+    const [identifier, setIdentifier] = useState<string | null>(null);
+    const [email, setEmail] = useState<string | null>(null);
+    const [phone, setPhone] = useState<string | null>(null);
+    const [purposeTitle, setPurposeTitle] = useState<string | null>(null);
+    const [purposeDetail, setPurposeDetail] = useState<string | null>(null);
+    const [reservationFlow, setReservationFlow] = useState<ReservationFlow | null>(null);
     const [supportingFile, setSupportingFile] = useState<File | null>(null);
     const [supportingFileDataUrl, setSupportingFileDataUrl] = useState<string | null>(null);
     const [validationError, setValidationError] = useState("");
+
+    const borrowerNameValue = borrowerName ?? storedDraft?.name ?? publicSessionUser?.name ?? "";
+    const identifierValue = identifier ?? storedDraft?.identifier ?? (isCivitas ? publicSessionUser?.identifier ?? "" : "");
+    const emailValue = email ?? storedDraft?.email ?? publicSessionUser?.email ?? "";
+    const phoneValue = phone ?? storedDraft?.phone ?? "";
+    const purposeTitleValue = purposeTitle ?? storedDraft?.purpose ?? "";
+    const purposeDetailValue = purposeDetail ?? storedDraft?.reason ?? "";
+    const reservationFlowValue = (reservationFlow ?? storedDraft?.res_flow ?? "GENERAL") as ReservationFlow;
+    const effectiveReservationFlow: ReservationFlow = isLabBuilding ? reservationFlowValue : "GENERAL";
+    const supportingFileDataUrlValue = supportingFileDataUrl ?? storedDraft?.documentDataUrl ?? null;
+    const supportingFileLabel = supportingFile?.name ?? storedDraft?.documentName ?? "Klik untuk unggah berkas";
 
     const handleSupportingFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] ?? null;
@@ -118,6 +137,13 @@ function ReservasiContent() {
             setSupportingFileDataUrl(null);
             return;
         }
+
+		if (file.size > 5 * 1024 * 1024) {
+			setSupportingFile(null);
+			setSupportingFileDataUrl(null);
+			setValidationError("Ukuran file terlalu besar (maks 5 MB). Silakan pilih file lain.");
+			return;
+		}
 
         const reader = new FileReader();
         reader.onload = () => {
@@ -145,9 +171,21 @@ function ReservasiContent() {
             return;
         }
 
-        if (!borrowerName || !email || !phone || !purposeTitle || !purposeDetail) {
+        if (!borrowerNameValue || !emailValue || !phoneValue || !purposeTitleValue || !purposeDetailValue) {
             setValidationError("Mohon lengkapi seluruh data wajib pada formulir reservasi.");
             return;
+        }
+
+        if (isLabBuilding) {
+            if (effectiveReservationFlow !== "LAB_SKRIPSI" && effectiveReservationFlow !== "LAB_LAINNYA") {
+                setValidationError("Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya).");
+                return;
+            }
+
+            if (!supportingFileDataUrlValue) {
+                setValidationError("Dokumen pendukung wajib diunggah untuk peminjaman lab.");
+                return;
+            }
         }
 
         const draftPayload = {
@@ -161,17 +199,18 @@ function ReservasiContent() {
             endDate,
             startTime,
             endTime,
-            name: borrowerName,
-            identifier,
+            name: borrowerNameValue,
+            identifier: identifierValue,
             identifierLabel: "NIM",
-            email,
-            phone,
-            purpose: purposeTitle,
-            reason: purposeDetail,
-            documentName: supportingFile?.name ?? "Belum ada dokumen",
-            documentSize: supportingFile?.size ?? null,
-            documentType: supportingFile?.type ?? null,
-            documentDataUrl: supportingFileDataUrl,
+            email: emailValue,
+            phone: phoneValue,
+            purpose: purposeTitleValue,
+            reason: purposeDetailValue,
+            res_flow: effectiveReservationFlow,
+            documentName: supportingFile?.name ?? storedDraft?.documentName ?? "Belum ada dokumen",
+            documentSize: supportingFile?.size ?? storedDraft?.documentSize ?? null,
+            documentType: supportingFile?.type ?? storedDraft?.documentType ?? null,
+            documentDataUrl: supportingFileDataUrlValue,
         };
 
         sessionStorage.setItem("reservationDraft", JSON.stringify(draftPayload));
@@ -304,7 +343,7 @@ function ReservasiContent() {
                                     </div>
                                     <input
                                         type="text"
-                                        value={borrowerName}
+                                        value={borrowerNameValue}
                                         onChange={(e) => setBorrowerName(e.target.value)}
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
                                         placeholder="Masukkan nama lengkap Anda"
@@ -318,7 +357,7 @@ function ReservasiContent() {
                                         </div>
                                         <input
                                             type="text"
-                                            value={identifier}
+                                            value={identifierValue}
                                             onChange={(e) => setIdentifier(e.target.value)}
                                             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
                                             placeholder="Masukkan Nomor Induk Mahasiswa"
@@ -333,7 +372,7 @@ function ReservasiContent() {
                                         <Mail size={14} className="absolute left-3 top-3 text-slate-400" />
                                         <input
                                             type="email"
-                                            value={email}
+                                            value={emailValue}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
                                             placeholder="Masukkan alamat email Anda"
@@ -348,7 +387,7 @@ function ReservasiContent() {
                                         <input
                                             type="tel"
                                             inputMode="numeric"
-                                            value={phone}
+                                            value={phoneValue}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/\D/g, "");
                                                 setPhone(value);
@@ -367,12 +406,13 @@ function ReservasiContent() {
                                 <Info size={14} className="text-slate-700" />
                                 <h4 className="text-xs lg:text-sm font-bold uppercase tracking-widest text-slate-800">Detail Kegiatan</h4>
                             </div>
+
                             <div className="space-y-3.5">
                                 <label className="space-y-1.5 block">
                                     <span className="text-[11px] lg:text-xs font-semibold text-slate-600">Nama Kegiatan</span>
                                     <input
                                         type="text"
-                                        value={purposeTitle}
+                                        value={purposeTitleValue}
                                         onChange={(e) => setPurposeTitle(e.target.value)}
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
                                         placeholder="Masukkan nama kegiatan"
@@ -380,10 +420,26 @@ function ReservasiContent() {
                                     />
                                 </label>
 
+                                {isLabBuilding && (
+                                    <label className="space-y-1.5 block">
+                                        <span className="text-[11px] lg:text-xs font-semibold text-slate-600">Kategori Peminjaman Lab</span>
+                                        <select
+                                            value={effectiveReservationFlow}
+                                            onChange={(e) => setReservationFlow(e.target.value as ReservationFlow)}
+                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                            required
+                                        >
+                                            <option value="GENERAL">Pilih kategori</option>
+                                            <option value="LAB_SKRIPSI">Skripsi</option>
+                                            <option value="LAB_LAINNYA">Lainnya</option>
+                                        </select>
+                                    </label>
+                                )}
+
                                 <label className="space-y-1.5 block">
                                     <span className="text-[11px] lg:text-xs font-semibold text-slate-600">Alasan Peminjaman</span>
                                     <textarea
-                                        value={purposeDetail}
+                                        value={purposeDetailValue}
                                         onChange={(e) => setPurposeDetail(e.target.value)}
                                         rows={3}
                                         className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400 resize-y"
@@ -397,7 +453,13 @@ function ReservasiContent() {
                         <div>
                             <div className="flex items-center gap-2 mb-3">
                                 <FileText size={14} className="text-slate-700" />
-                                <h4 className="text-xs lg:text-sm font-bold uppercase tracking-widest text-slate-800">Surat Pengantar</h4>
+                            <h4 className="text-xs lg:text-sm font-bold uppercase tracking-widest text-slate-800">
+                                {isLabBuilding
+                                    ? effectiveReservationFlow === "LAB_SKRIPSI"
+                                        ? "SK Pembimbingan"
+                                        : "Surat Pengantar"
+                                    : "Surat Pengantar"}
+                            </h4>
                             </div>
 
                             <label className="block rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center cursor-pointer hover:bg-slate-100 transition-colors">
@@ -409,7 +471,7 @@ function ReservasiContent() {
                                 />
                                 <Upload size={24} className="mx-auto text-slate-400" />
                                 <p className="mt-2 text-sm lg:text-base font-semibold text-slate-700">
-                                    {supportingFile ? supportingFile.name : "Klik untuk unggah berkas"}
+                                    {supportingFileLabel}
                                 </p>
                                 <p className="text-[11px] lg:text-xs text-slate-500 mt-1">Format: PDF/JPG/PNG (maks 5 MB)</p>
                             </label>

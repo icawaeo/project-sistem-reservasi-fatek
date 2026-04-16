@@ -2,11 +2,45 @@
 
 import Image from "next/image";
 import { Pencil, Trash2 } from "lucide-react";
-import type { RoomItem } from "./room-types";
+import type { LabDepartmentValue, LabProgramValue, RoomItem } from "./room-types";
+
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+const PROGRAM_LABEL: Record<LabProgramValue, string> = {
+  ELEKTRO: "Teknik Elektro",
+  IT: "Informatika",
+  ARSITEKTUR: "Arsitektur",
+  PWK: "PWK",
+  SIPIL: "Teknik Sipil",
+  LINGKUNGAN: "Teknik Lingkungan",
+  MESIN: "Teknik Mesin",
+};
+
+const DEPARTMENT_LABEL: Record<LabDepartmentValue, string> = {
+  ELEKTRO: "Elektro",
+  ARSITEKTUR: "Arsitektur",
+  SIPIL: "Sipil",
+  MESIN: "Mesin",
+};
 
 const formatFloorLabel = (value: string) => {
-  const floor = value.trim().match(/\d+/)?.[0] ?? value.trim().replace(/^(lantai|lt\.?)/i, "").trim();
+  const trimmed = (value ?? "").trim();
+  const floor = trimmed.match(/\d+/)?.[0] ?? trimmed.replace(/^(lantai|lt\.?)/i, "").trim();
   return floor ? `Lantai ${floor}` : "Lantai belum diisi";
+};
+
+const formatRoomMetaLabel = (room: RoomItem) => {
+  const floorLabel = formatFloorLabel(room.floor);
+
+  if (room.building !== LAB_BUILDING_NAME) {
+    return floorLabel;
+  }
+
+  const programLabel = room.labProgram ? PROGRAM_LABEL[room.labProgram] : "-";
+  const departmentLabel = room.labDepartment ? DEPARTMENT_LABEL[room.labDepartment] : "-";
+
+  // Format yang diminta: Lantai | Prodi | Jurusan
+  return `${floorLabel} | ${programLabel} | ${departmentLabel}`;
 };
 
 type RoomTableProps = {
@@ -48,14 +82,22 @@ export default function RoomTable({ rooms, onEdit, onDelete }: RoomTableProps) {
                   <div className="flex items-center gap-3">
                     <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
                       {room.imageUrl ? (
-                        <Image src={room.imageUrl} alt={room.name} fill className="object-cover" unoptimized />
+                        <Image
+                          src={room.imageUrl}
+                          alt={room.name}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No Img</div>
+                        <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">
+                          No Img
+                        </div>
                       )}
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900">{room.name}</p>
-                      <p className="text-xs text-slate-500">{formatFloorLabel(room.floor)}</p>
+                      <p className="text-xs text-slate-500">{formatRoomMetaLabel(room)}</p>
                     </div>
                   </div>
                 </td>
@@ -122,14 +164,16 @@ export default function RoomTable({ rooms, onEdit, onDelete }: RoomTableProps) {
                 {room.imageUrl ? (
                   <Image src={room.imageUrl} alt={room.name} fill className="object-cover" unoptimized />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No Img</div>
+                  <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">
+                    No Img
+                  </div>
                 )}
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-slate-900">{room.name}</p>
                 <p className="text-sm text-slate-500">{room.building}</p>
-                <p className="text-sm text-slate-500">{formatFloorLabel(room.floor)}</p>
+                <p className="text-sm text-slate-500">{formatRoomMetaLabel(room)}</p>
                 <p className="text-sm text-slate-600">Kapasitas: {room.capacity} Orang</p>
               </div>
             </div>
@@ -152,7 +196,9 @@ export default function RoomTable({ rooms, onEdit, onDelete }: RoomTableProps) {
             <div className="mt-3 flex items-center justify-between">
               <span
                 className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                  room.status === "aktif" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                  room.status === "aktif"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
                 }`}
               >
                 {room.status === "aktif" ? "Aktif" : "Maintenance"}

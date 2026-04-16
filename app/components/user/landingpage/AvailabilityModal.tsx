@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Building2, ChevronDown, ChevronUp, X } from "lucide-react";
 
 export type RoomAvailability = {
@@ -33,18 +33,28 @@ export default function AvailabilityModal({
   onSelectRoom,
 }: AvailabilityModalProps) {
   const buildingNames = useMemo(() => buildings.map((b) => b.building), [buildings]);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [expandedOverride, setExpandedOverride] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    if (!open) return;
+  const expanded = useMemo(() => {
+    if (!open) {
+      return {};
+    }
 
-    setExpanded(
-      buildingNames.reduce<Record<string, boolean>>((acc, name, index) => {
-        acc[name] = index === 0;
-        return acc;
-      }, {})
-    );
-  }, [open, buildingNames]);
+    const defaults = buildingNames.reduce<Record<string, boolean>>((acc, name, index) => {
+      acc[name] = index === 0;
+      return acc;
+    }, {});
+
+    return {
+      ...defaults,
+      ...expandedOverride,
+    };
+  }, [buildingNames, expandedOverride, open]);
+
+  const handleClose = () => {
+    setExpandedOverride({});
+    onClose();
+  };
 
   if (!open) return null;
 
@@ -60,7 +70,7 @@ export default function AvailabilityModal({
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-lg border border-slate-300 bg-white p-2 text-slate-600 hover:bg-slate-50"
             aria-label="Tutup popup"
             type="button"
@@ -86,9 +96,9 @@ export default function AvailabilityModal({
                   >
                     <button
                       onClick={() =>
-                        setExpanded((prev) => ({
+                        setExpandedOverride((prev) => ({
                           ...prev,
-                          [group.building]: !prev[group.building],
+                          [group.building]: !Boolean(expanded[group.building]),
                         }))
                       }
                       className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 text-left hover:bg-slate-200"

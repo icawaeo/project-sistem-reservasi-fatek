@@ -58,6 +58,8 @@ const mapRoom = (room: {
 	room_locDetail: string;
 	room_imageUrl: string | null;
 	room_isActive: boolean;
+	labProgram: RoomItem["labProgram"];
+	labDepartment: RoomItem["labDepartment"];
 }): RoomItem => {
 	const details = parseRoomDetails(room.room_locDetail);
 
@@ -70,6 +72,8 @@ const mapRoom = (room: {
 		facilities: details.facilities,
 		imageUrl: room.room_imageUrl,
 		status: room.room_isActive ? "aktif" : "maintenance",
+		labProgram: room.labProgram ?? null,
+		labDepartment: room.labDepartment ?? null,
 	};
 };
 

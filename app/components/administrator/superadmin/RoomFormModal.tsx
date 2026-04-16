@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 import ImageUpload from "./ImageUpload";
-import type { RoomItem, RoomPayload, RoomStatus } from "./room-types";
+import type { LabProgramValue, RoomItem, RoomPayload, RoomStatus } from "./room-types";
 
 type RoomFormModalProps = {
   isOpen: boolean;
@@ -18,6 +18,7 @@ type RoomFormModalProps = {
 type FormState = {
   name: string;
   building: string;
+  labProgram: "" | LabProgramValue;
   floor: string;
   capacity: string;
   facilities: string[];
@@ -29,6 +30,7 @@ type FormState = {
 const initialState: FormState = {
   name: "",
   building: "",
+  labProgram: "",
   floor: "",
   capacity: "",
   facilities: [],
@@ -36,6 +38,18 @@ const initialState: FormState = {
   imageUrl: null,
   facilityInput: "",
 };
+
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+const LAB_PROGRAM_OPTIONS: Array<{ value: LabProgramValue; label: string }> = [
+  { value: "ELEKTRO", label: "Teknik Elektro" },
+  { value: "IT", label: "Informatika" },
+  { value: "ARSITEKTUR", label: "Arsitektur" },
+  { value: "PWK", label: "PWK" },
+  { value: "SIPIL", label: "Teknik Sipil" },
+  { value: "LINGKUNGAN", label: "Teknik Lingkungan" },
+  { value: "MESIN", label: "Teknik Mesin" },
+];
 
 export default function RoomFormModal({
   isOpen,
@@ -58,6 +72,7 @@ export default function RoomFormModal({
       setForm({
         name: room.name,
         building: room.building,
+        labProgram: room.labProgram ?? "",
         floor: room.floor,
         capacity: String(room.capacity),
         facilities: room.facilities,
@@ -69,7 +84,7 @@ export default function RoomFormModal({
     }
 
     setForm(initialState);
-  }, [isOpen, mode, room, buildings]);
+  }, [isOpen, mode, room]);
 
   const addFacility = (rawValue: string) => {
     const value = rawValue.trim();
@@ -101,14 +116,23 @@ export default function RoomFormModal({
 
     const capacity = Number(form.capacity);
     const roomName = (form.name ?? "").trim();
+    const building = form.building.trim();
 
     if (!roomName) {
       pushToast({ type: "warning", message: "Nama ruangan belum diisi." });
       return;
     }
 
-    if (!form.building.trim()) {
+    if (!building) {
       pushToast({ type: "warning", message: "Belum ada gedung yang dipilih." });
+      return;
+    }
+
+    const isLabBuilding = building === LAB_BUILDING_NAME;
+    const labProgram = isLabBuilding && form.labProgram ? form.labProgram : null;
+
+    if (isLabBuilding && !labProgram) {
+      pushToast({ type: "warning", message: "Program studi wajib dipilih untuk ruangan lab." });
       return;
     }
 
@@ -122,12 +146,15 @@ export default function RoomFormModal({
     try {
       await onSubmit({
         name: roomName,
-        building: form.building.trim(),
+        building,
         floor: (form.floor ?? "").replace(/\D+/g, "").trim(),
         capacity: Math.floor(capacity),
         facilities: form.facilities,
         status: form.status,
         imageUrl: form.imageUrl,
+        labProgram,
+        // Jurusan tidak diinput; diturunkan (derived) oleh server.
+        labDepartment: null,
       });
 
       onClose();
@@ -148,8 +175,13 @@ export default function RoomFormModal({
   const buildingOptions =
     form.building && !buildings.includes(form.building) ? [...buildings, form.building] : buildings;
 
+  const isLabBuilding = form.building === LAB_BUILDING_NAME;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4"
+      onClick={onClose}
+    >
       <div
         className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-2xl"
         onClick={(event) => event.stopPropagation()}
@@ -204,7 +236,14 @@ export default function RoomFormModal({
               <span className="text-sm font-semibold text-slate-700">Gedung</span>
               <select
                 value={form.building}
-                onChange={(event) => setForm((prev) => ({ ...prev, building: event.target.value }))}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setForm((prev) => ({
+                    ...prev,
+                    building: value,
+                    labProgram: value === LAB_BUILDING_NAME ? prev.labProgram : "",
+                  }));
+                }}
                 className={`h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-slate-400 ${
                   form.building ? "text-slate-900" : "text-slate-400"
                 }`}
@@ -212,13 +251,41 @@ export default function RoomFormModal({
                 <option value="" className="text-slate-400">
                   Pilih gedung
                 </option>
-                {buildingOptions.map((building) => (
-                  <option key={building} value={building}>
-                    {building}
+                {buildingOptions.map((buildingItem) => (
+                  <option key={buildingItem} value={buildingItem}>
+                    {buildingItem}
                   </option>
                 ))}
               </select>
             </label>
+
+            {isLabBuilding ? (
+              <label className="space-y-1.5">
+                <span className="text-sm font-semibold text-slate-700">Program Studi</span>
+                <select
+                  value={form.labProgram}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      labProgram: event.target.value as "" | LabProgramValue,
+                    }))
+                  }
+                  className={`h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-slate-400 ${
+                    form.labProgram ? "text-slate-900" : "text-slate-400"
+                  }`}
+                  required
+                >
+                  <option value="" className="text-slate-400">
+                    Pilih program studi
+                  </option>
+                  {LAB_PROGRAM_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
 
             <label className="space-y-1.5">
               <span className="text-sm font-semibold text-slate-700">Lantai</span>
@@ -307,7 +374,10 @@ export default function RoomFormModal({
             </div>
           </div>
 
-          <ImageUpload value={form.imageUrl} onChange={(value) => setForm((prev) => ({ ...prev, imageUrl: value }))} />
+          <ImageUpload
+            value={form.imageUrl}
+            onChange={(value) => setForm((prev) => ({ ...prev, imageUrl: value }))}
+          />
 
           <div className="flex justify-end gap-2 border-t border-slate-200 pt-3">
             <button

@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, FileText, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 
+type TemplateType = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
+
 export type TemplateSummary = {
   id: string;
+  templateType: TemplateType;
   name: string;
   originalFilename: string;
   pdfOriginalFilename?: string | null;
@@ -15,6 +18,12 @@ export type TemplateSummary = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+};
+
+const resolveTemplateTypeLabel = (value: TemplateType) => {
+  if (value === "LAB_SKRIPSI") return "Lab - Skripsi";
+  if (value === "LAB_LAINNYA") return "Lab - Lainnya";
+  return "Umum";
 };
 
 const formatDateTime = (value: string) => {
@@ -51,6 +60,8 @@ export default function TemplateSuratManagementContent({
   const { pushToast } = useToast();
   const [templates, setTemplates] = useState<TemplateSummary[]>(initialTemplates);
 
+  const [selectedType, setSelectedType] = useState<TemplateType>("GENERAL");
+
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(() => {
     const active = initialTemplates.find((item) => item.isActive);
     return active?.id ?? initialTemplates[0]?.id ?? null;
@@ -76,6 +87,25 @@ export default function TemplateSuratManagementContent({
     const items: TemplateSummary[] = await response.json();
     setTemplates(items);
   };
+
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((item) => item.templateType === selectedType);
+  }, [selectedType, templates]);
+
+  useEffect(() => {
+    if (!filteredTemplates.length) {
+      setSelectedTemplateId(null);
+      return;
+    }
+
+    const currentStillValid = filteredTemplates.some((item) => item.id === selectedTemplateId);
+    if (currentStillValid) {
+      return;
+    }
+
+    const next = filteredTemplates.find((item) => item.isActive) ?? filteredTemplates[0] ?? null;
+    setSelectedTemplateId(next?.id ?? null);
+  }, [filteredTemplates, selectedTemplateId]);
 
   const handleDocxChange = (file: File | null) => {
     setUploadError(null);
@@ -116,6 +146,7 @@ export default function TemplateSuratManagementContent({
       const formData = new FormData();
       formData.append("file", uploadDocx);
       formData.append("name", uploadName.trim());
+      formData.append("templateType", selectedType);
 
       const response = await fetch("/api/admin/templates", {
         method: "POST",
@@ -139,7 +170,7 @@ export default function TemplateSuratManagementContent({
           message: error instanceof Error ? error.message : "Gagal memuat daftar template.",
         });
       }
-      // template baru otomatis menjadi template aktif
+      // template baru otomatis menjadi template aktif untuk kategori yang dipilih
     } catch (error) {
       pushToast({
         type: "error",
@@ -155,7 +186,9 @@ export default function TemplateSuratManagementContent({
       return;
     }
 
-    const confirmed = window.confirm("Hapus template aktif? File DOCX dan PDF preview juga akan terhapus.");
+    const confirmed = window.confirm(
+      `Hapus template aktif untuk kategori “${resolveTemplateTypeLabel(selectedType)}”? File DOCX dan PDF preview juga akan terhapus.`
+    );
     if (!confirmed) {
       return;
     }
@@ -187,27 +220,53 @@ export default function TemplateSuratManagementContent({
     }
   };
 
+  const handleSetActive = async () => {
+    if (!selectedTemplate || selectedTemplate.isActive) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/templates/${selectedTemplate.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "setActive" }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await buildErrorMessage(response, "Gagal mengubah template aktif."));
+      }
+
+      pushToast({ type: "success", message: "Template aktif berhasil diperbarui." });
+      await refreshList();
+    } catch (error) {
+      pushToast({
+        type: "error",
+        message: error instanceof Error ? error.message : "Terjadi kesalahan saat mengubah template aktif.",
+      });
+    }
+  };
+
   const activeTemplate = useMemo(() => {
-    return templates.find((item) => item.isActive) ?? templates[0] ?? null;
-  }, [templates]);
+    return filteredTemplates.find((item) => item.isActive) ?? filteredTemplates[0] ?? null;
+  }, [filteredTemplates]);
 
   const selectedTemplate = useMemo(() => {
-    if (!templates.length) {
+    if (!filteredTemplates.length) {
       return null;
     }
 
-    const resolved = templates.find((item) => item.id === selectedTemplateId);
+    const resolved = filteredTemplates.find((item) => item.id === selectedTemplateId);
     return resolved ?? activeTemplate;
-  }, [activeTemplate, selectedTemplateId, templates]);
+  }, [activeTemplate, filteredTemplates, selectedTemplateId]);
 
   const sortedTemplates = useMemo(() => {
-    return [...templates].sort((a, b) => {
+    return [...filteredTemplates].sort((a, b) => {
       if (a.isActive !== b.isActive) {
         return a.isActive ? -1 : 1;
       }
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
-  }, [templates]);
+  }, [filteredTemplates]);
 
   return (
     <main className="flex min-h-screen flex-col gap-5 p-4 lg:p-7">
@@ -215,10 +274,23 @@ export default function TemplateSuratManagementContent({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h3 className="text-base font-bold text-slate-900">Kelola Template Surat</h3>
-            <p className="text-sm text-slate-500">Sistem hanya menggunakan 1 template aktif.</p>
+            <p className="text-sm text-slate-500">Sistem menggunakan 1 template aktif per kategori.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Kategori</span>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value as TemplateType)}
+                className="h-8 rounded-md border border-slate-200 bg-slate-50 px-2 text-sm font-semibold text-slate-800 outline-none focus:border-slate-400"
+              >
+                <option value="GENERAL">Umum</option>
+                <option value="LAB_SKRIPSI">Lab - Skripsi</option>
+                <option value="LAB_LAINNYA">Lab - Lainnya</option>
+              </select>
+            </div>
+
             <button
               type="button"
               onClick={() => setIsUploadModalOpen(true)}
@@ -300,7 +372,7 @@ export default function TemplateSuratManagementContent({
                 })
               ) : (
                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                  Belum ada template. Klik “Template Baru” untuk mengunggah.
+                  Belum ada template untuk kategori “{resolveTemplateTypeLabel(selectedType)}”. Klik “Template Baru” untuk mengunggah.
                 </div>
               )}
             </div>
@@ -309,6 +381,16 @@ export default function TemplateSuratManagementContent({
           <section className="flex min-h-0 flex-1 flex-col lg:w-2/3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h4 className="text-xs font-bold uppercase tracking-widest text-slate-600">Preview Dokumen</h4>
+
+              {selectedTemplate && !selectedTemplate.isActive ? (
+                <button
+                  type="button"
+                  onClick={handleSetActive}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <CheckCircle2 size={16} className="text-emerald-600" /> Jadikan Aktif
+                </button>
+              ) : null}
             </div>
 
             <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50">

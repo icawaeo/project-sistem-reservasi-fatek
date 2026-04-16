@@ -16,6 +16,41 @@ const parseFacilities = (value: unknown): string[] => {
 
 const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
 
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+const LAB_PROGRAM_VALUES = [
+  "IT",
+  "ELEKTRO",
+  "ARSITEKTUR",
+  "PWK",
+  "SIPIL",
+  "LINGKUNGAN",
+  "MESIN",
+] as const;
+
+type LabProgramValue = (typeof LAB_PROGRAM_VALUES)[number];
+
+type LabDepartmentValue = "ELEKTRO" | "ARSITEKTUR" | "SIPIL" | "MESIN";
+
+const PROGRAM_TO_DEPARTMENT: Record<LabProgramValue, LabDepartmentValue> = {
+  ELEKTRO: "ELEKTRO",
+  IT: "ELEKTRO",
+  ARSITEKTUR: "ARSITEKTUR",
+  PWK: "ARSITEKTUR",
+  SIPIL: "SIPIL",
+  LINGKUNGAN: "SIPIL",
+  MESIN: "MESIN",
+};
+
+const parseLabProgram = (value: unknown): LabProgramValue | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim() as LabProgramValue;
+  return LAB_PROGRAM_VALUES.includes(trimmed) ? trimmed : null;
+};
+
 const normalizeCommaSeparated = (value: unknown): string[] => {
   if (typeof value !== "string") {
     return [];
@@ -78,6 +113,8 @@ const mapRoom = (room: {
   room_locDetail: string;
   room_imageUrl: string | null;
   room_isActive: boolean;
+  labProgram: LabProgramValue | null;
+  labDepartment: LabDepartmentValue | null;
 }) => {
   const details = parseRoomDetails(room.room_locDetail);
 
@@ -90,6 +127,8 @@ const mapRoom = (room: {
     facilities: details.facilities,
     imageUrl: room.room_imageUrl,
     status: room.room_isActive ? "aktif" : "maintenance",
+    labProgram: room.labProgram ?? null,
+    labDepartment: room.labDepartment ?? null,
   };
 };
 
@@ -144,6 +183,14 @@ export async function POST(request: Request) {
     const imageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
     const status = parseStatus(body?.status);
 
+    const isLabBuilding = building === LAB_BUILDING_NAME;
+    const labProgram = isLabBuilding ? parseLabProgram(body?.labProgram) : null;
+    const labDepartment = labProgram ? PROGRAM_TO_DEPARTMENT[labProgram] : null;
+
+    if (isLabBuilding && !labProgram) {
+      return NextResponse.json({ error: "Program studi lab wajib dipilih" }, { status: 400 });
+    }
+
     if (!name || !building || Number.isNaN(capacity) || capacity <= 0) {
       return NextResponse.json({ error: "Data ruangan belum valid" }, { status: 400 });
     }
@@ -169,6 +216,8 @@ export async function POST(request: Request) {
         room_locDetail: buildRoomLocDetail(floor, facilities),
         room_imageUrl: imageUrl,
         room_isActive: status === "aktif",
+        labProgram,
+        labDepartment,
       },
     });
 

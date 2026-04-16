@@ -9,8 +9,11 @@ import mammoth from "mammoth";
 
 export type PlaceholderMappingValue = string | null;
 
+export type DecisionLetterTemplateType = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
+
 export type LetterTemplateMeta = {
   id: string;
+  templateType: DecisionLetterTemplateType;
   name: string;
   originalFilename: string;
   storedFilename: string;
@@ -42,16 +45,67 @@ const ensureStoreReady = async () => {
   }
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
 const readAll = async (): Promise<LetterTemplateMeta[]> => {
   await ensureStoreReady();
   const raw = await fs.readFile(META_PATH, "utf8");
 
   try {
-    const parsed = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
       return [];
     }
-    return parsed as LetterTemplateMeta[];
+
+    const coerceType = (value: unknown): DecisionLetterTemplateType => {
+      if (value === "GENERAL" || value === "LAB_SKRIPSI" || value === "LAB_LAINNYA") {
+        return value;
+      }
+      return "GENERAL";
+    };
+
+    const normalized = parsed
+      .filter(isRecord)
+      .map((item) => {
+        const templateType = coerceType(item.templateType);
+        const base = item as unknown as LetterTemplateMeta;
+        return {
+          ...base,
+          templateType,
+          isActive: Boolean(item.isActive),
+        } satisfies LetterTemplateMeta;
+      });
+
+    // Ensure max 1 active per templateType (keep the most recently updated).
+    const latestActiveByType = new Map<DecisionLetterTemplateType, LetterTemplateMeta>();
+    for (const item of normalized) {
+      if (!item.isActive) continue;
+      const existing = latestActiveByType.get(item.templateType);
+      if (!existing) {
+        latestActiveByType.set(item.templateType, item);
+        continue;
+      }
+      const existingUpdated = new Date(existing.updatedAt).getTime();
+      const itemUpdated = new Date(item.updatedAt).getTime();
+      if (itemUpdated >= existingUpdated) {
+        latestActiveByType.set(item.templateType, item);
+      }
+    }
+
+    const cleaned = normalized.map((item) => {
+      const chosen = latestActiveByType.get(item.templateType);
+      if (!chosen) {
+        return item;
+      }
+      return {
+        ...item,
+        isActive: item.id === chosen.id,
+      };
+    });
+
+    return cleaned as LetterTemplateMeta[];
   } catch {
     return [];
   }
@@ -73,13 +127,17 @@ const logLibreOfficeError = (payload: {
   error: unknown;
 }) => {
   const error = payload.error;
-  const asAny = error as any;
+  const details =
+    typeof error === "object" && error !== null
+      ? (error as { code?: unknown; signal?: unknown; stdout?: unknown; stderr?: unknown })
+      : null;
   const message = error instanceof Error ? error.message : String(error);
   const stack = error instanceof Error ? error.stack : undefined;
-  const code = typeof asAny?.code === "string" || typeof asAny?.code === "number" ? asAny.code : undefined;
-  const signal = typeof asAny?.signal === "string" ? asAny.signal : undefined;
-  const stdout = typeof asAny?.stdout === "string" ? asAny.stdout : undefined;
-  const stderr = typeof asAny?.stderr === "string" ? asAny.stderr : undefined;
+  const code =
+    typeof details?.code === "string" || typeof details?.code === "number" ? details.code : undefined;
+  const signal = typeof details?.signal === "string" ? details.signal : undefined;
+  const stdout = typeof details?.stdout === "string" ? details.stdout : undefined;
+  const stderr = typeof details?.stderr === "string" ? details.stderr : undefined;
 
   console.error("[template-store] LibreOffice conversion error", {
     stage: payload.stage,
@@ -160,8 +218,9 @@ const convertDocxToPdf = async (params: {
       error,
     });
 
-    const asAny = error as any;
-    if (asAny?.code === "ENOENT") {
+    const details =
+      typeof error === "object" && error !== null ? (error as { code?: unknown }) : null;
+    if (details?.code === "ENOENT") {
       throw new Error(
         "LibreOffice tidak ditemukan (soffice ENOENT). Install LibreOffice atau set LIBREOFFICE_PATH ke lokasi soffice (contoh: C:\\Program Files\\LibreOffice\\program\\soffice.exe)."
       );
@@ -204,7 +263,21 @@ export const getTemplate = async (id: string) => {
   return templates.find((item) => item.id === id) ?? null;
 };
 
+export const getActiveTemplateByType = async (templateType: DecisionLetterTemplateType) => {
+  const templates = await readAll();
+  const ofType = templates.filter((item) => item.templateType === templateType);
+  const active = ofType.find((item) => item.isActive) ?? null;
+  if (active) {
+    return active;
+  }
+
+  // Fallback to latest updated template of that type.
+  const sorted = [...ofType].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  return sorted[0] ?? null;
+};
+
 export const createTemplateFromDocx = async (params: {
+  templateType: DecisionLetterTemplateType;
   name: string;
   originalFilename: string;
   mimeType: string;
@@ -258,6 +331,7 @@ export const createTemplateFromDocx = async (params: {
 
   const meta: LetterTemplateMeta = {
     id,
+    templateType: params.templateType,
     name: params.name,
     originalFilename: params.originalFilename,
     storedFilename,
@@ -277,26 +351,17 @@ export const createTemplateFromDocx = async (params: {
   };
 
   const existing = await readAll();
-  for (const item of existing) {
-    const docxPath = path.join(process.cwd(), item.storedPath);
-    const pdfPath = item.pdfStoredPath ? path.join(process.cwd(), item.pdfStoredPath) : null;
-
-    try {
-      await fs.unlink(docxPath);
-    } catch {
-      // ignore
+  const updatedExisting = existing.map((item) => {
+    if (item.templateType !== params.templateType) {
+      return item;
     }
-
-    if (pdfPath) {
-      try {
-        await fs.unlink(pdfPath);
-      } catch {
-        // ignore
-      }
+    if (!item.isActive) {
+      return item;
     }
-  }
+    return { ...item, isActive: false };
+  });
 
-  await writeAll([meta]);
+  await writeAll([meta, ...updatedExisting]);
 
   return meta;
 };
@@ -375,17 +440,25 @@ export const updateTemplate = async (
 
 export const setActiveTemplate = async (id: string) => {
   const templates = await readAll();
-  const exists = templates.some((item) => item.id === id);
-  if (!exists) {
+  const resolved = templates.find((item) => item.id === id);
+  if (!resolved) {
     return null;
   }
 
+  const templateType = resolved.templateType;
+
   const now = new Date().toISOString();
-  const updated = templates.map((item) => ({
-    ...item,
-    isActive: item.id === id,
-    updatedAt: item.id === id ? now : item.updatedAt,
-  }));
+  const updated = templates.map((item) => {
+    if (item.templateType !== templateType) {
+      return item;
+    }
+    const isActive = item.id === id;
+    return {
+      ...item,
+      isActive,
+      updatedAt: isActive ? now : item.updatedAt,
+    };
+  });
 
   await writeAll(updated);
   return updated.find((item) => item.id === id) ?? null;
@@ -401,7 +474,22 @@ export const deleteTemplate = async (id: string) => {
   const absolutePath = path.join(process.cwd(), template.storedPath);
   const pdfAbsolutePath = template.pdfStoredPath ? path.join(process.cwd(), template.pdfStoredPath) : null;
 
-  const remaining = templates.filter((item) => item.id !== id);
+  const remainingRaw = templates.filter((item) => item.id !== id);
+
+  let remaining = remainingRaw;
+  if (template.isActive) {
+    const sameType = remainingRaw.filter((item) => item.templateType === template.templateType);
+    const nextActive = [...sameType].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))[0] ?? null;
+    if (nextActive) {
+      remaining = remainingRaw.map((item) => {
+        if (item.templateType !== template.templateType) {
+          return item;
+        }
+        return { ...item, isActive: item.id === nextActive.id };
+      });
+    }
+  }
+
   await writeAll(remaining);
 
   try {

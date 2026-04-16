@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient, UserRole } from "@prisma/client";
+import { PrismaClient, UserRole, type LabDepartment, type LabProgram } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
@@ -23,6 +23,8 @@ type SeedUser = {
   identifier: string;
   userType: "STAFF";
   role: UserRole;
+  departmentScope?: LabDepartment;
+  programScope?: LabProgram;
 };
 
 const dummyPassword = "Admin12345";
@@ -56,7 +58,118 @@ const userSeeds: SeedUser[] = [
     userType: "STAFF",
     role: UserRole.ADMIN_WD2,
   },
+
+  // Kajur (4 jurusan)
+  {
+    name: "Kajur Elektro Dummy",
+    email: "kajur-elektro@unsrat.ac.id",
+    identifier: "19871001",
+    userType: "STAFF",
+    role: UserRole.KAJUR,
+    departmentScope: "ELEKTRO",
+  },
+  {
+    name: "Kajur Arsitektur Dummy",
+    email: "kajur-arsitektur@unsrat.ac.id",
+    identifier: "19871002",
+    userType: "STAFF",
+    role: UserRole.KAJUR,
+    departmentScope: "ARSITEKTUR",
+  },
+  {
+    name: "Kajur Sipil Dummy",
+    email: "kajur-sipil@unsrat.ac.id",
+    identifier: "19871003",
+    userType: "STAFF",
+    role: UserRole.KAJUR,
+    departmentScope: "SIPIL",
+  },
+  {
+    name: "Kajur Mesin Dummy",
+    email: "kajur-mesin@unsrat.ac.id",
+    identifier: "19871004",
+    userType: "STAFF",
+    role: UserRole.KAJUR,
+    departmentScope: "MESIN",
+  },
+
+  // Kepala Lab (7 prodi)
+  {
+    name: "Kepala Lab IT Dummy",
+    email: "kalab-it@unsrat.ac.id",
+    identifier: "19872001",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "IT",
+  },
+  {
+    name: "Kepala Lab Elektro Dummy",
+    email: "kalab-elektro@unsrat.ac.id",
+    identifier: "19872002",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "ELEKTRO",
+  },
+  {
+    name: "Kepala Lab Arsitektur Dummy",
+    email: "kalab-arsitektur@unsrat.ac.id",
+    identifier: "19872003",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "ARSITEKTUR",
+  },
+  {
+    name: "Kepala Lab PWK Dummy",
+    email: "kalab-pwk@unsrat.ac.id",
+    identifier: "19872004",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "PWK",
+  },
+  {
+    name: "Kepala Lab Sipil Dummy",
+    email: "kalab-sipil@unsrat.ac.id",
+    identifier: "19872005",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "SIPIL",
+  },
+  {
+    name: "Kepala Lab Lingkungan Dummy",
+    email: "kalab-lingkungan@unsrat.ac.id",
+    identifier: "19872006",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "LINGKUNGAN",
+  },
+  {
+    name: "Kepala Lab Mesin Dummy",
+    email: "kalab-mesin@unsrat.ac.id",
+    identifier: "19872007",
+    userType: "STAFF",
+    role: UserRole.KEPALA_LAB,
+    programScope: "MESIN",
+  },
 ];
+
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+const programToDepartment = (program: LabProgram): LabDepartment => {
+  if (program === "IT" || program === "ELEKTRO") return "ELEKTRO";
+  if (program === "ARSITEKTUR" || program === "PWK") return "ARSITEKTUR";
+  if (program === "SIPIL" || program === "LINGKUNGAN") return "SIPIL";
+  return "MESIN";
+};
+
+const resolveLabProgramFromRoomName = (roomName: string): LabProgram => {
+  const normalized = roomName.toLowerCase();
+
+  if (normalized.includes("perangkat lunak") || normalized.includes("keamanan") || normalized.includes("multimedia")) {
+    return "IT";
+  }
+
+  return "IT";
+};
 
 type SeedRoom = {
   room_name: string;
@@ -265,6 +378,10 @@ async function seedRooms() {
     });
 
     if (existingRoom) {
+      const isLabBuilding = room.room_building === LAB_BUILDING_NAME;
+      const labProgram = isLabBuilding ? resolveLabProgramFromRoomName(room.room_name) : undefined;
+      const labDepartment = labProgram ? programToDepartment(labProgram) : undefined;
+
       await prisma.room.update({
         where: { room_id: existingRoom.room_id },
         data: {
@@ -272,16 +389,24 @@ async function seedRooms() {
           room_capacity: room.room_capacity,
           room_imageUrl: room.room_imageUrl,
           room_isActive: room.room_isActive ?? true,
+          labProgram,
+          labDepartment,
         },
       });
       updatedCount += 1;
       continue;
     }
 
+    const isLabBuilding = room.room_building === LAB_BUILDING_NAME;
+    const labProgram = isLabBuilding ? resolveLabProgramFromRoomName(room.room_name) : undefined;
+    const labDepartment = labProgram ? programToDepartment(labProgram) : undefined;
+
     await prisma.room.create({
       data: {
         ...room,
         room_isActive: room.room_isActive ?? true,
+        labProgram,
+        labDepartment,
       },
     });
     createdCount += 1;
@@ -335,6 +460,8 @@ async function seedUsers() {
         identifier: user.identifier,
         userType: user.userType,
         role: user.role,
+        departmentScope: user.departmentScope ?? null,
+        programScope: user.programScope ?? null,
         passwordHash,
       },
       create: {
@@ -343,6 +470,8 @@ async function seedUsers() {
         identifier: user.identifier,
         userType: user.userType,
         role: user.role,
+        departmentScope: user.departmentScope ?? null,
+        programScope: user.programScope ?? null,
         passwordHash,
       },
     });
@@ -353,6 +482,17 @@ async function seedUsers() {
   console.log("- admin@unsrat.ac.id / Admin12345");
   console.log("- dekan@unsrat.ac.id / Admin12345");
   console.log("- wd2@unsrat.ac.id / Admin12345");
+  console.log("- kajur-elektro@unsrat.ac.id / Admin12345");
+  console.log("- kajur-arsitektur@unsrat.ac.id / Admin12345");
+  console.log("- kajur-sipil@unsrat.ac.id / Admin12345");
+  console.log("- kajur-mesin@unsrat.ac.id / Admin12345");
+  console.log("- kalab-it@unsrat.ac.id / Admin12345");
+  console.log("- kalab-elektro@unsrat.ac.id / Admin12345");
+  console.log("- kalab-arsitektur@unsrat.ac.id / Admin12345");
+  console.log("- kalab-pwk@unsrat.ac.id / Admin12345");
+  console.log("- kalab-sipil@unsrat.ac.id / Admin12345");
+  console.log("- kalab-lingkungan@unsrat.ac.id / Admin12345");
+  console.log("- kalab-mesin@unsrat.ac.id / Admin12345");
 }
 
 async function main() {

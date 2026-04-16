@@ -141,13 +141,33 @@ export default function LandingPage() {
     }
 
     const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
+
+    try {
+      sessionStorage.setItem(
+        "reservationDraft",
+        JSON.stringify({
+          room_id: room.room_id,
+          room_name: room.room_name,
+          room_building: room.room_building,
+          room_capacity: String(room.room_capacity),
+          room_locDetail: room.room_locDetail,
+          room_imageUrl: room.room_imageUrl ?? "",
+          startDate,
+          endDate: effectiveEndDate,
+          startTime,
+          endTime,
+        }),
+      );
+    } catch {
+      // ignore (e.g. storage quota)
+    }
+
     const qp = new URLSearchParams({
       room_id: room.room_id,
       room_name: room.room_name,
       room_building: room.room_building,
       room_capacity: String(room.room_capacity),
       room_locDetail: room.room_locDetail,
-      room_imageUrl: room.room_imageUrl ?? "",
       startDate,
       endDate: effectiveEndDate,
       startTime,

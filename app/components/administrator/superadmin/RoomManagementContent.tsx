@@ -82,11 +82,11 @@ export default function RoomManagementContent({
       return Array.from({ length: totalPages }, (_, index) => index + 1);
     }
 
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, start + 4);
-    start = Math.max(1, end - 4);
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, start + 4);
+    const adjustedStart = Math.max(1, end - 4);
 
-    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+    return Array.from({ length: end - adjustedStart + 1 }, (_, index) => adjustedStart + index);
   }, [currentPage, totalPages]);
 
   useEffect(() => {

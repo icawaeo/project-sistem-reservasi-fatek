@@ -5,12 +5,20 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import { ensurePdfPreview, listTemplates } from "@/lib/template-store";
+import { prisma } from "@/lib/prisma";
+import { ensurePdfPreview, getActiveTemplateByType, type DecisionLetterTemplateType } from "@/lib/template-store";
 
 export const runtime = "nodejs";
 
 const isAdminLikeRole = (role: unknown) => {
-  return role === "ADMIN" || role === "ADMIN_DEKAN" || role === "ADMIN_WD2" || role === "SUPERADMIN";
+  return (
+    role === "ADMIN" ||
+    role === "ADMIN_DEKAN" ||
+    role === "ADMIN_WD2" ||
+    role === "KAJUR" ||
+    role === "KEPALA_LAB" ||
+    role === "SUPERADMIN"
+  );
 };
 
 const ensureAdminAccess = async () => {
@@ -20,24 +28,56 @@ const ensureAdminAccess = async () => {
     return { ok: false as const, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  if (isAdminLikeRole((session.user as any)?.role) || isSuperadminUser(session.user)) {
+  if (isAdminLikeRole(session.user.role) || isSuperadminUser(session.user)) {
     return { ok: true as const };
   }
 
   return { ok: false as const, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await ensureAdminAccess();
   if (!auth.ok) {
     return auth.response;
   }
 
-  const templates = await listTemplates();
-  const active = templates.find((item) => item.isActive) ?? templates[0] ?? null;
+  // Default behavior: show GENERAL preview.
+  // If reservationId is provided, select template type based on reservation flow.
+  let templateType: DecisionLetterTemplateType = "GENERAL";
+
+  const { searchParams } = new URL(request.url);
+
+  const flowParam = searchParams.get("flow");
+  if (flowParam === "GENERAL" || flowParam === "LAB_SKRIPSI" || flowParam === "LAB_LAINNYA") {
+    templateType = flowParam;
+  } else {
+    const reservationId = searchParams.get("reservationId");
+    if (reservationId) {
+      const reservation = await prisma.reservation.findUnique({
+        where: { res_id: reservationId },
+        select: { res_flow: true },
+      });
+
+      if (!reservation) {
+        return NextResponse.json({ error: "Reservasi tidak ditemukan." }, { status: 404 });
+      }
+
+      const flow = reservation.res_flow;
+      templateType =
+        flow === "LAB_SKRIPSI" || flow === "LAB_LAINNYA" || flow === "GENERAL" ? (flow as DecisionLetterTemplateType) : "GENERAL";
+    }
+  }
+
+  const active = await getActiveTemplateByType(templateType);
 
   if (!active) {
-    return NextResponse.json({ error: "Template surat keputusan belum tersedia." }, { status: 404 });
+    const label =
+      templateType === "LAB_SKRIPSI"
+        ? "Lab (Skripsi)"
+        : templateType === "LAB_LAINNYA"
+          ? "Lab (Lainnya)"
+          : "Umum";
+    return NextResponse.json({ error: `Template surat keputusan (${label}) belum tersedia.` }, { status: 404 });
   }
 
   let template = active;

@@ -24,6 +24,7 @@ export default async function SuperadminKelolaTemplateSuratPage() {
 	const templates = await listTemplates();
 	const initialTemplates: TemplateSummary[] = templates.map((item) => ({
 		id: item.id,
+		templateType: item.templateType,
 		name: item.name,
 		originalFilename: item.originalFilename,
 		pdfOriginalFilename: item.pdfOriginalFilename ?? null,

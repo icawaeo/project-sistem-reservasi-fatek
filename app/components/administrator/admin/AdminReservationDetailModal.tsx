@@ -62,7 +62,9 @@ const extractFilename = (url: string) => {
 function resolveRoleLabel(role: AdminRole) {
 	if (role === "ADMIN") return "Admin";
 	if (role === "ADMIN_DEKAN") return "Admin Dekan";
-	return "Admin Wakil Dekan 2";
+	if (role === "ADMIN_WD2") return "Admin Wakil Dekan 2";
+	if (role === "KAJUR") return "Kajur";
+	return "Kepala Lab";
 }
 
 export default function AdminReservationDetailModal({
@@ -87,6 +89,8 @@ export default function AdminReservationDetailModal({
 		normalizedStatus === "DISETUJUI" ||
 		normalizedStatus === "COMPLETED" ||
 		normalizedStatus === "SELESAI";
+
+	const decisionLetterPdfUrl = `/api/admin/decision-letter/pdf?flow=${encodeURIComponent(data.flow)}`;
 
 	return (
 		<div
@@ -188,7 +192,7 @@ export default function AdminReservationDetailModal({
 							<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 								<div>
 									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">
-										Surat Pengantar
+										{data.flow === "LAB_SKRIPSI" ? "SK Pembimbingan" : "Surat Pengantar"}
 									</span>
 									<div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
 										{data.documentUrl ? (
@@ -211,7 +215,7 @@ export default function AdminReservationDetailModal({
 									<div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
 										{isDecisionLetterReady ? (
 											<object
-												data="/api/admin/decision-letter/pdf"
+												data={decisionLetterPdfUrl}
 												type="application/pdf"
 												className="h-72 w-full"
 												title="Preview Surat Keputusan"
