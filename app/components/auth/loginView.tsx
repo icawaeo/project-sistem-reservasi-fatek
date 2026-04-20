@@ -5,14 +5,15 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/app/components/ui/toast";
 
 export default function LoginView() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { pushToast } = useToast();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const getPostLoginRedirectPath = async () => {
@@ -36,7 +37,6 @@ export default function LoginView() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
       const res = await signIn("credentials", {
@@ -46,14 +46,14 @@ export default function LoginView() {
       });
 
       if (res?.error) {
-        setError("Email atau password salah");
+        pushToast({ type: "error", message: "Email atau password salah" });
       } else {
         const redirectTo = await getPostLoginRedirectPath();
         router.push(redirectTo);
         router.refresh();
       }
     } catch {
-      setError("Terjadi kesalahan sistem");
+      pushToast({ type: "error", message: "Terjadi kesalahan sistem" });
     } finally {
       setLoading(false);
     }
@@ -68,12 +68,6 @@ export default function LoginView() {
 
       <div className="mt-6 rounded-3xl bg-white/40 p-6 ring-1 ring-white/30">
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {error && (
-            <div className="p-3 text-sm lg:text-base text-red-600 bg-red-100 rounded-xl ring-1 ring-red-200">
-              {error}
-            </div>
-          )}
-          
           <div>
             <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
               ALAMAT EMAIL

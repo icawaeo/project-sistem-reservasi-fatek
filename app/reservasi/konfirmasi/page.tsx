@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Navbar from "@/app/components/layout/Navbar";
+import { useToast } from "@/app/components/ui/toast";
 
 const buildingColorMap = {
   "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
@@ -96,10 +97,10 @@ export default function KonfirmasiReservasiPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const isPrivilegedStaff = session?.user?.userType === "STAFF";
+  const { pushToast } = useToast();
   const [reservation, setReservation] = useState<ReservationDraft | null>(null);
   const [submitted, setSubmitted] = useState<SubmittedReservation | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const uploadSupportingDocument = async () => {
     if (!reservation?.documentDataUrl) return null;
@@ -248,10 +249,6 @@ export default function KonfirmasiReservasiPage() {
         </nav>
 
         <section className="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 md:p-7">
-          {error && (
-            <div className="mb-4 text-sm lg:text-base text-red-600 font-semibold text-center">{error}</div>
-          )}
-
           <div className="flex items-start justify-between gap-2 mb-6">
             <div>
               <h2 className="text-xl lg:text-2xl font-black tracking-tight text-slate-900">Ringkasan Reservasi</h2>
@@ -391,10 +388,9 @@ export default function KonfirmasiReservasiPage() {
               disabled={loading}
               onClick={async () => {
                 setLoading(true);
-                setError("");
                 try {
                   if (!session?.user?.id || isPrivilegedStaff) {
-                    setError("Sesi login tidak ditemukan. Silakan login ulang.");
+                    pushToast({ type: "error", message: "Sesi login tidak ditemukan. Silakan login ulang." });
                     setLoading(false);
                     return;
                   }
@@ -418,12 +414,15 @@ export default function KonfirmasiReservasiPage() {
           const isLab = reservation.room_building === LAB_BUILDING_NAME;
           if (isLab) {
             if (payload.res_flow !== "LAB_SKRIPSI" && payload.res_flow !== "LAB_LAINNYA") {
-              setError("Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya). Silakan kembali dan lengkapi data.");
+              pushToast({
+                type: "error",
+                message: "Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya). Silakan kembali dan lengkapi data.",
+              });
               setLoading(false);
               return;
             }
             if (!reservation.documentDataUrl) {
-              setError("Dokumen pendukung wajib diunggah untuk peminjaman lab.");
+              pushToast({ type: "error", message: "Dokumen pendukung wajib diunggah untuk peminjaman lab." });
               setLoading(false);
               return;
             }
@@ -439,12 +438,15 @@ export default function KonfirmasiReservasiPage() {
                   });
                   const data = await res.json();
                   if (!res.ok) {
-                    setError(data.error || "Gagal menyimpan reservasi.");
+                    pushToast({ type: "error", message: data.error || "Gagal menyimpan reservasi." });
                   } else {
                     setSubmitted(data);
                   }
-                } catch {
-                  setError("Terjadi kesalahan saat submit reservasi.");
+                } catch (error) {
+                  pushToast({
+                    type: "error",
+                    message: error instanceof Error ? error.message : "Terjadi kesalahan saat submit reservasi.",
+                  });
                 } finally {
                   setLoading(false);
                 }

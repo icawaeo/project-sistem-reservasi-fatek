@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
 
 const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
 
@@ -62,6 +63,17 @@ export async function POST(request: Request) {
     // Validasi sederhana
     if (!body.room_id || !body.res_startTime || !body.res_endTime || !body.res_purpose) {
       return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
+    }
+
+    const resStart = new Date(body.res_startTime);
+    const leadTimeCheck = validateReservationLeadTimeDate(resStart);
+    if (!leadTimeCheck.ok) {
+      return NextResponse.json(
+        {
+          error: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
+        },
+        { status: 400 },
+      );
     }
 
     const roomId = typeof body.room_id === "string" ? body.room_id : "";

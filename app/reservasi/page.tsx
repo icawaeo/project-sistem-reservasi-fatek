@@ -18,6 +18,7 @@ import {
     Users,
 } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
+import { useToast } from "@/app/components/ui/toast";
 
 const buildingColorMap: Record<string, string> = {
     "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
@@ -81,6 +82,7 @@ function ReservasiContent() {
     const publicSessionUser = session?.user?.userType === "STAFF" ? null : session?.user;
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { pushToast } = useToast();
 
     const rawDraft = useSessionStorageItem("reservationDraft");
     const storedDraft = useMemo(() => {
@@ -116,7 +118,6 @@ function ReservasiContent() {
     const [reservationFlow, setReservationFlow] = useState<ReservationFlow | null>(null);
     const [supportingFile, setSupportingFile] = useState<File | null>(null);
     const [supportingFileDataUrl, setSupportingFileDataUrl] = useState<string | null>(null);
-    const [validationError, setValidationError] = useState("");
 
     const borrowerNameValue = borrowerName ?? storedDraft?.name ?? publicSessionUser?.name ?? "";
     const identifierValue = identifier ?? storedDraft?.identifier ?? (isCivitas ? publicSessionUser?.identifier ?? "" : "");
@@ -141,7 +142,10 @@ function ReservasiContent() {
 		if (file.size > 5 * 1024 * 1024) {
 			setSupportingFile(null);
 			setSupportingFileDataUrl(null);
-			setValidationError("Ukuran file terlalu besar (maks 5 MB). Silakan pilih file lain.");
+            pushToast({
+                type: "error",
+                message: "Ukuran file terlalu besar (maks 5 MB). Silakan pilih file lain.",
+            });
 			return;
 		}
 
@@ -164,26 +168,37 @@ function ReservasiContent() {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setValidationError("");
 
         if (!roomId || !startDate || !startTime || !endTime) {
-            setValidationError("Data jadwal tidak lengkap. Silakan pilih ulang ruangan dari halaman gedung.");
+            pushToast({
+                type: "error",
+                message: "Data jadwal tidak lengkap. Silakan pilih ulang ruangan dari halaman gedung.",
+            });
             return;
         }
 
         if (!borrowerNameValue || !emailValue || !phoneValue || !purposeTitleValue || !purposeDetailValue) {
-            setValidationError("Mohon lengkapi seluruh data wajib pada formulir reservasi.");
+            pushToast({
+                type: "error",
+                message: "Mohon lengkapi seluruh data wajib pada formulir reservasi.",
+            });
             return;
         }
 
         if (isLabBuilding) {
             if (effectiveReservationFlow !== "LAB_SKRIPSI" && effectiveReservationFlow !== "LAB_LAINNYA") {
-                setValidationError("Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya).");
+                pushToast({
+                    type: "error",
+                    message: "Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya).",
+                });
                 return;
             }
 
             if (!supportingFileDataUrlValue) {
-                setValidationError("Dokumen pendukung wajib diunggah untuk peminjaman lab.");
+                pushToast({
+                    type: "error",
+                    message: "Dokumen pendukung wajib diunggah untuk peminjaman lab.",
+                });
                 return;
             }
         }
@@ -476,12 +491,6 @@ function ReservasiContent() {
                                 <p className="text-[11px] lg:text-xs text-slate-500 mt-1">Format: PDF/JPG/PNG (maks 5 MB)</p>
                             </label>
                         </div>
-
-                        {validationError && (
-                            <p className="text-sm lg:text-base font-medium text-red-600 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-                                {validationError}
-                            </p>
-                        )}
 
                         <div className="border-t border-slate-100 pt-5">
                             <button

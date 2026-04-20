@@ -18,7 +18,6 @@ type HeroSectionProps = {
   onEndTimeChange: (value: string) => void;
   onSearch: () => void;
   isSearching: boolean;
-  validationError: string;
   selectedRoom: RoomAvailability | null;
 };
 
@@ -35,7 +34,6 @@ export default function HeroSection({
   onEndTimeChange,
   onSearch,
   isSearching,
-  validationError,
   selectedRoom,
 }: HeroSectionProps) {
   return (
@@ -159,10 +157,6 @@ export default function HeroSection({
               </button>
             </div>
           </div>
-
-          {validationError && (
-            <p className="mt-3 text-xs md:text-sm font-medium text-red-600">{validationError}</p>
-          )}
 
           {selectedRoom && (
             <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">

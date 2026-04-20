@@ -19,6 +19,7 @@ import {
   Eye,
 } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
+import { useToast } from "@/app/components/ui/toast";
 
 type ReservationStatus = "PENDING" | "APPROVED" | "REJECTED" | string;
 
@@ -123,12 +124,12 @@ export default function RiwayatPeminjamanPage() {
   const { data: session, status } = useSession();
   const isPrivilegedStaff = session?.user?.userType === "STAFF";
   const router = useRouter();
+  const { pushToast } = useToast();
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filterStatus, setFilterStatus] = useState<"ALL" | ReservationStatus>("ALL");
   const [reservations, setReservations] = useState<ReservationRecord[]>([]);
   const [latestDraftSnapshot, setLatestDraftSnapshot] = useState<ReservationDraftSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated" || (status === "authenticated" && isPrivilegedStaff)) {
@@ -157,21 +158,23 @@ export default function RiwayatPeminjamanPage() {
 
     const fetchReservations = async () => {
       setLoading(true);
-      setError("");
 
       try {
         const response = await fetch(`/api/reservasi?sort=${sortOrder}`);
         const payload = (await response.json()) as ReservationsResponse | { error?: string };
 
         if (!response.ok || !("reservations" in payload)) {
-          setError((payload as { error?: string }).error || "Gagal memuat data riwayat.");
+          pushToast({
+            type: "error",
+            message: (payload as { error?: string }).error || "Gagal memuat data riwayat.",
+          });
           setReservations([]);
           return;
         }
 
         setReservations(payload.reservations);
       } catch {
-        setError("Terjadi kesalahan saat memuat data riwayat.");
+        pushToast({ type: "error", message: "Terjadi kesalahan saat memuat data riwayat." });
         setReservations([]);
       } finally {
         setLoading(false);
@@ -384,8 +387,6 @@ export default function RiwayatPeminjamanPage() {
           <div className="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
             {loading ? (
               <div className="p-5 text-sm lg:text-base text-slate-500">Memuat riwayat peminjaman...</div>
-            ) : error ? (
-              <div className="p-5 text-sm lg:text-base text-red-600">{error}</div>
             ) : historyItems.length === 0 ? (
               <div className="p-5 text-sm lg:text-base font-medium text-slate-500">Belum ada riwayat peminjaman</div>
             ) : (

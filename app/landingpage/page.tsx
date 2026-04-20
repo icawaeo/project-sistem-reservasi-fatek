@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useToast } from "@/app/components/ui/toast";
+import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
 import AvailabilityModal, {
   type BuildingGroup,
   type RoomAvailability,
@@ -117,13 +119,13 @@ export default function LandingPage() {
   const { data: session } = useSession();
   const isPrivilegedStaff = session?.user?.userType === "STAFF";
   const router = useRouter();
+  const { pushToast } = useToast();
 
   const [reservationMode, setReservationMode] = useState<ReservationMode>("per-day");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [validationError, setValidationError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [availableBuildings, setAvailableBuildings] = useState<BuildingGroup[]>([]);
@@ -179,29 +181,38 @@ export default function LandingPage() {
   };
 
   const handleSearch = async () => {
-    setValidationError("");
     const OPENING_TIME = "08:00";
     const CLOSING_TIME = "18:00";
 
     if (!startDate || !startTime || !endTime || (reservationMode === "date-range" && !endDate)) {
-      setValidationError("Lengkapi tanggal dan waktu reservasi terlebih dahulu.");
+      pushToast({ type: "error", message: "Lengkapi tanggal dan waktu reservasi terlebih dahulu." });
+      return;
+    }
+
+    const leadTimeCheck = validateReservationLeadTimeYMD(startDate);
+    if (!leadTimeCheck.ok) {
+      pushToast({
+        type: "error",
+        message: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
+      });
       return;
     }
 
     if (startTime < OPENING_TIME || endTime > CLOSING_TIME) {
-      setValidationError("Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).");
+      pushToast({
+        type: "error",
+        message: "Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).",
+      });
       return;
     }
 
     if (reservationMode === "date-range" && endDate < startDate) {
-      setValidationError("End Date harus lebih besar atau sama dengan Start Date.");
+      pushToast({ type: "error", message: "End Date harus lebih besar atau sama dengan Start Date." });
       return;
     }
 
     if (endTime <= startTime) {
-      setValidationError(
-        "Jam selesai tidak boleh lebih awal dari jam mulai.",
-      );
+      pushToast({ type: "error", message: "Jam selesai tidak boleh lebih awal dari jam mulai." });
       return;
     }
 
@@ -220,7 +231,7 @@ export default function LandingPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setValidationError(data?.error ?? "Gagal mengambil data ruangan.");
+        pushToast({ type: "error", message: data?.error ?? "Gagal mengambil data ruangan." });
         return;
       }
 
@@ -243,7 +254,7 @@ export default function LandingPage() {
       setAvailableBuildings(buildingGroups);
       setIsModalOpen(true);
     } catch {
-      setValidationError("Terjadi kesalahan saat mencari ruangan.");
+      pushToast({ type: "error", message: "Terjadi kesalahan saat mencari ruangan." });
     } finally {
       setIsSearching(false);
     }
@@ -259,31 +270,25 @@ export default function LandingPage() {
           onReservationModeChange={(mode) => {
             setReservationMode(mode);
             if (mode === "per-day") setEndDate("");
-            setValidationError("");
           }}
           startDate={startDate}
           onStartDateChange={(value) => {
             setStartDate(value);
-            setValidationError("");
           }}
           endDate={endDate}
           onEndDateChange={(value) => {
             setEndDate(value);
-            setValidationError("");
           }}
           startTime={startTime}
           onStartTimeChange={(value) => {
             setStartTime(value);
-            setValidationError("");
           }}
           endTime={endTime}
           onEndTimeChange={(value) => {
             setEndTime(value);
-            setValidationError("");
           }}
           onSearch={handleSearch}
           isSearching={isSearching}
-          validationError={validationError}
           selectedRoom={selectedRoom}
         />
         <OccupiedRoomsSection rooms={occupiedRooms} />

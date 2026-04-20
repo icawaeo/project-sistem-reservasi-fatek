@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
 import { useSession } from "next-auth/react";
+import { useToast } from "@/app/components/ui/toast";
+import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
 
 type RoomWithStatus = {
     room_id: string;
@@ -72,6 +74,7 @@ export default function BuildingPage() {
     const buildingName = decodeURIComponent(params.building as string);
     const { data: session, status: sessionStatus } = useSession();
     const isPrivilegedStaff = sessionStatus === "authenticated" && session?.user?.userType === "STAFF";
+    const { pushToast } = useToast();
 
     const [rooms, setRooms] = useState<RoomWithStatus[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -84,7 +87,6 @@ export default function BuildingPage() {
     const [endDate, setEndDate] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
-    const [validationError, setValidationError] = useState("");
     const [isSearching, setIsSearching] = useState(false);
 
     // Pagination
@@ -99,41 +101,65 @@ export default function BuildingPage() {
             setIsLoading(true);
             try {
                 const res = await fetch(`/api/rooms?building=${encodeURIComponent(buildingName)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setRooms(data);
+                const payload = (await res.json().catch(() => null)) as unknown;
+
+                if (!res.ok) {
+                    const message =
+                        payload && typeof payload === "object" && "error" in payload
+                            ? String((payload as { error?: unknown }).error ?? "")
+                            : "";
+                    pushToast({
+                        type: "error",
+                        message: message.trim() || "Gagal memuat data ruangan.",
+                    });
+                    setRooms([]);
+                    return;
                 }
+
+                setRooms(payload as RoomWithStatus[]);
+            } catch {
+                pushToast({ type: "error", message: "Terjadi kesalahan saat memuat data ruangan." });
+                setRooms([]);
             } finally {
                 setIsLoading(false);
             }
         };
         loadRooms();
-    }, [buildingName]);
+    }, [buildingName, pushToast]);
 
     const handleSearch = async () => {
-        setValidationError("");
         const OPENING_TIME = "08:00";
         const CLOSING_TIME = "18:00";
 
         if (!startDate || !startTime || !endTime || (reservationMode === "date-range" && !endDate)) {
-            setValidationError("Lengkapi tanggal dan waktu reservasi terlebih dahulu.");
+            pushToast({ type: "error", message: "Lengkapi tanggal dan waktu reservasi terlebih dahulu." });
+            return;
+        }
+
+        const leadTimeCheck = validateReservationLeadTimeYMD(startDate);
+        if (!leadTimeCheck.ok) {
+            pushToast({
+                type: "error",
+                message: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
+            });
             return;
         }
 
         if (startTime < OPENING_TIME || endTime > CLOSING_TIME) {
-            setValidationError("Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).");
+            pushToast({
+                type: "error",
+                message: "Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).",
+            });
             return;
         }
 
         if (reservationMode === "date-range" && endDate < startDate) {
-            setValidationError("End Date harus lebih besar atau sama dengan Start Date.");
+            pushToast({ type: "error", message: "End Date harus lebih besar atau sama dengan Start Date." });
             return;
         }
 
         if (endTime <= startTime) {
-            setValidationError(
-                "Jam selesai tidak boleh lebih awal dari jam mulai.",
-            );
+            pushToast({ type: "error", message: "Jam selesai tidak boleh lebih awal dari jam mulai." });
             return;
         }
 
@@ -153,7 +179,7 @@ export default function BuildingPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                setValidationError(data?.error ?? "Gagal mengambil data ruangan.");
+                pushToast({ type: "error", message: data?.error ?? "Gagal mengambil data ruangan." });
                 return;
             }
 
@@ -172,7 +198,7 @@ export default function BuildingPage() {
                     : `${startDate} · ${startTime} - ${endTime}`;
             setSearchScheduleLabel(label);
         } catch {
-            setValidationError("Terjadi kesalahan saat mencari ruangan.");
+            pushToast({ type: "error", message: "Terjadi kesalahan saat mencari ruangan." });
         } finally {
             setIsSearching(false);
         }
@@ -189,7 +215,10 @@ export default function BuildingPage() {
         }
 
         if (!hasSearched) {
-            setValidationError("Silakan cek ketersediaan terlebih dahulu sebelum melakukan reservasi.");
+            pushToast({
+                type: "error",
+                message: "Silakan cek ketersediaan terlebih dahulu sebelum melakukan reservasi.",
+            });
             return;
         }
         const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
@@ -269,7 +298,6 @@ export default function BuildingPage() {
                                     onChange={() => {
                                         setReservationMode("per-day");
                                         setEndDate("");
-                                        setValidationError("");
                                     }}
                                     className="h-4 w-4 accent-slate-900"
                                 />
@@ -283,7 +311,6 @@ export default function BuildingPage() {
                                     checked={reservationMode === "date-range"}
                                     onChange={() => {
                                         setReservationMode("date-range");
-                                        setValidationError("");
                                     }}
                                     className="h-4 w-4 accent-slate-900"
                                 />
@@ -303,7 +330,6 @@ export default function BuildingPage() {
                                         value={startDate}
                                         onChange={(e) => {
                                             setStartDate(e.target.value);
-                                            setValidationError("");
                                         }}
                                         className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                     />
@@ -322,7 +348,6 @@ export default function BuildingPage() {
                                             value={endDate}
                                             onChange={(e) => {
                                                 setEndDate(e.target.value);
-                                                setValidationError("");
                                             }}
                                             className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                         />
@@ -341,7 +366,6 @@ export default function BuildingPage() {
                                         value={startTime}
                                         onChange={(e) => {
                                             setStartTime(e.target.value);
-                                            setValidationError("");
                                         }}
                                         className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                     />
@@ -359,7 +383,6 @@ export default function BuildingPage() {
                                         value={endTime}
                                         onChange={(e) => {
                                             setEndTime(e.target.value);
-                                            setValidationError("");
                                         }}
                                         className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
                                     />
@@ -377,10 +400,6 @@ export default function BuildingPage() {
                                 </button>
                             </div>
                         </div>
-
-                        {validationError && (
-                            <p className="mt-3 text-xs lg:text-sm font-medium text-red-600">{validationError}</p>
-                        )}
                     </div>
                 </div>
             </section>
@@ -422,7 +441,22 @@ export default function BuildingPage() {
                                     const res = await fetch(
                                         `/api/rooms?building=${encodeURIComponent(buildingName)}`
                                     );
-                                    if (res.ok) setRooms(await res.json());
+                                    const payload = (await res.json().catch(() => null)) as unknown;
+
+                                    if (!res.ok) {
+                                        const message =
+                                            payload && typeof payload === "object" && "error" in payload
+                                                ? String((payload as { error?: unknown }).error ?? "")
+                                                : "";
+                                        pushToast({
+                                            type: "error",
+                                            message: message.trim() || "Gagal memuat data ruangan.",
+                                        });
+                                        setRooms([]);
+                                        return;
+                                    }
+
+                                    setRooms(payload as RoomWithStatus[]);
                                 } finally {
                                     setIsLoading(false);
                                 }

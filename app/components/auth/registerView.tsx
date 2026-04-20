@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/app/components/ui/toast";
 
 type AccountType = "CIVITAS" | "UMUM";
 
@@ -40,6 +41,7 @@ export default function RegisterView() {
   const [accountType, setAccountType] = useState<AccountType | null>(null);
 
     const router = useRouter();
+        const { pushToast } = useToast();
     
     const [formData, setFormData] = useState({
     name: "",
@@ -50,7 +52,6 @@ export default function RegisterView() {
     });
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
   const handleAccountTypeChange = (type: AccountType | null) => {
     setAccountType(type);
@@ -62,7 +63,6 @@ export default function RegisterView() {
       password: "",
       confirmPassword: ""
     });
-    setError("");
   };
 
   const isCivitas = accountType === "CIVITAS";
@@ -81,7 +81,6 @@ export default function RegisterView() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
     try {
         const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -103,7 +102,7 @@ export default function RegisterView() {
         router.push("/?tab=login");
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar.";
-        setError(message);
+        pushToast({ type: "error", message });
         console.error("Registration error:", err);
     } finally {
         setLoading(false);
@@ -116,12 +115,6 @@ export default function RegisterView() {
             <p className="mt-2 text-sm lg:text-base text-slate-700/80">
         Pilih tipe akun Anda untuk melanjutkan pendaftaran.
       </p>
-
-      {error && (
-        <div className="mt-4 rounded-2xl bg-red-100/80 border border-red-300 p-4">
-                    <p className="text-sm lg:text-base font-semibold text-red-800">{error}</p>
-        </div>
-      )}
 
       <div className="mt-6 space-y-5">
         {/* Civitas */}

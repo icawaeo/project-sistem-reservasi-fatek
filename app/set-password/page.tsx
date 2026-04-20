@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useToast } from "@/app/components/ui/toast";
 
 const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -11,6 +12,7 @@ function SetPasswordContent() {
   const params = useSearchParams();
   const router = useRouter();
   const token = params.get("token") ?? "";
+  const { pushToast } = useToast();
 
   const [isChecking, setIsChecking] = useState(true);
   const [isValidToken, setIsValidToken] = useState(false);
@@ -21,7 +23,6 @@ function SetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const validateToken = async () => {
@@ -53,20 +54,19 @@ function SetPasswordContent() {
   const passwordRuleMet = useMemo(() => PASSWORD_RULES.test(password), [password]);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
 
     if (!token) {
-      setError("Token tidak ditemukan.");
+      pushToast({ type: "error", message: "Token tidak ditemukan." });
       return;
     }
 
     if (!passwordRuleMet) {
-      setError("Kata sandi belum memenuhi persyaratan keamanan.");
+      pushToast({ type: "error", message: "Kata sandi belum memenuhi persyaratan keamanan." });
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Kata sandi tidak sesuai");
+      pushToast({ type: "error", message: "Kata sandi tidak sesuai" });
       return;
     }
 
@@ -94,7 +94,10 @@ function SetPasswordContent() {
       router.push("/?tab=login");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan kata sandi.");
+      pushToast({
+        type: "error",
+        message: err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan kata sandi.",
+      });
     } finally {
       setLoading(false);
     }
@@ -182,8 +185,6 @@ function SetPasswordContent() {
           <p className={`text-xs lg:text-sm ${passwordRuleMet ? "text-emerald-700" : "text-slate-500"}`}>
             Kata sandi minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka.
           </p>
-
-          {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm lg:text-base text-rose-700">{error}</div> : null}
 
           <button
             type="submit"
