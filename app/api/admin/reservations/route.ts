@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import type { MonitoringReservation } from "@/app/components/administrator/superadmin/types";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const parseDateTime = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}:00`);
@@ -66,13 +67,13 @@ const mapReservation = (item: {
 });
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user || !isSuperadminUser(session.user)) {
-    return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || !isSuperadminUser(session.user)) {
+      return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+    }
+
     const body = await request.json();
 
     const roomId = typeof body?.room_id === "string" ? body.room_id : "";
@@ -167,7 +168,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ data: mapReservation(createdReservation) }, { status: 201 });
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/reservations] Failed to create reservation", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menambahkan pengajuan" }, { status: 500 });
   }
 }

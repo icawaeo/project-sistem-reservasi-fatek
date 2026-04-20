@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
 
@@ -20,12 +21,12 @@ const normalizeFlow = (value: unknown): IncomingReservationFlow | null => {
 const allowedSortValues = new Set(["newest", "oldest"]);
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const sortQuery = searchParams.get("sort") || "newest";
     const sort = allowedSortValues.has(sortQuery) ? sortQuery : "newest";
@@ -46,18 +47,19 @@ export async function GET(request: Request) {
       reservations,
       sort,
     });
-  } catch {
+  } catch (error) {
+    logServerError("[api/reservasi] Failed to fetch reservation history", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal mengambil riwayat reservasi" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
 
     // Validasi sederhana
@@ -148,7 +150,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(reservasi);
-  } catch {
+  } catch (error) {
+    logServerError("[api/reservasi] Failed to create reservation", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menyimpan reservasi" }, { status: 500 });
   }
 }

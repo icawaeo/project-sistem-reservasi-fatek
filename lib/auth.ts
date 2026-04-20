@@ -2,8 +2,22 @@ import { NextAuthOptions } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { logServerError, logServerWarn } from "@/lib/server-logger";
 
 export const authOptions: NextAuthOptions = {
+  logger: {
+    error(code, ...message) {
+      logServerError("[nextauth] error", { code, message }, { code });
+    },
+    warn(code, ...message) {
+      logServerWarn("[nextauth] warn", { code, message });
+    },
+    debug(code, ...message) {
+      if (process.env.NODE_ENV === "development") {
+        console.log({ timestamp: new Date().toISOString(), level: "debug", message: "[nextauth] debug", meta: { code, message } });
+      }
+    },
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -66,20 +80,23 @@ export const authOptions: NextAuthOptions = {
           session.user.identifier = token.identifier;
         }
 
-    try {
-      if (typeof token.id === "string" && token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { user_id: token.id },
-          select: { name: true, email: true },
-        });
-        if (dbUser) {
-          session.user.name = dbUser.name;
-          session.user.email = dbUser.email;
+
+        try {
+          if (typeof token.id === "string" && token.id) {
+            const dbUser = await prisma.user.findUnique({
+              where: { user_id: token.id },
+              select: { name: true, email: true },
+            });
+            if (dbUser) {
+              session.user.name = dbUser.name;
+              session.user.email = dbUser.email;
+            }
+          }
+        } catch (error) {
+          logServerError("[nextauth] Failed to refresh session user fields", error, {
+            tokenUserId: typeof token.id === "string" ? token.id : null,
+          });
         }
-      }
-    } catch {
-      // ignore
-    }
       }
       return session;
     },

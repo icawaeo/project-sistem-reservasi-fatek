@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const parseDateTime = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}:00`);
@@ -82,7 +83,8 @@ export async function GET(request: Request) {
     }));
 
     return NextResponse.json(result);
-  } catch {
+  } catch (error) {
+    logServerError("[api/rooms] Failed to fetch rooms", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal mengambil data ruangan" }, { status: 500 });
   }
 }

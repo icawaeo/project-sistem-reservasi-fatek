@@ -1,24 +1,24 @@
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export async function DELETE(request: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Get reservation ID from URL
-  const url = new URL(request.url);
-  const reservationId = url.searchParams.get("id");
-
-  if (!reservationId) {
-    return Response.json({ error: "ID tidak diberikan" }, { status: 400 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get reservation ID from URL
+    const url = new URL(request.url);
+    const reservationId = url.searchParams.get("id");
+
+    if (!reservationId) {
+      return Response.json({ error: "ID tidak diberikan" }, { status: 400 });
+    }
+
     // Find and delete the reservation
     const reservation = await prisma.reservation.findUnique({
       where: { res_id: reservationId },
@@ -38,7 +38,7 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Delete error:", error);
+    logServerError("[api/reservasi/delete] Failed to delete reservation", error, getRequestLogMeta(request));
     return Response.json(
       { error: "Gagal menghapus pengajuan" },
       { status: 500 }

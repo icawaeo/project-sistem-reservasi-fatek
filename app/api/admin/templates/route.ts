@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { createTemplateFromDocx, listTemplates, type DecisionLetterTemplateType } from "@/lib/template-store";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -35,78 +36,90 @@ const toSummary = (template: Awaited<ReturnType<typeof listTemplates>>[number]) 
   createdAt: template.createdAt,
 });
 
-export async function GET() {
-  const auth = await ensureSuperadmin();
-  if (!auth.ok) {
-    return auth.response;
-  }
+export async function GET(request: NextRequest) {
+  try {
+    const auth = await ensureSuperadmin();
+    if (!auth.ok) {
+      return auth.response;
+    }
 
-  const templates = await listTemplates();
-  return NextResponse.json(templates.map(toSummary));
+    const templates = await listTemplates();
+    return NextResponse.json(templates.map(toSummary));
+  } catch (error) {
+    logServerError("[api/admin/templates] Failed to list templates", error, getRequestLogMeta(request));
+    return NextResponse.json({ error: "Gagal mengambil data template." }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await ensureSuperadmin();
-  if (!auth.ok) {
-    return auth.response;
-  }
-
-  const formData = await request.formData();
-  const file = formData.get("file");
-  const nameInput = formData.get("name");
-  const templateTypeInput = formData.get("templateType");
-
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "File wajib diunggah." }, { status: 400 });
-  }
-
-  const originalFilename = file.name || "template.docx";
-  const loweredName = originalFilename.toLowerCase();
-  if (!loweredName.endsWith(".docx")) {
-    return NextResponse.json({ error: "Format file harus .docx" }, { status: 400 });
-  }
-
-  const nameFromUser = typeof nameInput === "string" ? nameInput.trim() : "";
-  const defaultName = originalFilename.replace(/\.docx$/i, "").trim() || "Template Surat";
-  const name = nameFromUser || defaultName;
-
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const resolvedTemplateType = (
-    typeof templateTypeInput === "string" ? templateTypeInput.trim() : ""
-  ) as DecisionLetterTemplateType;
-
-  const templateType: DecisionLetterTemplateType =
-    resolvedTemplateType === "LAB_SKRIPSI" || resolvedTemplateType === "LAB_LAINNYA" || resolvedTemplateType === "GENERAL"
-      ? resolvedTemplateType
-      : "GENERAL";
-
   try {
-    const created = await createTemplateFromDocx({
-      templateType,
-      name,
-      originalFilename,
-      mimeType: file.type || "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      fileBuffer: buffer,
-    });
+    const auth = await ensureSuperadmin();
+    if (!auth.ok) {
+      return auth.response;
+    }
 
-    return NextResponse.json(toSummary(created), { status: 201 });
+    const formData = await request.formData();
+    const file = formData.get("file");
+    const nameInput = formData.get("name");
+    const templateTypeInput = formData.get("templateType");
+
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "File wajib diunggah." }, { status: 400 });
+    }
+
+    const originalFilename = file.name || "template.docx";
+    const loweredName = originalFilename.toLowerCase();
+    if (!loweredName.endsWith(".docx")) {
+      return NextResponse.json({ error: "Format file harus .docx" }, { status: 400 });
+    }
+
+    const nameFromUser = typeof nameInput === "string" ? nameInput.trim() : "";
+    const defaultName = originalFilename.replace(/\.docx$/i, "").trim() || "Template Surat";
+    const name = nameFromUser || defaultName;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const resolvedTemplateType = (
+      typeof templateTypeInput === "string" ? templateTypeInput.trim() : ""
+    ) as DecisionLetterTemplateType;
+
+    const templateType: DecisionLetterTemplateType =
+      resolvedTemplateType === "LAB_SKRIPSI" ||
+      resolvedTemplateType === "LAB_LAINNYA" ||
+      resolvedTemplateType === "GENERAL"
+        ? resolvedTemplateType
+        : "GENERAL";
+
+    try {
+      const created = await createTemplateFromDocx({
+        templateType,
+        name,
+        originalFilename,
+        mimeType: file.type || "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        fileBuffer: buffer,
+      });
+
+      return NextResponse.json(toSummary(created), { status: 201 });
+    } catch (error) {
+      logServerError("[api/admin/templates] Failed to upload template DOCX", error, {
+        ...getRequestLogMeta(request),
+        templateType,
+        name,
+        originalFilename,
+        mimeType: file.type || "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        fileSize: buffer.byteLength,
+      });
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error ? error.message : "Gagal mengunggah template. Silakan coba lagi.",
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("[api/admin/templates] Failed to upload template DOCX", {
-      name,
-      originalFilename,
-      mimeType: file.type || "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      fileSize: buffer.byteLength,
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Gagal mengunggah template. Silakan coba lagi.",
-      },
-      { status: 500 }
-    );
+    logServerError("[api/admin/templates] Unexpected error during template upload", error, getRequestLogMeta(request));
+    return NextResponse.json({ error: "Gagal mengunggah template." }, { status: 500 });
   }
 }

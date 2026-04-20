@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 const parseFacilities = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -217,14 +218,19 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json(mapRoom(room));
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      logServerWarn("[api/admin/rooms/:id] Room not found during update", {
+        ...getRequestLogMeta(request),
+        code: error.code,
+      });
       return NextResponse.json({ error: "Ruangan tidak ditemukan" }, { status: 404 });
     }
 
+    logServerError("[api/admin/rooms/:id] Failed to update room", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal memperbarui ruangan" }, { status: 500 });
   }
 }
 
-export async function DELETE(_request: Request, { params }: RouteParams) {
+export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const session = await authorize();
 
@@ -248,10 +254,18 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {
+        logServerWarn("[api/admin/rooms/:id] Room not found during delete", {
+          ...getRequestLogMeta(request),
+          code: error.code,
+        });
         return NextResponse.json({ error: "Ruangan tidak ditemukan" }, { status: 404 });
       }
 
       if (error.code === "P2003") {
+        logServerWarn("[api/admin/rooms/:id] Room delete blocked by FK", {
+          ...getRequestLogMeta(request),
+          code: error.code,
+        });
         return NextResponse.json(
           { error: "Ruangan tidak dapat dihapus karena sudah memiliki riwayat reservasi" },
           { status: 409 }
@@ -259,6 +273,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
       }
     }
 
+    logServerError("[api/admin/rooms/:id] Failed to delete room", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menghapus ruangan" }, { status: 500 });
   }
 }

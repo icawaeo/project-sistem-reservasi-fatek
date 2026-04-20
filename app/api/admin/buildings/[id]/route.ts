@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 type RouteParams = {
   params: Promise<{
@@ -125,19 +126,28 @@ export async function PUT(request: Request, { params }: RouteParams) {
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {
+        logServerWarn("[api/admin/buildings/:id] Building not found during update", {
+          ...getRequestLogMeta(request),
+          code: error.code,
+        });
         return NextResponse.json({ error: "Gedung tidak ditemukan" }, { status: 404 });
       }
 
       if (error.code === "P2002") {
+        logServerWarn("[api/admin/buildings/:id] Duplicate building name during update", {
+          ...getRequestLogMeta(request),
+          code: error.code,
+        });
         return NextResponse.json({ error: "Nama gedung sudah terdaftar" }, { status: 409 });
       }
     }
 
+    logServerError("[api/admin/buildings/:id] Failed to update building", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal memperbarui gedung" }, { status: 500 });
   }
 }
 
-export async function DELETE(_request: Request, { params }: RouteParams) {
+export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const session = await authorize();
 
@@ -185,7 +195,8 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/buildings/:id] Failed to delete building", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menghapus gedung" }, { status: 500 });
   }
 }

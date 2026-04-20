@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 const normalizeDays = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -69,7 +70,11 @@ export async function GET() {
     });
 
     return NextResponse.json(buildings.map(mapBuilding));
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/buildings] Failed to fetch buildings", error, {
+      method: "GET",
+      path: "/api/admin/buildings",
+    });
     return NextResponse.json({ error: "Gagal mengambil data gedung" }, { status: 500 });
   }
 }
@@ -109,9 +114,14 @@ export async function POST(request: Request) {
     return NextResponse.json(mapBuilding(building), { status: 201 });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      logServerWarn("[api/admin/buildings] Duplicate building name during create", {
+        ...getRequestLogMeta(request),
+        code: error.code,
+      });
       return NextResponse.json({ error: "Nama gedung sudah terdaftar" }, { status: 409 });
     }
 
+    logServerError("[api/admin/buildings] Failed to create building", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menambahkan gedung" }, { status: 500 });
   }
 }

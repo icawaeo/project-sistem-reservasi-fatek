@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -34,7 +35,8 @@ export async function PATCH(request: Request) {
 		});
 
 		return NextResponse.json({ success: true });
-	} catch {
+	} catch (error) {
+		logServerError("[api/admin/profile] Failed to update profile", error, getRequestLogMeta(request));
 		return NextResponse.json({ error: "Gagal memperbarui profil" }, { status: 500 });
 	}
 }

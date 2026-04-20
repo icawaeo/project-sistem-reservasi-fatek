@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { hashPasswordSetupToken } from "@/lib/password-setup";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -43,7 +44,8 @@ export async function GET(request: Request) {
       email: record.user.email,
       name: record.user.name,
     });
-  } catch {
+  } catch (error) {
+    logServerError("[api/auth/set-password] Failed to validate password setup token", error, getRequestLogMeta(request));
     return NextResponse.json({ valid: false }, { status: 200 });
   }
 }
@@ -109,7 +111,8 @@ export async function POST(request: Request) {
     ]);
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    logServerError("[api/auth/set-password] Failed to set password", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menyimpan password" }, { status: 500 });
   }
 }

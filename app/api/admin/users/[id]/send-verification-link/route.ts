@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { generatePasswordSetupToken, PASSWORD_SETUP_TOKEN_TTL_MS } from "@/lib/password-setup";
 import { sendPasswordSetupMail } from "@/lib/mail";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -127,7 +128,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
       inviteEmailSent = mailResult.delivered;
     } catch (mailError) {
-      console.error("MAIL_DEBUG: gagal kirim ulang email setup password", mailError);
+      logServerError("[api/admin/users/:id/send-verification-link] Failed to resend setup password mail", mailError, {
+        ...getRequestLogMeta(request),
+        targetUserId: user.user_id,
+      });
       inviteEmailSent = false;
     }
 
@@ -136,7 +140,8 @@ export async function POST(request: Request, { params }: RouteParams) {
       setupUrl: inviteEmailSent ? null : setupUrl,
       retryAfterSeconds: RESEND_COOLDOWN_SECONDS,
     });
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/users/:id/send-verification-link] Failed to send verification link", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal mengirim link verifikasi" }, { status: 500 });
   }
 }

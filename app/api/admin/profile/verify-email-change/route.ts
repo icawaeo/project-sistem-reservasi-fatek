@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hashEmailChangeToken } from "@/lib/email-change";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -52,7 +53,8 @@ export async function GET(request: Request) {
 		]);
 
 		return NextResponse.redirect(new URL("/administrator/profile?emailChanged=1", request.url));
-	} catch {
+	} catch (error) {
+		logServerError("[api/admin/profile/verify-email-change] Failed to verify email change", error, getRequestLogMeta(request));
 		return NextResponse.redirect(new URL("/auth", request.url));
 	}
 }

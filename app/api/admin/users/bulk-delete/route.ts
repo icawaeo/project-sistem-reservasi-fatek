@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const authorize = async () => {
   const session = await getServerSession(authOptions);
@@ -73,7 +74,8 @@ export async function POST(request: Request) {
       deletedIds: deletableIds,
       skippedCount,
     });
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/users/bulk-delete] Failed to bulk delete users", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menghapus user terpilih" }, { status: 500 });
   }
 }

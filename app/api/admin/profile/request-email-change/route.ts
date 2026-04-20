@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateEmailChangeToken, EMAIL_CHANGE_TOKEN_TTL_MS } from "@/lib/email-change";
 import { sendEmailChangeVerificationMail } from "@/lib/mail";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -93,7 +94,8 @@ export async function POST(request: Request) {
 		});
 
 		return NextResponse.json({ success: true, delivered: result.delivered });
-	} catch {
+	} catch (error) {
+		logServerError("[api/admin/profile/request-email-change] Failed to request email change", error, getRequestLogMeta(request));
 		return NextResponse.json({ error: "Gagal mengirim email verifikasi" }, { status: 500 });
 	}
 }

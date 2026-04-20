@@ -5,6 +5,7 @@ import path from "path";
 import crypto from "crypto";
 
 import { authOptions } from "@/lib/auth";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -64,7 +65,8 @@ export async function POST(request: Request) {
     const documentUrl = `/uploads/reservations/${fileName}`;
 
     return NextResponse.json({ success: true, documentUrl });
-  } catch {
+  } catch (error) {
+    logServerError("[api/reservasi/document] Failed to upload reservation document", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal mengupload dokumen" }, { status: 500 });
   }
 }

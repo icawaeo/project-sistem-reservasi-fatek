@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { generatePasswordSetupToken, PASSWORD_SETUP_TOKEN_TTL_MS } from "@/lib/password-setup";
 import { sendPasswordSetupMail } from "@/lib/mail";
+import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -114,7 +115,11 @@ export async function GET() {
     });
 
     return NextResponse.json(users.map(mapUser));
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/users] Failed to fetch users", error, {
+      method: "GET",
+      path: "/api/admin/users",
+    });
     return NextResponse.json({ error: "Gagal mengambil data user" }, { status: 500 });
   }
 }
@@ -196,7 +201,10 @@ export async function POST(request: Request) {
 
       inviteEmailSent = mailResult.delivered;
     } catch (mailError) {
-      console.error("MAIL_DEBUG: gagal kirim email setup password", mailError);
+      logServerError("[api/admin/users] Failed to send password setup mail", mailError, {
+        ...getRequestLogMeta(request),
+        createdUserId: user.user_id,
+      });
       inviteEmailSent = false;
     }
 
@@ -214,9 +222,14 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      logServerWarn("[api/admin/users] Duplicate email during create", {
+        ...getRequestLogMeta(request),
+        code: error.code,
+      });
       return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 409 });
     }
 
+    logServerError("[api/admin/users] Failed to create user", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menambahkan user" }, { status: 500 });
   }
 }

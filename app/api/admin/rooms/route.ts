@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { logServerError } from "@/lib/server-logger";
 
 const parseFacilities = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -160,7 +161,11 @@ export async function GET() {
       rooms: rooms.map(mapRoom),
       buildings,
     });
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/rooms] Failed to fetch rooms", error, {
+      method: "GET",
+      path: "/api/admin/rooms",
+    });
     return NextResponse.json({ error: "Gagal mengambil data ruangan" }, { status: 500 });
   }
 }
@@ -222,7 +227,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(mapRoom(room), { status: 201 });
-  } catch {
+  } catch (error) {
+    logServerError("[api/admin/rooms] Failed to create room", error, {
+      method: "POST",
+      path: "/api/admin/rooms",
+    });
     return NextResponse.json({ error: "Gagal menambahkan ruangan" }, { status: 500 });
   }
 }

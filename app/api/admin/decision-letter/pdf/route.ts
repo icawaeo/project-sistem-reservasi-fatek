@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 import { ensurePdfPreview, getActiveTemplateByType, type DecisionLetterTemplateType } from "@/lib/template-store";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -36,10 +37,11 @@ const ensureAdminAccess = async () => {
 };
 
 export async function GET(request: Request) {
-  const auth = await ensureAdminAccess();
-  if (!auth.ok) {
-    return auth.response;
-  }
+  try {
+    const auth = await ensureAdminAccess();
+    if (!auth.ok) {
+      return auth.response;
+    }
 
   // Default behavior: show GENERAL preview.
   // If reservationId is provided, select template type based on reservation flow.
@@ -81,29 +83,28 @@ export async function GET(request: Request) {
   }
 
   let template = active;
-  if (!template.pdfStoredPath) {
-    try {
-      const ensured = await ensurePdfPreview(template.id);
-      if (ensured) {
-        template = ensured;
+    if (!template.pdfStoredPath) {
+      try {
+        const ensured = await ensurePdfPreview(template.id);
+        if (ensured) {
+          template = ensured;
+        }
+      } catch (error) {
+        logServerError("[api/admin/decision-letter/pdf] Failed to ensure PDF preview", error, {
+          ...getRequestLogMeta(request),
+          templateId: template.id,
+        });
+        return NextResponse.json(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Gagal menyiapkan preview surat keputusan.",
+          },
+          { status: 500 }
+        );
       }
-    } catch (error) {
-      console.error("[api/admin/decision-letter/pdf] Failed to ensure PDF preview", {
-        templateId: template.id,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      return NextResponse.json(
-        {
-          error:
-            error instanceof Error
-              ? error.message
-              : "Gagal menyiapkan preview surat keputusan.",
-        },
-        { status: 500 }
-      );
     }
-  }
 
   if (!template.pdfStoredPath) {
     return NextResponse.json({ error: "Preview surat keputusan tidak tersedia." }, { status: 404 });
@@ -111,20 +112,29 @@ export async function GET(request: Request) {
 
   const absolutePath = path.join(process.cwd(), template.pdfStoredPath);
 
-  let body: ArrayBuffer;
-  try {
-    const fileBuffer = await fs.readFile(absolutePath);
-    body = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
-  } catch {
-    return NextResponse.json({ error: "File preview surat keputusan tidak ditemukan." }, { status: 404 });
-  }
+    let body: ArrayBuffer;
+    try {
+      const fileBuffer = await fs.readFile(absolutePath);
+      body = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+    } catch (error) {
+      logServerError("[api/admin/decision-letter/pdf] PDF preview file not found", error, {
+        ...getRequestLogMeta(request),
+        templateId: template.id,
+        storedPath: template.pdfStoredPath,
+      });
+      return NextResponse.json({ error: "File preview surat keputusan tidak ditemukan." }, { status: 404 });
+    }
 
-  return new NextResponse(body, {
-    status: 200,
-    headers: {
-      "Content-Type": template.pdfMimeType || "application/pdf",
-      "Content-Disposition": `inline; filename="${template.pdfStoredFilename ?? "surat_keputusan.pdf"}"`,
-      "Cache-Control": "no-store",
-    },
-  });
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        "Content-Type": template.pdfMimeType || "application/pdf",
+        "Content-Disposition": `inline; filename="${template.pdfStoredFilename ?? "surat_keputusan.pdf"}"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (error) {
+    logServerError("[api/admin/decision-letter/pdf] Failed to serve decision letter PDF preview", error, getRequestLogMeta(request));
+    return NextResponse.json({ error: "Gagal memuat preview surat keputusan." }, { status: 500 });
+  }
 }

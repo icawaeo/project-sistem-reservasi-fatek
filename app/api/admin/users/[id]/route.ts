@@ -4,6 +4,7 @@ import { Prisma, UserRole, UserType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -135,14 +136,19 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json(mapUser(user));
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      logServerWarn("[api/admin/users/:id] User not found during update", {
+        ...getRequestLogMeta(request),
+        code: error.code,
+      });
       return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
     }
 
+    logServerError("[api/admin/users/:id] Failed to update user", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal memperbarui user" }, { status: 500 });
   }
 }
 
-export async function DELETE(_request: Request, { params }: RouteParams) {
+export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const session = await authorize();
 
@@ -182,9 +188,14 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      logServerWarn("[api/admin/users/:id] User not found during delete", {
+        ...getRequestLogMeta(request),
+        code: error.code,
+      });
       return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
     }
 
+    logServerError("[api/admin/users/:id] Failed to delete user", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menghapus user" }, { status: 500 });
   }
 }

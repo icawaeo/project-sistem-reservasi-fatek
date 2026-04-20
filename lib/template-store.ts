@@ -351,17 +351,29 @@ export const createTemplateFromDocx = async (params: {
   };
 
   const existing = await readAll();
-  const updatedExisting = existing.map((item) => {
-    if (item.templateType !== params.templateType) {
-      return item;
-    }
-    if (!item.isActive) {
-      return item;
-    }
-    return { ...item, isActive: false };
-  });
 
-  await writeAll([meta, ...updatedExisting]);
+  const replaced = existing.filter((item) => item.templateType === params.templateType);
+  const remaining = existing.filter((item) => item.templateType !== params.templateType);
+
+  // Replace: keep exactly 1 template per flow/type.
+  await writeAll([meta, ...remaining]);
+
+  // Best-effort cleanup of previous template files for this type.
+  for (const old of replaced) {
+    try {
+      await fs.unlink(path.join(process.cwd(), old.storedPath));
+    } catch {
+      // ignore missing files
+    }
+
+    if (old.pdfStoredPath) {
+      try {
+        await fs.unlink(path.join(process.cwd(), old.pdfStoredPath));
+      } catch {
+        // ignore missing files
+      }
+    }
+  }
 
   return meta;
 };

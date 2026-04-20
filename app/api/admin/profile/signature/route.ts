@@ -5,6 +5,7 @@ import path from "path";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
@@ -71,7 +72,8 @@ export async function POST(request: Request) {
 		});
 
 		return NextResponse.json({ success: true, signatureUrl });
-	} catch {
+	} catch (error) {
+		logServerError("[api/admin/profile/signature] Failed to upload signature", error, getRequestLogMeta(request));
 		return NextResponse.json({ error: "Gagal mengupload TTD" }, { status: 500 });
 	}
 }
