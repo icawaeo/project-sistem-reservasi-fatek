@@ -131,7 +131,9 @@ export default function BuildingPage() {
         }
 
         if (endTime <= startTime) {
-            setValidationError("End Time harus lebih besar dari Start Time.");
+            setValidationError(
+                "Jam selesai tidak boleh lebih awal dari jam mulai.",
+            );
             return;
         }
 

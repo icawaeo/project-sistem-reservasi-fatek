@@ -26,7 +26,13 @@ export async function GET(request: Request) {
       }
 
       if (requestEnd <= requestStart) {
-        return NextResponse.json({ error: "Rentang waktu tidak valid" }, { status: 400 });
+        return NextResponse.json(
+          {
+            error:
+              "Jam selesai tidak boleh lebih awal dari jam mulai.",
+          },
+          { status: 400 },
+        );
       }
 
       const rooms = await prisma.room.findMany({
