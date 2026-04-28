@@ -51,26 +51,32 @@ const buildings: LandingBuildingCard[] = [
   {
     name: "Gedung Dekanat Fakultas Teknik",
     image: "/images/building/dekanat.jpeg",
+    roomsLabel: "1 RUANGAN",
   },
   {
     name: "Gedung Jurusan Teknik Sipil",
     image: "/images/building/sipil.jpeg",
+    roomsLabel: "3 RUANGAN",
   },
   {
     name: "Gedung Jurusan Teknik Arsitektur",
     image: "/images/building/jte.jpeg",
+    roomsLabel: "3 RUANGAN",
   },
   {
     name: "Gedung Jurusan Teknik Elektro",
     image: "/images/building/jte.jpeg",
+    roomsLabel: "5 RUANGAN",
   },
   {
     name: "Gedung Jurusan Teknik Mesin",
     image: "/images/building/dekanat.jpeg",
+    roomsLabel: "3 RUANGAN",
   },
   {
     name: "Gedung Laboratorium Fakultas Teknik",
     image: "/images/building/lab.jpeg",
+    roomsLabel: "3 RUANGAN",
   },
 ];
 

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Assistant, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
 import { ToastProvider } from "@/app/components/ui/toast";
 
-const assistant = Assistant({
-  variable: "--font-assistant",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${assistant.variable} ${geistMono.variable} antialiased`}
+        className={`${manrope.variable} ${geistMono.variable} antialiased`}
       >
         <NextAuthProvider>
           <ToastProvider>{children}</ToastProvider>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Calendar, Clock, Search } from "lucide-react";
 import type { RoomAvailability } from "./AvailabilityModal";
 
@@ -37,24 +38,41 @@ export default function HeroSection({
   selectedRoom,
 }: HeroSectionProps) {
   return (
-    <section className="relative h-[62vh] min-h-105">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-slate-700 via-slate-600 to-slate-800" />
-        <div className="absolute inset-0 bg-black/40" />
+    <section className="relative" style={{ minHeight: "100dvh" }}>
+      <div className="absolute inset-0 overflow-hidden bg-linear-to-br from-slate-700 via-slate-600 to-slate-800">
+        <Image
+          src="/hero.jpeg"
+          alt="Gedung Fakultas Teknik"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/65 to-black/85 backdrop-blur-sm" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pb-12">
-        <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">
-          Sistem Reservasi Ruangan
-        </h1>
-        <p className="text-white/70 mt-2 text-sm md:text-base lg:text-lg max-w-md">
-          Cari dan pinjam ruangan untuk kegiatan akademik dan organisasi dengan mudah.
-        </p>
-      </div>
+      <div
+        className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-10 px-4 py-28 text-center"
+        style={{ minHeight: "100dvh" }}
+      >
+        <div>
+          <h1
+            style={{ fontSize: "clamp(3rem, 7vw, 3rem)" }}
+            className="text-balance font-black leading-[0.95] tracking-tight text-white"
+          >
+            Sistem Reservasi Ruangan
+          </h1>
+          <p
+            style={{ fontSize: "clamp(1.125rem, 2.2vw, 1.25rem)" }}
+            className="mt-3 max-w-2xl text-white/70"
+          >
+            Cari dan pinjam ruangan untuk kegiatan akademik dan organisasi dengan mudah.
+          </p>
+        </div>
 
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-full max-w-4xl px-4">
-        <div className="bg-white rounded-2xl shadow-2xl px-6 py-6 border border-slate-100">
-          <div className="mb-4 flex flex-wrap items-center gap-4">
+        <div className="z-20 mt-10 w-full max-w-4xl md:mt-14">
+          <div className="bg-white rounded-2xl shadow-2xl px-6 py-6 border border-slate-100 text-left">
+            <div className="mb-4 flex flex-wrap items-center gap-4">
             <span className="text-[10px] md:text-[11px] lg:text-xs font-bold tracking-widest text-slate-500 uppercase">
               Reservation Mode
             </span>
@@ -164,13 +182,17 @@ export default function HeroSection({
                 Ruangan Dipilih
               </p>
               <div className="mt-1 flex flex-col gap-1 text-sm md:text-base text-slate-700 md:flex-row md:items-center md:justify-between">
-                <p className="font-semibold text-slate-900">{selectedRoom.room_name}</p>
+                <p className="font-semibold text-slate-900">
+                  {selectedRoom.room_name}
+                </p>
                 <p className="text-xs md:text-sm text-slate-600">
-                  {selectedRoom.room_building} · Kapasitas {selectedRoom.room_capacity} Orang
+                  {selectedRoom.room_building} · Kapasitas{" "}
+                  {selectedRoom.room_capacity} Orang
                 </p>
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </section>
