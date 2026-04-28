@@ -15,7 +15,7 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
 
   if (visibleRooms.length === 0) {
     return (
-      <section className="mt-64 md:mt-48 w-full px-4 sm:px-6 lg:px-8 xl:px-10">
+      <section className="w-full bg-white px-4 pb-10 pt-64 sm:px-6 lg:px-8 xl:px-10 md:pt-48">
         <div className="mx-auto w-full max-w-none">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -38,7 +38,7 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
             </div>
           </div>
 
-          <div className="rounded-[26px] border border-slate-100 bg-white p-12 text-center shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+          <div className="rounded-[26px] border border-slate-200 bg-white p-12 text-center shadow-md">
             <p className="text-slate-500">Belum ada data peminjaman yang tersedia</p>
           </div>
         </div>
@@ -47,7 +47,7 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
   }
 
   return (
-    <section className="mt-10 w-full px-4 sm:px-6 lg:px-8 xl:px-10">
+    <section className="w-full bg-white px-4 pb-10 pt-28 sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto w-full max-w-none">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
           {visibleRooms.map((room) => (
             <div
               key={room.name}
-              className="min-h-47 min-w-70 flex-1 basis-0 rounded-[26px] border border-slate-100 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-0.5"
+              className="min-h-47 min-w-70 flex-1 basis-0 rounded-[26px] border border-slate-200 bg-white p-5 shadow-md transition-transform duration-300 hover:-translate-y-0.5"
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 ring-1 ring-red-200">

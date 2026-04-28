@@ -29,11 +29,11 @@ export default function CampusMapSection({ mapPoints, allMapView }: CampusMapSec
   ];
 
   return (
-    <section className="mt-16 px-4 sm:px-6 lg:px-8 xl:px-10">
-      <div className="mx-auto flex w-full max-w-310 flex-col gap-8 md:flex-row md:items-start">
-        <div className="rounded-3xl bg-transparent p-2 pt-6 md:w-74 md:flex-none lg:w-78 lg:pt-14">
+    <section className="w-full bg-slate-100 px-4 pb-16 pt-28 sm:px-6 lg:px-8 xl:px-10">
+      <div className="mx-auto flex w-full max-w-none flex-col gap-8 md:flex-row md:items-start">
+        <div className="rounded-3xl bg-transparent md:w-74 md:flex-none lg:w-78">
           <div className="flex items-start gap-3">
-            <div className="mt-1 h-10 w-1.5 rounded-full bg-slate-900" />
+            <div className="mt-1 h-10 w-1.5 shrink-0 rounded-full bg-slate-900" />
             <div>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
                 Lokasi Gedung
@@ -67,7 +67,7 @@ export default function CampusMapSection({ mapPoints, allMapView }: CampusMapSec
           </div>
         </div>
 
-        <div className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_22px_55px_rgba(15,23,42,0.18)] md:ml-auto md:max-w-165">
+        <div className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_22px_55px_rgba(15,23,42,0.18)]">
           <div className="h-96 md:h-140">
             <iframe
               key={currentMap.name}

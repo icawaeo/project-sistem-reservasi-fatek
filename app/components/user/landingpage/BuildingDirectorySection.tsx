@@ -12,7 +12,7 @@ type BuildingDirectorySectionProps = {
 
 export default function BuildingDirectorySection({ buildings }: BuildingDirectorySectionProps) {
   return (
-    <section id="buildings" className="mt-16 py-12 bg-[#f5f5f0] overflow-hidden">
+    <section id="buildings" className="bg-white overflow-hidden pb-12 pt-28">
       <div className="mb-8 px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="mx-auto w-full max-w-none">
           <div className="flex items-start gap-3">
