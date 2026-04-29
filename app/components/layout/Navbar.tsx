@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { ChevronDown, CircleUserRound, LogOut } from "lucide-react";
+import PanduanPeminjamanModal from "@/app/components/user/PanduanPeminjamanModal";
 
 const SCROLL_PIN_THRESHOLD = 12;
 
@@ -13,6 +14,7 @@ export default function Navbar() {
     const { data: session } = useSession();
     const pathname = usePathname();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const isPrivilegedStaff = session?.user?.userType === "STAFF";
@@ -64,7 +66,11 @@ export default function Navbar() {
 
     const loginButtonClassName = "flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-6 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition-all";
 
+    const guideButtonClassName =
+        "inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+
     return (
+        <>
         <header
             className={`${headerClassName} transition-[top,width,transform] duration-300 ease-out`}
             style={{ top: headerTopOffset }}
@@ -105,7 +111,18 @@ export default function Navbar() {
                     </nav>
                 </div>
 
-                <nav className="flex items-center gap-6 shrink-0">
+                <nav className="flex items-center gap-3 shrink-0">
+
+                <button
+                    type="button"
+                    className={guideButtonClassName}
+                    onClick={() => {
+                        setIsDropdownOpen(false);
+                        setIsGuideOpen(true);
+                    }}
+                >
+                    Lihat Panduan
+                </button>
 
                 {showUserMenu ? (
                     <div ref={dropdownRef} className="relative">
@@ -152,5 +169,8 @@ export default function Navbar() {
                 </nav>
             </div>
         </header>
+
+        <PanduanPeminjamanModal open={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
+        </>
     );
 }

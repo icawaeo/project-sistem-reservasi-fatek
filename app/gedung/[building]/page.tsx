@@ -5,9 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-    Calendar,
-    Clock,
-    Search,
     Users,
     MapPin,
     Building2,
@@ -17,6 +14,7 @@ import {
     Home,
 } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
+import ReservationSearchWidget, { type ReservationMode } from "@/app/components/user/ReservationSearchWidget";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
 import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
@@ -92,7 +90,7 @@ export default function BuildingPage() {
     const [searchScheduleLabel, setSearchScheduleLabel] = useState("");
 
     // Search form state
-    const [reservationMode, setReservationMode] = useState<"per-day" | "date-range">("per-day");
+    const [reservationMode, setReservationMode] = useState<ReservationMode>("per-day");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [startTime, setStartTime] = useState("");
@@ -302,123 +300,27 @@ export default function BuildingPage() {
 
                 {/* Search Widget */}
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-full max-w-4xl px-4">
-                    <div className="bg-white rounded-2xl shadow-2xl px-6 py-6 border border-slate-100">
-                        <div className="mb-4 flex flex-wrap items-center gap-4">
-                            <span className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
-                                Reservation Mode
-                            </span>
-                            <label className="inline-flex items-center gap-2 text-sm lg:text-base text-slate-700">
-                                <input
-                                    type="radio"
-                                    name="reservation-mode"
-                                    value="per-day"
-                                    checked={reservationMode === "per-day"}
-                                    onChange={() => {
-                                        setReservationMode("per-day");
-                                        setEndDate("");
-                                    }}
-                                    className="h-4 w-4 accent-slate-900"
-                                />
-                                Per Day
-                            </label>
-                            <label className="inline-flex items-center gap-2 text-sm lg:text-base text-slate-700">
-                                <input
-                                    type="radio"
-                                    name="reservation-mode"
-                                    value="date-range"
-                                    checked={reservationMode === "date-range"}
-                                    onChange={() => {
-                                        setReservationMode("date-range");
-                                    }}
-                                    className="h-4 w-4 accent-slate-900"
-                                />
-                                Date Range
-                            </label>
-                        </div>
-
-                        <div className="flex flex-col md:flex-row md:items-end gap-4">
-                            <div className="flex-1 min-w-0">
-                                <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
-                                    {reservationMode === "per-day" ? "Date" : "Start Date"}
-                                </label>
-                                <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
-                                    <Calendar size={14} className="text-slate-400 shrink-0" />
-                                    <input
-                                        type="date"
-                                        value={startDate}
-                                        onChange={(e) => {
-                                            setStartDate(e.target.value);
-                                        }}
-                                        className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
-                                    />
-                                </div>
-                            </div>
-
-                            {reservationMode === "date-range" && (
-                                <div className="flex-1 min-w-0">
-                                    <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
-                                        End Date
-                                    </label>
-                                    <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
-                                        <Calendar size={14} className="text-slate-400 shrink-0" />
-                                        <input
-                                            type="date"
-                                            value={endDate}
-                                            onChange={(e) => {
-                                                setEndDate(e.target.value);
-                                            }}
-                                            className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex-1 min-w-0">
-                                <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
-                                    Start Time
-                                </label>
-                                <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
-                                    <Clock size={14} className="text-slate-400 shrink-0" />
-                                    <input
-                                        type="time"
-                                        value={startTime}
-                                        onChange={(e) => {
-                                            setStartTime(e.target.value);
-                                        }}
-                                        className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                                <label className="text-[10px] lg:text-[11px] font-bold tracking-widest text-slate-500 uppercase">
-                                    End Time
-                                </label>
-                                <div className="mt-1 flex items-center gap-2 border-b border-slate-200 pb-1">
-                                    <Clock size={14} className="text-slate-400 shrink-0" />
-                                    <input
-                                        type="time"
-                                        value={endTime}
-                                        onChange={(e) => {
-                                            setEndTime(e.target.value);
-                                        }}
-                                        className="text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="shrink-0 md:self-end">
-                                <button
-                                    onClick={handleSearch}
-                                    disabled={isSearching}
-                                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl px-6 py-3 text-sm lg:text-base font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 whitespace-nowrap disabled:cursor-not-allowed disabled:bg-slate-500"
-                                >
-                                    <Search size={15} />
-                                    {isSearching ? "Mencari..." : "Cek Ketersediaan"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <ReservationSearchWidget
+                        reservationMode={reservationMode}
+                        onReservationModeChange={(mode) => {
+                            setReservationMode(mode);
+                            if (mode === "per-day") {
+                                setEndDate("");
+                            }
+                        }}
+                        startDate={startDate}
+                        onStartDateChange={setStartDate}
+                        endDate={endDate}
+                        onEndDateChange={setEndDate}
+                        startTime={startTime}
+                        onStartTimeChange={setStartTime}
+                        endTime={endTime}
+                        onEndTimeChange={setEndTime}
+                        onSearch={handleSearch}
+                        isSearching={isSearching}
+                        searchLabelIdle="Cek Ketersediaan"
+                        searchLabelLoading="Mencari..."
+                    />
                 </div>
             </section>
 
