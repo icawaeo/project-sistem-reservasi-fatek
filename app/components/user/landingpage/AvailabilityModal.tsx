@@ -17,6 +17,51 @@ export type BuildingGroup = {
   rooms: RoomAvailability[];
 };
 
+const normalizeCommaSeparated = (value: unknown): string[] => {
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const normalizeFloor = (value: string) => {
+  const trimmed = value.trim();
+  const matchedNumber = trimmed.match(/\d+/);
+
+  if (matchedNumber) {
+    return matchedNumber[0];
+  }
+
+  return trimmed.replace(/^(lantai|lt\.?)/i, "").trim();
+};
+
+const parseRoomDetails = (value: unknown): { floor: string; facilities: string[] } => {
+  const parts = normalizeCommaSeparated(value);
+
+  if (parts.length === 0) {
+    return { floor: "", facilities: [] };
+  }
+
+  const firstPart = parts[0];
+  const hasFloorPrefix = /^(lantai|lt\.?)/i.test(firstPart) || /^\d+$/.test(firstPart);
+
+  if (hasFloorPrefix) {
+    return {
+      floor: normalizeFloor(firstPart),
+      facilities: parts.slice(1),
+    };
+  }
+
+  return {
+    floor: "",
+    facilities: parts,
+  };
+};
+
 type AvailabilityModalProps = {
   open: boolean;
   onClose: () => void;
@@ -104,15 +149,15 @@ export default function AvailabilityModal({
                       className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 text-left hover:bg-slate-200"
                       type="button"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <Building2 size={16} className="text-orange-500" />
-                        <span className="text-xs md:text-sm font-black tracking-[0.2em] text-slate-700 uppercase">
-                          {group.building}
-                        </span>
-                        <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] md:text-xs font-bold text-slate-600">
-                          {group.rooms.length} Ruangan
-                        </span>
-                      </div>
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <Building2 size={16} className="text-slate-900" />
+                          <span className="min-w-0 flex-1 text-xs font-black uppercase leading-snug tracking-[0.16em] text-slate-700 md:text-sm">
+                            <span className="line-clamp-2">{group.building}</span>
+                          </span>
+                          <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-200 px-2 py-0.5 text-[9px] font-bold leading-none text-slate-600 md:text-[11px]">
+                            {group.rooms.length} Ruangan
+                          </span>
+                        </div>
                       {isExpanded ? (
                         <ChevronUp size={16} className="text-slate-500" />
                       ) : (
@@ -129,24 +174,55 @@ export default function AvailabilityModal({
                           >
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
-                                <p className="text-xl md:text-2xl font-bold text-slate-800">
+                                <p className="text-base md:text-lg font-bold text-slate-800">
                                   {room.room_name}
                                 </p>
                                 <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
                                   Tersedia
                                 </span>
                               </div>
+
+                              {(() => {
+                                const details = parseRoomDetails(room.room_locDetail);
+                                if (details.facilities.length === 0) return null;
+
+                                return (
+                                  <div className="mt-2 flex flex-wrap gap-1.5">
+                                    {details.facilities.map((facility) => (
+                                      <span
+                                        key={`${room.room_id}-${facility}`}
+                                        className="inline-flex items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700"
+                                      >
+                                        {facility}
+                                      </span>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
+
                               <p className="mt-1 text-sm md:text-base text-slate-600">
                                 Kapasitas: {room.room_capacity} Orang
                               </p>
-                              <p className="text-xs md:text-sm italic text-slate-500">
-                                {room.room_locDetail}
-                              </p>
+                              {(() => {
+                                const details = parseRoomDetails(room.room_locDetail);
+
+                                if (details.floor) {
+                                  return (
+                                    <p className="text-xs italic text-slate-500 md:text-sm">
+                                      Lantai {details.floor}
+                                    </p>
+                                  );
+                                }
+
+                                return room.room_locDetail ? (
+                                  <p className="text-xs italic text-slate-500 md:text-sm">{room.room_locDetail}</p>
+                                ) : null;
+                              })()}
                             </div>
 
                             <button
                               onClick={() => onSelectRoom(room)}
-                              className="h-fit rounded-lg bg-slate-900 px-4 py-2 text-sm md:text-base font-semibold text-white transition-colors hover:bg-slate-700"
+                              className="h-fit rounded-lg bg-slate-900 px-4 py-2 text-xs md:text-sm font-semibold text-white transition-colors hover:bg-slate-700"
                               type="button"
                             >
                               Pilih Ruangan

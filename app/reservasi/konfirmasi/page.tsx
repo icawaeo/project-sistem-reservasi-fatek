@@ -264,10 +264,11 @@ export default function KonfirmasiReservasiPage() {
             </div>
             {!submitted && (
               <button
-                className="flex items-center gap-1 text-xs lg:text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+                className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] md:text-xs lg:text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
                 onClick={handleEditData}
               >
-                <ArrowLeft size={13} /> Ubah Data
+                <ArrowLeft size={13} />
+                <span className="whitespace-nowrap">Ubah Data</span>
               </button>
             )}
           </div>
@@ -370,7 +371,7 @@ export default function KonfirmasiReservasiPage() {
               <span className="text-[11px] lg:text-xs font-bold uppercase tracking-widest text-slate-600">Surat Pengantar</span>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
               <FileText className="text-red-400" size={24} />
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-slate-900 text-sm lg:text-base truncate">{reservation.documentName}</div>
