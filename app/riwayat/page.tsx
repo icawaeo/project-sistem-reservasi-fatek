@@ -363,7 +363,11 @@ export default function RiwayatPeminjamanPage() {
                           size={24}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-slate-900 text-sm lg:text-base truncate">
+                          <div
+                            className={`font-semibold text-sm lg:text-base truncate ${
+                              latestDecisionLetterUrl ? "text-slate-900" : "text-slate-700"
+                            }`}
+                          >
                             {latestDecisionLetterUrl ? "Surat keputusan tersedia" : "Surat keputusan belum tersedia"}
                           </div>
                           <div className="text-xs lg:text-sm text-slate-500">
