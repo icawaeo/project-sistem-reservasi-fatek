@@ -28,21 +28,25 @@ const occupiedRooms: OccupiedRoomCard[] = [
   {
     name: "Auditorium Dekanat",
     building: "Gedung Dekanat Fakultas Teknik",
+    activity: "Seminar Fakultas Teknik",
     time: "06:00 - 22:00 WITA",
   },
   {
     name: "Creative Room",
     building: "Gedung Jurusan Teknik Elektro",
+    activity: "Workshop Desain UI/UX",
     time: "09:30 - 21:00 WITA",
   },
   {
     name: "Lab Multimedia",
-    building: "Gedung Laboratorium Teknik",
+    building: "Gedung Laboratorium Fakultas Teknik",
+    activity: "Praktikum Multimedia",
     time: "07:30 - 11:30 WITA",
   },
   {
     name: "JTE - 02",
     building: "Gedung Jurusan Teknik Elektro",
+    activity: "Rapat Organisasi Mahasiswa",
     time: "10:00 - 14:00 WITA",
   },
 ];

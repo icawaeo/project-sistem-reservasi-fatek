@@ -4,6 +4,7 @@ export type OccupiedRoomCard = {
   name: string;
   building: string;
   time: string;
+  activity: string;
 };
 
 type OccupiedRoomsSectionProps = {
@@ -83,7 +84,7 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
 
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/12 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-red-600 ring-1 ring-red-200">
                   <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                  Occupied
+                  Digunakan
                 </span>
               </div>
 
@@ -97,10 +98,10 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Kegiatan:</span>
-                  <span className="font-semibold text-slate-800">Sedang digunakan</span>
+                  <span className="font-semibold text-slate-800">{room.activity}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Berakhir:</span>
+                  <span className="text-slate-500">Waktu:</span>
                   <span className="font-semibold text-slate-800">{room.time}</span>
                 </div>
               </div>
