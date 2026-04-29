@@ -2,6 +2,7 @@
 
 import { type ComponentType, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -215,6 +216,14 @@ export default function RiwayatPeminjamanPage() {
   const latestReason = latestDraftSnapshot?.reason || "-";
   const latestDocumentName = latestDraftSnapshot?.documentName || "Belum ada surat pengantar";
 
+  const normalizedLatestStatus = (latestActiveSubmission?.res_status ?? "").toUpperCase();
+  const isLatestDecisionLetterReady =
+    normalizedLatestStatus === "APPROVED" ||
+    normalizedLatestStatus === "DISETUJUI" ||
+    normalizedLatestStatus === "COMPLETED" ||
+    normalizedLatestStatus === "SELESAI";
+  const latestDecisionLetterUrl = isLatestDecisionLetterReady ? latestActiveSubmission?.res_documentUrl ?? null : null;
+
   const handlePreviewDocument = () => {
     if (!latestDraftSnapshot?.documentDataUrl) return;
     
@@ -227,16 +236,23 @@ export default function RiwayatPeminjamanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0] font-sans flex flex-col">
+    <div className="min-h-screen bg-white font-sans flex flex-col">
       <Navbar />
 
-      <section className="relative flex flex-col justify-end pt-20 pb-10 min-h-56">
+      <section className="relative h-[62vh] min-h-105">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-linear-to-br from-slate-700 via-slate-600 to-slate-800" />
-          <div className="absolute inset-0 bg-black/40" />
+          <Image
+            src="/hero.jpeg"
+            alt="Fakultas Teknik"
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/65 to-black/85 backdrop-blur-sm" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center text-center px-4">
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pb-12">
           <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">Riwayat Peminjaman</h1>
           <p className="text-white/75 mt-2 text-sm lg:text-base max-w-md">
             Lacak status pengajuan terbaru dan seluruh histori peminjaman ruangan Anda.
@@ -244,7 +260,7 @@ export default function RiwayatPeminjamanPage() {
         </div>
       </section>
 
-      <main className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-8 pb-14 flex-1">
+      <main className="w-full max-w-6xl mx-auto px-4 pt-8 pb-14 flex-1 sm:px-6 lg:px-8 xl:px-10">
         <nav className="flex items-center gap-1.5 text-[11px] lg:text-xs text-slate-500 mb-5 px-1">
           <Link href="/landingpage" className="hover:text-slate-800 flex items-center gap-1 transition-colors">
             <Home size={12} />
@@ -304,7 +320,7 @@ export default function RiwayatPeminjamanPage() {
                       <p className="text-slate-800 leading-relaxed">{latestReason}</p>
                     </div>
 
-                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 md:col-span-2">
+                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
                       <p className="text-[11px] lg:text-xs text-slate-500 mb-2">Surat Pengantar</p>
                       {latestDraftSnapshot?.documentDataUrl ? (
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3">
@@ -337,6 +353,45 @@ export default function RiwayatPeminjamanPage() {
                       ) : (
                         <p className="text-slate-600 text-xs lg:text-sm">{latestDocumentName}</p>
                       )}
+                    </div>
+
+                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                      <p className="text-[11px] lg:text-xs text-slate-500 mb-2">Surat Keputusan</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3">
+                        <FileCheck2
+                          className={latestDecisionLetterUrl ? "text-emerald-500" : "text-slate-300"}
+                          size={24}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-slate-900 text-sm lg:text-base truncate">
+                            {latestDecisionLetterUrl ? "Surat keputusan tersedia" : "Surat keputusan belum tersedia"}
+                          </div>
+                          <div className="text-xs lg:text-sm text-slate-500">
+                            {latestDecisionLetterUrl ? "Dokumen • Tersedia" : "Dokumen • Menunggu persetujuan"}
+                          </div>
+                        </div>
+
+                        {latestDecisionLetterUrl ? (
+                          <a
+                            href={latestDecisionLetterUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-slate-700 hover:text-slate-900 transition-colors"
+                            title="Preview surat keputusan"
+                          >
+                            <Eye size={18} />
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled
+                            className="text-slate-400 cursor-not-allowed"
+                            title="Surat keputusan tersedia setelah pengajuan disetujui"
+                          >
+                            <Eye size={18} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -418,7 +473,7 @@ export default function RiwayatPeminjamanPage() {
                           <div className="text-left">
                             <p className="text-sm lg:text-base font-bold text-slate-900">{item.room.room_name}</p>
                             <p className="text-xs lg:text-sm text-slate-500 flex items-center gap-1 mt-1">
-                              <Building2 size={12} />
+                              {/* <Building2 size={12} /> */}
                               {item.room.room_building}
                             </p>
                           </div>

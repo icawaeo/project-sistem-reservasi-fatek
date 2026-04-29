@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -217,16 +218,23 @@ export default function KonfirmasiReservasiPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0] font-sans">
+    <div className="min-h-screen bg-white font-sans">
       <Navbar />
 
-      <section className="relative flex flex-col justify-end pt-20 pb-10 min-h-56">
+      <section className="relative h-[62vh] min-h-105">
         <div className="absolute inset-0 overflow-hidden">
           <div className={`absolute inset-0 bg-linear-to-br ${buildingGradient}`} />
-          <div className="absolute inset-0 bg-black/40" />
+          <Image
+            src="/hero.jpeg"
+            alt="Fakultas Teknik"
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/65 to-black/85 backdrop-blur-sm" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center text-center px-4">
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pb-12">
           <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">Konfirmasi Reservasi</h1>
           <p className="text-white/75 mt-2 text-sm lg:text-base max-w-md">
             Periksa kembali seluruh data sebelum reservasi diproses.

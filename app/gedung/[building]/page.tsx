@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Calendar,
     Clock,
@@ -37,6 +38,15 @@ const buildingColorMap: Record<string, string> = {
     "Gedung Jurusan Teknik Elektro": "from-green-800 to-green-600",
     "Gedung Jurusan Teknik Mesin": "from-indigo-900 to-indigo-700",
     "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
+};
+
+const buildingImageMap: Record<string, string> = {
+    "Gedung Dekanat Fakultas Teknik": "/images/building/dekanat.jpeg",
+    "Gedung Jurusan Teknik Sipil": "/images/building/sipil.jpeg",
+    "Gedung Jurusan Teknik Arsitektur": "/images/building/jte.jpeg",
+    "Gedung Jurusan Teknik Elektro": "/images/building/jte.jpeg",
+    "Gedung Jurusan Teknik Mesin": "/images/building/dekanat.jpeg",
+    "Gedung Laboratorium Fakultas Teknik": "/images/building/lab.jpeg",
 };
 
 const mapPoints: Record<string, { shortUrl: string; embedUrl: string }> = {
@@ -93,6 +103,7 @@ export default function BuildingPage() {
     const [currentPage, setCurrentPage] = useState(1);
 
     const buildingGradient = buildingColorMap[buildingName] ?? "from-slate-700 via-slate-600 to-slate-800";
+    const buildingHeroImage = buildingImageMap[buildingName] ?? "/hero.jpeg";
     const buildingMap = mapPoints[buildingName] ?? null;
 
     // Load all rooms for this building on mount
@@ -262,7 +273,7 @@ export default function BuildingPage() {
     const paginatedRooms = rooms.slice((currentPage - 1) * ROOMS_PER_PAGE, currentPage * ROOMS_PER_PAGE);
 
     return (
-        <div className="min-h-screen bg-[#f5f5f0] font-sans">
+        <div className="min-h-screen bg-white font-sans">
             {/* Navbar */}
             <Navbar />
 
@@ -270,7 +281,14 @@ export default function BuildingPage() {
             <section className="relative h-[62vh] min-h-105">
                 <div className="absolute inset-0 overflow-hidden">
                     <div className={`absolute inset-0 bg-linear-to-br ${buildingGradient}`} />
-                    <div className="absolute inset-0 bg-black/40" />
+                    <Image
+                        src={buildingHeroImage}
+                        alt={buildingName}
+                        fill
+                        sizes="100vw"
+                        className="object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/65 to-black/85 backdrop-blur-sm" />
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pb-12">
