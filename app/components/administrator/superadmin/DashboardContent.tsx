@@ -34,10 +34,10 @@ export default function DashboardContent({
 
   return (
     <main className="space-y-5 p-4 lg:p-7">
-      <section className="grid gap-4 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StatCard
           icon={Clock}
-          label="Total Pengajuan Pending"
+          label="Total Pengajuan Tertunda"
           value={totalPending}
           sublabel="Menunggu Persetujuan"
           color="amber"
@@ -61,7 +61,7 @@ export default function DashboardContent({
         />
         <StatCard
           icon={Users}
-          label="Total User"
+          label="Total Pengguna"
           value={totalUsers}
           sublabel="Akun Terdaftar"
           color="blue"

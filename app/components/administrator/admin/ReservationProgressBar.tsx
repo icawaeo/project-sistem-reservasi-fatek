@@ -26,7 +26,7 @@ function resolveSteps(flow: AdminReservationRecord["flow"]): Step[] {
 	if (flow === "LAB_LAINNYA") {
 		return [
 			{ key: "SUBMITTED", label: "Diajukan" },
-			{ key: "WAITING_KAJUR", label: "Menunggu Persetujuan Kajur" },
+			{ key: "WAITING_KAJUR", label: "Menunggu Persetujuan Kepala Jurusan" },
 			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab" },
 			{ key: "DECISION", label: "Disetujui/Ditolak" },
 			{ key: "COMPLETED", label: "Selesai" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,6 +18,7 @@ import ReservationSearchWidget, { type ReservationMode } from "@/app/components/
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
 import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
+import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/superadmin/room-types";
 
 type RoomWithStatus = {
     room_id: string;
@@ -27,7 +28,31 @@ type RoomWithStatus = {
     room_locDetail: string;
     room_imageUrl: string | null;
     isCurrentlyOccupied: boolean;
+    labProgram: LabProgramValue | null;
+    labDepartment: LabDepartmentValue | null;
 };
+
+const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+const LAB_PROGRAM_LABELS: Record<LabProgramValue, string> = {
+    IT: "Informatika",
+    ELEKTRO: "Teknik Elektro",
+    ARSITEKTUR: "Arsitektur",
+    PWK: "PWK",
+    SIPIL: "Teknik Sipil",
+    LINGKUNGAN: "Teknik Lingkungan",
+    MESIN: "Teknik Mesin",
+};
+
+const LAB_DEPARTMENT_LABELS: Record<LabDepartmentValue, string> = {
+    ELEKTRO: "Teknik Elektro",
+    ARSITEKTUR: "Arsitektur",
+    SIPIL: "Teknik Sipil",
+    MESIN: "Teknik Mesin",
+};
+
+const LAB_DEPARTMENT_OPTIONS: LabDepartmentValue[] = ["ELEKTRO", "ARSITEKTUR", "SIPIL", "MESIN"];
+const LAB_PROGRAM_OPTIONS: LabProgramValue[] = ["IT", "ELEKTRO", "ARSITEKTUR", "PWK", "SIPIL", "LINGKUNGAN", "MESIN"];
 
 const buildingColorMap: Record<string, string> = {
     "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
@@ -74,7 +99,7 @@ const mapPoints: Record<string, { shortUrl: string; embedUrl: string }> = {
     },
 };
 
-const ROOMS_PER_PAGE = 5;
+const ROOMS_PER_PAGE = 10;
 
 export default function BuildingPage() {
     const params = useParams();
@@ -88,6 +113,8 @@ export default function BuildingPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [hasSearched, setHasSearched] = useState(false);
     const [searchScheduleLabel, setSearchScheduleLabel] = useState("");
+    const [selectedLabDepartment, setSelectedLabDepartment] = useState<"" | LabDepartmentValue>("");
+    const [selectedLabProgram, setSelectedLabProgram] = useState<"" | LabProgramValue>("");
 
     // Search form state
     const [reservationMode, setReservationMode] = useState<ReservationMode>("per-day");
@@ -103,6 +130,34 @@ export default function BuildingPage() {
     const buildingGradient = buildingColorMap[buildingName] ?? "from-slate-700 via-slate-600 to-slate-800";
     const buildingHeroImage = buildingImageMap[buildingName] ?? "/hero.jpeg";
     const buildingMap = mapPoints[buildingName] ?? null;
+    const isLabBuilding = buildingName === LAB_BUILDING_NAME;
+
+    const filteredRooms = useMemo(() => {
+        return rooms.filter((room) => {
+            if (!isLabBuilding) return true;
+
+            if (selectedLabDepartment && room.labDepartment !== selectedLabDepartment) {
+                return false;
+            }
+
+            if (selectedLabProgram && room.labProgram !== selectedLabProgram) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [isLabBuilding, rooms, selectedLabDepartment, selectedLabProgram]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredRooms.length / ROOMS_PER_PAGE));
+    const paginatedRooms = filteredRooms.slice((currentPage - 1) * ROOMS_PER_PAGE, currentPage * ROOMS_PER_PAGE);
+
+    useEffect(() => {
+        setCurrentPage((page) => Math.min(page, totalPages));
+    }, [totalPages]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedLabDepartment, selectedLabProgram]);
 
     // Load all rooms for this building on mount
     useEffect(() => {
@@ -198,6 +253,8 @@ export default function BuildingPage() {
             }));
 
             setRooms(roomsWithStatus);
+            setSelectedLabDepartment("");
+            setSelectedLabProgram("");
             setHasSearched(true);
             setCurrentPage(1);
 
@@ -266,9 +323,6 @@ export default function BuildingPage() {
 
         router.push(`/reservasi?${qp.toString()}`);
     };
-
-    const totalPages = Math.ceil(rooms.length / ROOMS_PER_PAGE);
-    const paginatedRooms = rooms.slice((currentPage - 1) * ROOMS_PER_PAGE, currentPage * ROOMS_PER_PAGE);
 
     return (
         <div className="min-h-screen bg-white font-sans">
@@ -388,6 +442,46 @@ export default function BuildingPage() {
                     )}
                 </div>
 
+                {isLabBuilding ? (
+                    <div className="mb-6 flex w-full items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:w-auto sm:justify-start">
+                        <label className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs md:text-sm lg:text-base text-slate-700">
+                            <span className="whitespace-nowrap font-semibold">Filter Jurusan</span>
+                            <select
+                                value={selectedLabDepartment}
+                                onChange={(event) => {
+                                    const nextDepartment = event.target.value as "" | LabDepartmentValue;
+                                    setSelectedLabDepartment(nextDepartment);
+                                    setSelectedLabProgram("");
+                                }}
+                                className="bg-transparent text-xs md:text-sm lg:text-base font-semibold outline-none"
+                            >
+                                <option value="">Semua Jurusan</option>
+                                {LAB_DEPARTMENT_OPTIONS.map((department) => (
+                                    <option key={department} value={department}>
+                                        {LAB_DEPARTMENT_LABELS[department]}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs md:text-sm lg:text-base text-slate-700">
+                            <span className="whitespace-nowrap font-semibold">Filter Prodi</span>
+                            <select
+                                value={selectedLabProgram}
+                                onChange={(event) => setSelectedLabProgram(event.target.value as "" | LabProgramValue)}
+                                className="bg-transparent text-xs md:text-sm lg:text-base font-semibold outline-none"
+                            >
+                                <option value="">Semua Prodi</option>
+                                {LAB_PROGRAM_OPTIONS.map((program) => (
+                                    <option key={program} value={program}>
+                                        {LAB_PROGRAM_LABELS[program]}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    </div>
+                ) : null}
+
                 {/* Room List */}
                 {isLoading ? (
                     <div className="space-y-4">
@@ -412,6 +506,13 @@ export default function BuildingPage() {
                             {hasSearched
                                 ? "Tidak ada ruangan tersedia untuk jadwal yang dipilih."
                                 : "Tidak ada ruangan ditemukan untuk gedung ini."}
+                        </p>
+                    </div>
+                ) : paginatedRooms.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-12 text-center">
+                        <Building2 size={32} className="mx-auto text-slate-300 mb-3" />
+                        <p className="text-sm lg:text-base font-medium text-slate-600">
+                            Tidak ada data.
                         </p>
                     </div>
                 ) : (
@@ -471,6 +572,16 @@ export default function BuildingPage() {
                                             <Users size={11} className="shrink-0" />
                                             <span>Kapasitas: {room.room_capacity} Orang</span>
                                         </div>
+                                        {isLabBuilding && room.labProgram && room.labDepartment ? (
+                                            <div className="flex items-center gap-1.5 text-[11px] lg:text-sm text-slate-500 mb-1">
+                                                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
+                                                    Program Studi: {LAB_PROGRAM_LABELS[room.labProgram]}
+                                                </span>
+                                                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
+                                                    Jurusan: {LAB_DEPARTMENT_LABELS[room.labDepartment]}
+                                                </span>
+                                            </div>
+                                        ) : null}
                                         {room.room_locDetail && (
                                             <p className="text-xs lg:text-sm italic text-slate-400 mt-0.5 truncate">
                                                 {room.room_locDetail}

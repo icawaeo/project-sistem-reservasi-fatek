@@ -48,7 +48,7 @@ export default function AdminDashboardContent({ initialData, adminRole }: AdminD
 
   return (
     <main className="space-y-5 p-4 lg:p-7">
-      <section className="grid gap-4 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StatCard
           icon={Clock}
           label="Pengajuan Pending"

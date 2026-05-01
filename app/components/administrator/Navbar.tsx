@@ -1,24 +1,34 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Bell, ChevronDown, LogOut, UserCog } from "lucide-react";
+import { Bell, ChevronDown, LogOut, UserCog, User } from "lucide-react";
+import Sidebar from "./Sidebar";
 
 type NavbarProps = {
   pageTitle: string;
   pageSubtitle: string;
   userName: string;
+  role?: "superadmin" | "admin";
 };
 
 export default function Navbar({
   pageTitle,
   pageSubtitle,
   userName,
+  role,
 }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Auto-detect role from pathname if not provided
+  const detectedRole = role || (
+    pathname.includes("/administrator/superadmin/") ? "superadmin" : "admin"
+  );
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -48,14 +58,29 @@ export default function Navbar({
   }, []);
 
   return (
-    <header className="border-b border-slate-200 bg-white px-4 py-3 lg:px-7">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">{pageTitle}</h1>
-          <p className="text-sm text-slate-500">{pageSubtitle}</p>
+    <header className="border-b border-slate-200 bg-white px-4 py-6 lg:px-7 lg:py-4">
+      <div className="flex items-center justify-between gap-2 lg:gap-3">
+        <div className="flex min-w-0 items-center gap-2 lg:gap-3">
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 lg:hidden"
+            aria-label="Buka menu"
+            onClick={() => setIsMobileSidebarOpen(true)}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+
+          <div className="min-w-0">
+            <h1 className="truncate text-sm font-bold text-slate-900 sm:text-base lg:text-lg">
+              {pageTitle}
+            </h1>
+            <p className="truncate text-[11px] leading-tight text-slate-500 sm:text-xs">
+              {pageSubtitle}
+            </p>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-nowrap items-center gap-2 lg:gap-3">
           {/* <div className="relative">
             <Search
               size={16}
@@ -70,22 +95,35 @@ export default function Navbar({
 
           <button
             type="button"
-            className="flex h-14 w-14 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100"
             aria-label="Notifikasi"
           >
-            <Bell size={16} />
+            <Bell size={14} />
           </button>
 
-          <div className="relative" ref={menuRef}>
+          <div className="relative shrink-0" ref={menuRef}>
+            {/* Mobile: icon-only profile button */}
             <button
               type="button"
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="flex h-14 items-center gap-2 rounded-lg border border-slate-200 px-3 text-slate-900 transition-colors hover:bg-slate-100"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-900 transition-colors hover:bg-slate-100 lg:hidden"
               aria-haspopup="menu"
               aria-expanded={isMenuOpen}
             >
-              <span className="text-sm font-semibold text-slate-900">{userName}</span>
-              <ChevronDown size={16} className="text-slate-500" aria-hidden="true" />
+              <User size={16} />
+            </button>
+
+            {/* Desktop: name + chevron */}
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="hidden h-10 lg:flex items-center gap-2 rounded-lg border border-slate-200 px-3 text-slate-900 transition-colors hover:bg-slate-100"
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
+            >
+              <User size={14} className="text-slate-500" aria-hidden="true" />
+              <span className="text-sm font-semibold text-slate-900 max-w-35 truncate">{userName}</span>
+              <ChevronDown size={14} className="text-slate-500" aria-hidden="true" />
             </button>
 
             {isMenuOpen ? (
@@ -120,6 +158,11 @@ export default function Navbar({
           </div>
         </div>
       </div>
+
+      {/* Mobile sidebar drawer */}
+      {isMobileSidebarOpen && detectedRole ? (
+        <Sidebar role={detectedRole} isMobile onClose={() => setIsMobileSidebarOpen(false)} />
+      ) : null}
     </header>
   );
 }

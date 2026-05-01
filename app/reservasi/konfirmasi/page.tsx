@@ -102,6 +102,7 @@ export default function KonfirmasiReservasiPage() {
   const [reservation, setReservation] = useState<ReservationDraft | null>(null);
   const [submitted, setSubmitted] = useState<SubmittedReservation | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const uploadSupportingDocument = async () => {
     if (!reservation?.documentDataUrl) return null;
@@ -215,6 +216,70 @@ export default function KonfirmasiReservasiPage() {
     cleanupTimeout = window.setTimeout(() => {
       window.removeEventListener("message", onReady);
     }, 2000);
+  };
+
+  const submitReservation = async () => {
+    setLoading(true);
+    try {
+      if (!session?.user?.id || isPrivilegedStaff) {
+        pushToast({ type: "error", message: "Sesi login tidak ditemukan. Silakan login ulang." });
+        return;
+      }
+
+      const now = new Date();
+      const startDateTime = new Date(`${reservation.startDate}T${reservation.startTime}:00`);
+      const endDateSource = reservation.endDate || reservation.startDate;
+      const endDateTime = new Date(`${endDateSource}T${reservation.endTime}:00`);
+
+      const payload = {
+        room_id: reservation.room_id,
+        res_startTime: Number.isNaN(startDateTime.getTime()) ? now.toISOString() : startDateTime.toISOString(),
+        res_endTime: Number.isNaN(endDateTime.getTime())
+          ? new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString()
+          : endDateTime.toISOString(),
+        res_purpose: reservation.reason && reservation.reason !== "-" ? `${reservation.purpose} - ${reservation.reason}` : reservation.purpose,
+        res_flow: reservation.res_flow ?? "GENERAL",
+        res_documentUrl: null as string | null,
+      };
+
+      const isLab = reservation.room_building === LAB_BUILDING_NAME;
+      if (isLab) {
+        if (payload.res_flow !== "LAB_SKRIPSI" && payload.res_flow !== "LAB_LAINNYA") {
+          pushToast({
+            type: "error",
+            message: "Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya). Silakan kembali dan lengkapi data.",
+          });
+          return;
+        }
+        if (!reservation.documentDataUrl) {
+          pushToast({ type: "error", message: "Dokumen pendukung wajib diunggah untuk peminjaman lab." });
+          return;
+        }
+      }
+
+      const uploadedDocumentUrl = await uploadSupportingDocument();
+      payload.res_documentUrl = uploadedDocumentUrl;
+
+      const res = await fetch("/api/reservasi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        pushToast({ type: "error", message: data.error || "Gagal menyimpan reservasi." });
+      } else {
+        setSubmitted(data);
+        router.push("/riwayat");
+      }
+    } catch (error) {
+      pushToast({
+        type: "error",
+        message: error instanceof Error ? error.message : "Terjadi kesalahan saat submit reservasi.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -395,71 +460,7 @@ export default function KonfirmasiReservasiPage() {
             <button
               className="w-full mt-6 bg-slate-900 text-white rounded-xl px-6 py-3 text-base lg:text-lg font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 disabled:cursor-not-allowed disabled:bg-slate-500"
               disabled={loading}
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  if (!session?.user?.id || isPrivilegedStaff) {
-                    pushToast({ type: "error", message: "Sesi login tidak ditemukan. Silakan login ulang." });
-                    setLoading(false);
-                    return;
-                  }
-
-                  const now = new Date();
-                  const startDateTime = new Date(`${reservation.startDate}T${reservation.startTime}:00`);
-                  const endDateSource = reservation.endDate || reservation.startDate;
-                  const endDateTime = new Date(`${endDateSource}T${reservation.endTime}:00`);
-
-                  const payload = {
-                    room_id: reservation.room_id,
-                    res_startTime: Number.isNaN(startDateTime.getTime()) ? now.toISOString() : startDateTime.toISOString(),
-                    res_endTime: Number.isNaN(endDateTime.getTime())
-                      ? new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString()
-                      : endDateTime.toISOString(),
-					res_purpose: reservation.reason && reservation.reason !== "-" ? `${reservation.purpose} - ${reservation.reason}` : reservation.purpose,
-          res_flow: reservation.res_flow ?? "GENERAL",
-          res_documentUrl: null as string | null,
-                  };
-
-          const isLab = reservation.room_building === LAB_BUILDING_NAME;
-          if (isLab) {
-            if (payload.res_flow !== "LAB_SKRIPSI" && payload.res_flow !== "LAB_LAINNYA") {
-              pushToast({
-                type: "error",
-                message: "Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya). Silakan kembali dan lengkapi data.",
-              });
-              setLoading(false);
-              return;
-            }
-            if (!reservation.documentDataUrl) {
-              pushToast({ type: "error", message: "Dokumen pendukung wajib diunggah untuk peminjaman lab." });
-              setLoading(false);
-              return;
-            }
-          }
-
-          const uploadedDocumentUrl = await uploadSupportingDocument();
-          payload.res_documentUrl = uploadedDocumentUrl;
-
-                  const res = await fetch("/api/reservasi", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                  });
-                  const data = await res.json();
-                  if (!res.ok) {
-                    pushToast({ type: "error", message: data.error || "Gagal menyimpan reservasi." });
-                  } else {
-                    setSubmitted(data);
-                  }
-                } catch (error) {
-                  pushToast({
-                    type: "error",
-                    message: error instanceof Error ? error.message : "Terjadi kesalahan saat submit reservasi.",
-                  });
-                } finally {
-                  setLoading(false);
-                }
-              }}
+              onClick={() => setIsConfirmModalOpen(true)}
             >
               {loading ? "Menyimpan..." : "KONFIRMASI RESERVASI"}
             </button>
@@ -482,6 +483,53 @@ export default function KonfirmasiReservasiPage() {
             Dengan menklik konfirmasi, Anda menyetujui seluruh tata tertib penggunaan fasilitas kampus FATEK UNSRAT yang berlaku secara akademik dan administratif.
           </div>
         </section>
+
+        {isConfirmModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !loading) {
+                setIsConfirmModalOpen(false);
+              }
+            }}
+            role="presentation"
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="konfirmasi-reservasi-title"
+              className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+            >
+              <h3 id="konfirmasi-reservasi-title" className="text-lg font-black tracking-tight text-slate-900">
+                Konfirmasi Reservasi
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Apakah Anda yakin ingin melakukan reservasi? Periksa kembali data peminjaman Anda.
+              </p>
+
+              <div className="mt-5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await submitReservation();
+                  }}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? "Menyimpan..." : "Ya, Saya Yakin"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </main>
 
       <footer className="bg-slate-900 py-5 text-center">

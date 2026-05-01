@@ -105,8 +105,8 @@ export default function BuildingTable({ buildings, onEdit, onDelete }: BuildingT
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-slate-900">{building.name}</p>
-                <p className="mt-1 text-sm text-slate-600">{formatOperational(building)}</p>
+                 <p className="font-semibold text-slate-900">{building.name}</p>
+                 <p className="mt-1 text-sm text-slate-600">{formatOperational(building)}</p>
               </div>
             </div>
 

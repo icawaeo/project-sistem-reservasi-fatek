@@ -26,6 +26,8 @@ type NavItem = {
 
 type SidebarProps = {
   role: Role;
+  isMobile?: boolean;
+  onClose?: () => void;
 };
 
 const navByRole: Record<Role, NavItem[]> = {
@@ -75,11 +77,79 @@ const navByRole: Record<Role, NavItem[]> = {
   ],
 };
 
-export default function Sidebar({ role }: SidebarProps) {
+export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
   const pathname = usePathname();
   const navItems = navByRole[role];
   const [isCollapsed, setIsCollapsed] = useState(false);
   const isExpanded = !isCollapsed;
+
+  // If rendering as mobile drawer, return an overlay panel
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 z-50 flex">
+        <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+        <aside className="relative h-full w-64 shrink-0 overflow-hidden border-r border-slate-200 bg-white">
+          <div className="flex items-center justify-between gap-3 px-5 py-5">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/images/Logo_Fatek_Unsrat.png"
+                alt="Logo Fakultas Teknik Universitas Sam Ratulangi"
+                width={38}
+                height={38}
+                className="h-9 w-9 shrink-0 object-contain"
+                priority
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-extrabold text-slate-900">FAKULTAS TEKNIK</p>
+                <p className="text-[11px] text-slate-500">UNIVERSITAS SAM RATULANGI</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100"
+              aria-label="Tutup sidebar"
+            >
+              <Menu size={18} />
+            </button>
+          </div>
+
+          <nav className="px-3 py-4">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  title={item.label}
+                  onClick={onClose}
+                  className={`flex items-center rounded-lg py-2.5 text-sm font-medium ${
+                    isActive ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  } gap-2.5 px-3 justify-start`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="border-t border-slate-200 px-3 py-4">
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              title="Keluar"
+              className="flex w-full items-center rounded-lg py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 gap-2.5 px-3 justify-start"
+            >
+              <LogOut size={16} />
+              <span>Keluar</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+    );
+  }
 
   return (
     <aside

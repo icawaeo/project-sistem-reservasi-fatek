@@ -16,22 +16,22 @@ export default function StatCard({
   sublabel,
 }: StatCardProps) {
   return (
-    <div className="relative rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
-      {/* Icon on the right */}
+    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md md:p-4">
       {Icon && (
-        <div className="absolute right-4 top-4 lg:right-5 lg:top-5">
-          <Icon size={24} className="text-[#64748B]" />
+        <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-[#64748B] ring-1 ring-slate-200/80">
+          <Icon size={16} />
         </div>
       )}
 
-      {/* Label */}
-      <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">{label}</p>
+      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B] md:text-xs">
+        {label}
+      </p>
 
-      {/* Value */}
-      <p className="mt-3 text-3xl font-bold text-[#0F172A]">{value}</p>
+      <p className="mt-1 text-xl font-bold leading-none tracking-tight whitespace-nowrap text-[#0F172A] md:text-[1.75rem]">
+        {value}
+      </p>
 
-      {/* Sublabel */}
-      {sublabel && <p className="mt-2 text-sm font-medium text-[#64748B]">{sublabel}</p>}
+      {sublabel && <p className="mt-1.5 text-[11px] font-medium text-[#64748B] md:text-xs">{sublabel}</p>}
     </div>
   );
 }

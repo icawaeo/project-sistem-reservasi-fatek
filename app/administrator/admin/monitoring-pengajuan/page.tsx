@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import { isSuperadminUser } from "@/lib/admin-access";
+import { isSuperadminUser, shouldShowAdminReservation } from "@/lib/admin-access";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
 import AdminMonitoringContent from "@/app/components/administrator/admin/AdminMonitoringContent";
@@ -33,7 +33,20 @@ export default async function AdminMonitoringPengajuanPage() {
 		redirect("/administrator/superadmin/monitoring-pengajuan");
 	}
 
-	const role = (session.user.role || "ADMIN").toUpperCase();
+	const dbUser = await prisma.user.findUnique({
+		where: { user_id: session.user.id },
+		select: {
+			role: true,
+			departmentScope: true,
+			programScope: true,
+		},
+	});
+
+	if (!dbUser) {
+		redirect("/auth");
+	}
+
+	const role = (dbUser.role || session.user.role || "ADMIN").toUpperCase();
 	const adminRole: AdminRole =
 		role === "ADMIN_DEKAN" || role === "ADMIN_WD2" || role === "KAJUR" || role === "KEPALA_LAB" ? (role as AdminRole) : "ADMIN";
 
@@ -60,7 +73,23 @@ export default async function AdminMonitoringPengajuanPage() {
 		},
 	});
 
-	const tableData: AdminReservationRecord[] = reservations.map((item) => {
+	const visibleReservations = reservations.filter((item) =>
+		shouldShowAdminReservation(
+			{
+				role: adminRole,
+				departmentScope: dbUser.departmentScope,
+				programScope: dbUser.programScope,
+			},
+			{
+				flow: item.res_flow,
+				status: item.res_status,
+				labDepartment: item.res_labDepartment,
+				labProgram: item.res_labProgram,
+			},
+		),
+	);
+
+	const tableData: AdminReservationRecord[] = visibleReservations.map((item) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
 
 		return {

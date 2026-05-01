@@ -108,6 +108,7 @@ export default async function SuperadminDashboardPage() {
 						pageTitle="Dashboard Superadmin"
 						pageSubtitle="Monitoring pengajuan peminjaman ruangan"
 						userName={session.user.name || "Superadmin"}
+						role="superadmin"
 					/>
 
 					<DashboardContent

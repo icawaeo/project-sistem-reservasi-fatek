@@ -121,6 +121,9 @@ const formatDateTimeFull = (start: string, end: string) => {
   return `${startLabel} - ${endLabel}`;
 };
 
+const buildDecisionLetterUrl = (reservationId: string) =>
+  `/api/admin/decision-letter/pdf?reservationId=${encodeURIComponent(reservationId)}`;
+
 export default function RiwayatPeminjamanPage() {
   const { data: session, status } = useSession();
   const isPrivilegedStaff = session?.user?.userType === "STAFF";
@@ -228,7 +231,8 @@ export default function RiwayatPeminjamanPage() {
     normalizedLatestStatus === "DISETUJUI" ||
     normalizedLatestStatus === "COMPLETED" ||
     normalizedLatestStatus === "SELESAI";
-  const latestDecisionLetterUrl = isLatestDecisionLetterReady ? latestActiveSubmission?.res_documentUrl ?? null : null;
+  const latestDecisionLetterUrl =
+    isLatestDecisionLetterReady && latestActiveSubmission ? buildDecisionLetterUrl(latestActiveSubmission.res_id) : null;
 
   const handlePreviewDocument = () => {
     if (!latestDraftSnapshot?.documentDataUrl) return;
@@ -473,7 +477,14 @@ export default function RiwayatPeminjamanPage() {
                       icon: History,
                     };
                     const StatusIcon = status.icon;
-                    const decisionDocUrl = item.res_status === "PENDING" ? null : item.res_documentUrl;
+                    const normalizedStatus = (item.res_status ?? "").toUpperCase();
+                    const decisionDocUrl =
+                      normalizedStatus === "APPROVED" ||
+                      normalizedStatus === "DISETUJUI" ||
+                      normalizedStatus === "COMPLETED" ||
+                      normalizedStatus === "SELESAI"
+                        ? buildDecisionLetterUrl(item.res_id)
+                        : null;
 
                     return (
                       <article key={item.res_id} className="px-4 md:px-5 py-4">

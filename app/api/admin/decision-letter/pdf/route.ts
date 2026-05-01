@@ -22,7 +22,22 @@ const isAdminLikeRole = (role: unknown) => {
   );
 };
 
-const ensureAdminAccess = async () => {
+const isReservationOwner = async (reservationId: string, userId: string) => {
+  const reservation = await prisma.reservation.findFirst({
+    where: {
+      res_id: reservationId,
+      user_id: userId,
+    },
+    select: {
+      res_flow: true,
+      res_status: true,
+    },
+  });
+
+  return reservation;
+};
+
+const ensureDecisionLetterAccess = async (request: Request) => {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -33,12 +48,25 @@ const ensureAdminAccess = async () => {
     return { ok: true as const };
   }
 
-  return { ok: false as const, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  const { searchParams } = new URL(request.url);
+  const reservationId = searchParams.get("reservationId") ?? "";
+
+  if (!reservationId) {
+    return { ok: false as const, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  }
+
+  const reservation = await isReservationOwner(reservationId, session.user.id);
+
+  if (!reservation) {
+    return { ok: false as const, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  }
+
+  return { ok: true as const };
 };
 
 export async function GET(request: Request) {
   try {
-    const auth = await ensureAdminAccess();
+    const auth = await ensureDecisionLetterAccess(request);
     if (!auth.ok) {
       return auth.response;
     }

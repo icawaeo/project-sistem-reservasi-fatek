@@ -171,10 +171,10 @@ export default function RoomTable({ rooms, onEdit, onDelete }: RoomTableProps) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-slate-900">{room.name}</p>
-                <p className="text-sm text-slate-500">{room.building}</p>
-                <p className="text-sm text-slate-500">{formatRoomMetaLabel(room)}</p>
-                <p className="text-sm text-slate-600">Kapasitas: {room.capacity} Orang</p>
+                 <p className="font-semibold text-slate-900">{room.name}</p>
+                 <p className="text-sm text-slate-500">{room.building}</p>
+                 <p className="text-sm text-slate-500">{formatRoomMetaLabel(room)}</p>
+                 <p className="text-sm text-slate-600">Kapasitas: {room.capacity} Orang</p>
               </div>
             </div>
 

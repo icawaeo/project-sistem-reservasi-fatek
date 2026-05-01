@@ -23,11 +23,14 @@ type FormState = {
   imageUrl: string | null;
 };
 
+type OperationalMode = "WEEKDAYS" | "ALL_DAYS" | "CUSTOM";
+
 const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+const WEEKDAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
 const initialState: FormState = {
   name: "",
-  operationalDays: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"],
+  operationalDays: WEEKDAYS,
   openTime: "08:00",
   closeTime: "17:00",
   status: "aktif",
@@ -43,7 +46,22 @@ export default function BuildingFormModal({
 }: BuildingFormModalProps) {
   const { pushToast } = useToast();
   const [form, setForm] = useState<FormState>(initialState);
+  const [operationalMode, setOperationalMode] = useState<OperationalMode>("WEEKDAYS");
   const [isLoading, setIsLoading] = useState(false);
+
+  const resolveOperationalMode = (days: string[]): OperationalMode => {
+    const sortedSelected = DAYS.filter((day) => days.includes(day));
+
+    if (sortedSelected.length === WEEKDAYS.length && WEEKDAYS.every((day, idx) => sortedSelected[idx] === day)) {
+      return "WEEKDAYS";
+    }
+
+    if (sortedSelected.length === DAYS.length && DAYS.every((day, idx) => sortedSelected[idx] === day)) {
+      return "ALL_DAYS";
+    }
+
+    return "CUSTOM";
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -59,10 +77,12 @@ export default function BuildingFormModal({
         status: building.status,
         imageUrl: building.imageUrl,
       });
+      setOperationalMode(resolveOperationalMode(building.operationalDays));
       return;
     }
 
     setForm(initialState);
+    setOperationalMode("WEEKDAYS");
   }, [isOpen, mode, building]);
 
   const hasValidTimeRange = useMemo(() => {
@@ -70,6 +90,10 @@ export default function BuildingFormModal({
   }, [form.openTime, form.closeTime]);
 
   const toggleDay = (day: string) => {
+    if (operationalMode !== "CUSTOM") {
+      return;
+    }
+
     setForm((prev) => {
       const exists = prev.operationalDays.includes(day);
       const nextDays = exists
@@ -83,11 +107,17 @@ export default function BuildingFormModal({
     });
   };
 
-  const setPresetDays = (days: string[]) => {
-    setForm((prev) => ({
-      ...prev,
-      operationalDays: days,
-    }));
+  const setOperationalPreset = (nextMode: OperationalMode) => {
+    setOperationalMode(nextMode);
+
+    if (nextMode === "WEEKDAYS") {
+      setForm((prev) => ({ ...prev, operationalDays: WEEKDAYS }));
+      return;
+    }
+
+    if (nextMode === "ALL_DAYS") {
+      setForm((prev) => ({ ...prev, operationalDays: DAYS }));
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -146,7 +176,7 @@ export default function BuildingFormModal({
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div>
             <h3 className="text-base font-bold text-slate-900">
-              {mode === "create" ? "Tambah Gedung" : "Edit Gedung"}
+              {mode === "create" ? "Tambah Gedung" : "Perbarui Gedung"}
             </h3>
             <p className="text-sm text-slate-500">Isi data operasional gedung dengan lengkap.</p>
           </div>
@@ -173,53 +203,68 @@ export default function BuildingFormModal({
             />
           </label>
 
-          <div className="space-y-2">
+          <div className="space-y-4 pt-2">
             <span className="text-sm font-semibold text-slate-700">Hari Operasional</span>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setPresetDays(["Senin", "Selasa", "Rabu", "Kamis", "Jumat"])}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Senin - Jumat
-              </button>
-              <button
-                type="button"
-                onClick={() => setPresetDays(["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"])}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Senin - Sabtu
-              </button>
-              <button
-                type="button"
-                onClick={() => setPresetDays(DAYS)}
-                className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
+            <div className="grid grid-cols-3 gap-1 sm:gap-2">
+              <label className="inline-flex min-w-0 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md border border-slate-200 px-1.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 sm:gap-1.5 sm:px-2 sm:text-xs">
+                <input
+                  type="radio"
+                  name="operationalMode"
+                  checked={operationalMode === "ALL_DAYS"}
+                  onChange={() => setOperationalPreset("ALL_DAYS")}
+                  className="h-3 w-3 shrink-0"
+                />
                 Semua Hari
-              </button>
+              </label>
+              <label className="inline-flex min-w-0 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md border border-slate-200 px-1.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 sm:gap-1.5 sm:px-2 sm:text-xs">
+                <input
+                  type="radio"
+                  name="operationalMode"
+                  checked={operationalMode === "WEEKDAYS"}
+                  onChange={() => setOperationalPreset("WEEKDAYS")}
+                  className="h-3 w-3 shrink-0"
+                />
+                Senin - Jumat
+              </label>
+              <label className="inline-flex min-w-0 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md border border-slate-200 px-1.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 sm:gap-1.5 sm:px-2 sm:text-xs">
+                <input
+                  type="radio"
+                  name="operationalMode"
+                  checked={operationalMode === "CUSTOM"}
+                  onChange={() => setOperationalPreset("CUSTOM")}
+                  className="h-3 w-3 shrink-0"
+                />
+                Custom Hari
+              </label>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {DAYS.map((day) => {
                 const isActive = form.operationalDays.includes(day);
+                const isDisabled = operationalMode !== "CUSTOM";
 
                 return (
                   <button
                     key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
+                    disabled={isDisabled}
                     className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
                       isActive
                         ? "border-slate-900 bg-slate-900 text-white"
                         : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
+                    } ${isDisabled ? "cursor-not-allowed opacity-50" : ""}`}
                   >
                     {day}
                   </button>
                 );
               })}
             </div>
+
+            {/* {operationalMode !== "CUSTOM" ? (
+              <p className="text-xs text-slate-500">Pilih Custom Hari untuk mengubah kombinasi hari operasional.</p>
+            ) : null} */}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -281,7 +326,7 @@ export default function BuildingFormModal({
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-              {isLoading ? "Menyimpan..." : mode === "create" ? "Simpan Gedung" : "Update Gedung"}
+              {isLoading ? "Menyimpan..." : mode === "create" ? "Simpan Gedung" : "Perbarui Gedung"}
             </button>
           </div>
         </form>
