@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { signOut } from "next-auth/react";
 import {
   LayoutGrid,
@@ -85,11 +86,11 @@ export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
 
   // If rendering as mobile drawer, return an overlay panel
   if (isMobile) {
-    return (
+    return createPortal(
       <div className="fixed inset-0 z-50 flex">
         <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-        <aside className="relative h-full w-64 shrink-0 overflow-hidden border-r border-slate-200 bg-white">
-          <div className="flex items-center justify-between gap-3 px-5 py-5">
+        <aside className="relative h-full w-64 shrink-0 overflow-hidden border-r border-slate-200 bg-white shadow-2xl">
+          <div className="flex items-center justify-between gap-3 px-5 py-5 border-b border-slate-200">
             <div className="flex items-center gap-3">
               <Image
                 src="/images/Logo_Fatek_Unsrat.png"
@@ -147,7 +148,8 @@ export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
             </button>
           </div>
         </aside>
-      </div>
+      </div>,
+      document.body
     );
   }
 

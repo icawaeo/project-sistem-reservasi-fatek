@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FileText, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 type TemplateType = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -73,6 +74,7 @@ export default function TemplateSuratManagementContent({
   const [uploadInputKey, setUploadInputKey] = useState(0);
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const refreshList = async () => {
     const response = await fetch("/api/admin/templates");
@@ -194,17 +196,13 @@ export default function TemplateSuratManagementContent({
     }
   };
 
-  const handleDeleteSelected = async () => {
-    if (!selectedTemplate) {
-      return;
-    }
+  const handleDeleteSelected = () => {
+    if (!selectedTemplate) return;
+    setIsDeleteModalOpen(true);
+  };
 
-    const confirmed = window.confirm(
-      `Hapus template aktif untuk kategori “${resolveTemplateTypeLabel(selectedType)}”? File DOCX dan PDF preview juga akan terhapus.`
-    );
-    if (!confirmed) {
-      return;
-    }
+  const confirmDeleteSelected = async () => {
+    if (!selectedTemplate) return;
 
     setIsDeleting(true);
     try {
@@ -214,6 +212,7 @@ export default function TemplateSuratManagementContent({
       }
 
       pushToast({ type: "success", message: "Template berhasil dihapus." });
+      setIsDeleteModalOpen(false);
 
       try {
         await refreshList();
@@ -269,35 +268,48 @@ export default function TemplateSuratManagementContent({
                 setUploadTemplateType(selectedType);
                 setIsUploadModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              className="hidden items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 lg:inline-flex"
             >
               <Plus size={16} /> Upload Template
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                refreshList().catch((error) => {
-                  pushToast({
-                    type: "error",
-                    message: error instanceof Error ? error.message : "Gagal memuat daftar template.",
-                  });
-                })
-              }
-              className="w-fit rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Refresh
-            </button>
-
-            <button
-              type="button"
               onClick={handleDeleteSelected}
               disabled={!selectedTemplate || isDeleting}
-              className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="hidden items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60 lg:inline-flex"
             >
               {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
               Hapus Template
             </button>
+          </div>
+
+          {/* Mobile / tablet full-width actions */}
+          <div className="mt-3 w-full lg:hidden">
+            <div className="mb-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadTemplateType(selectedType);
+                  setIsUploadModalOpen(true);
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                <Plus size={16} /> Upload Template
+              </button>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                disabled={!selectedTemplate || isDeleting}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                Hapus Template
+              </button>
+            </div>
           </div>
         </div>
 
@@ -317,24 +329,24 @@ export default function TemplateSuratManagementContent({
                 const isSelected = card.type === selectedType;
 
                 return (
-                  <button
+                  <div
                     key={card.type}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedType(card.type)}
-                    className={`w-full rounded-xl border p-4 text-left transition-colors ${
-                      isSelected
-                        ? "border-slate-900 bg-white"
-                        : "border-slate-200 bg-slate-50 hover:bg-white"
-                    }`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") setSelectedType(card.type);
+                    }}
                     aria-pressed={isSelected}
+                    className={`w-full rounded-xl border p-4 text-left transition-colors ${
+                      isSelected ? "border-slate-900 bg-white" : "border-slate-200 bg-slate-50 hover:bg-white"
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{card.label}</p>
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          isSelected
-                            ? "bg-slate-900 text-white"
-                            : "bg-slate-200 text-slate-700"
+                        className={`inline-flex items-center text-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          isSelected ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-700"
                         }`}
                       >
                         {isSelected ? "Dipilih" : "Klik untuk pilih"}
@@ -350,27 +362,39 @@ export default function TemplateSuratManagementContent({
                         </div>
 
                         <p className="mt-3 wrap-break-word font-semibold text-slate-900">{item.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Terakhir diperbarui: {formatDateTime(item.updatedAt)}
-                        </p>
+                        <p className="mt-1 text-xs text-slate-500">Terakhir diperbarui: {formatDateTime(item.updatedAt)}</p>
 
                         <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700">
                           <FileText size={14} className="text-slate-400" />
                           <span className="truncate">{item.originalFilename}</span>
                         </div>
+
+                        {/* Mobile-only preview button inside each card */}
+                        <div className="mt-3 lg:hidden">
+                          <a
+                            href={`/api/admin/templates/${item.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              // allow the link to open; prevent parent click from re-selecting if necessary
+                              e.stopPropagation();
+                            }}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+                          >
+                            <FileText size={14} /> Preview Surat
+                          </a>
+                        </div>
                       </>
                     ) : (
-                      <p className="mt-2 text-sm text-slate-500">
-                        Belum ada template. Klik “Upload Template” untuk menambahkan.
-                      </p>
+                      <p className="mt-2 text-sm text-slate-500">Belum ada template. Klik “Upload Template” untuk menambahkan.</p>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
           </section>
 
-          <section className="flex min-h-0 flex-1 flex-col lg:w-2/3">
+          <section className="hidden min-h-0 flex-1 flex-col lg:flex lg:w-2/3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-widest text-slate-600">Preview Dokumen</h4>
@@ -397,7 +421,7 @@ export default function TemplateSuratManagementContent({
                   <div className="px-4 py-4">
                     <p className="text-sm font-semibold text-slate-700">PDF tidak ditemukan</p>
                     <p className="mt-1 text-sm text-slate-500">
-                      File preview PDF tidak tersedia atau gagal dimuat. Coba klik Refresh atau unggah ulang template.
+                      File preview PDF tidak tersedia atau gagal dimuat. Coba unggah ulang template.
                     </p>
                   </div>
                 </object>
@@ -405,8 +429,8 @@ export default function TemplateSuratManagementContent({
                 <div className="px-4 py-4">
                   <p className="text-sm font-semibold text-slate-700">Preview belum tersedia</p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Sistem akan mengonversi DOCX ke PDF via LibreOffice secara otomatis. Jika preview belum muncul, coba klik
-                    Refresh.
+                    Sistem akan mengonversi DOCX ke PDF via LibreOffice secara otomatis. Jika preview belum muncul, coba unggah ulang
+                    template.
                   </p>
                 </div>
               )}
@@ -503,6 +527,21 @@ export default function TemplateSuratManagementContent({
           </div>
         </div>
       ) : null}
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        title="Hapus Template"
+        description={
+          selectedTemplate
+            ? `Hapus template “${selectedTemplate.name}” untuk kategori ${resolveTemplateTypeLabel(
+                selectedType
+              )}? File DOCX dan PDF preview juga akan terhapus.`
+            : "Hapus template terpilih?"
+        }
+        onConfirm={confirmDeleteSelected}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        isLoading={isDeleting}
+      />
     </main>
   );
 }

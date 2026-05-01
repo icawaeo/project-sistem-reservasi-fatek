@@ -52,6 +52,7 @@ export default async function AdministratorProfilePage({ searchParams }: Profile
 						pageTitle="Profil"
 						pageSubtitle="Perbarui informasi akun administrator"
 						userName={session.user.name || "Admin"}
+						role={sidebarRole}
 					/>
 
 					<main className="flex-1 p-4 lg:p-7">

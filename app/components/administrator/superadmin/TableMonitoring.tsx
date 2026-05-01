@@ -194,7 +194,7 @@ export default function TableMonitoring({
   return (
     <>
       {showControls ? (
-        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="mb-3 flex flex-row flex-wrap items-center gap-2">
         <label className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
           <ArrowUpDown size={14} className="text-slate-500" />
           <span>Urutkan</span>
@@ -229,7 +229,8 @@ export default function TableMonitoring({
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* Desktop table view */}
+      <div className="hidden lg:block overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="min-w-275 w-full border-collapse text-left text-sm">
             <thead className="bg-slate-50">
@@ -366,6 +367,73 @@ export default function TableMonitoring({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile card view */}
+      <div className="lg:hidden space-y-3">
+        {paginatedData.length > 0 ? (
+          paginatedData.map((item) => (
+            <div key={item.id} className="flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <div className="flex-1 p-4 space-y-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Nama Pengaju</p>
+                  <p className="text-sm font-semibold text-slate-900">{item.user.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Kegiatan</p>
+                  <p className="text-sm text-slate-700">{item.activityName}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tujuan</p>
+                  <p className="text-sm text-slate-700">{item.purpose}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ruangan</p>
+                  <p className="text-sm font-semibold text-slate-900">{item.room.name}</p>
+                  <p className="text-xs text-slate-500">{item.room.building}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal &amp; Waktu</p>
+                  <p className="text-sm text-slate-700">{formatDate(item.startTime)}</p>
+                  <p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</p>
+                  <div className="mt-1">
+                    <StatusBadge status={computeReservationStatus(item.status, item.endTime)} />
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-200 p-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedRow({
+                      ...item,
+                      status: computeReservationStatus(item.status, item.endTime),
+                    })
+                  }
+                  className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                >
+                  Lihat Detail
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteClick(item)}
+                  className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"
+                  title="Hapus Data Pengajuan"
+                  aria-label={`Hapus pengajuan ${item.activityName}`}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-10 text-center">
+            <p className="text-sm text-slate-500">Belum ada data pengajuan terbaru.</p>
+          </div>
+        )}
       </div>
 
       <MonitoringDetailModal data={selectedRow} onClose={() => setSelectedRow(null)} />

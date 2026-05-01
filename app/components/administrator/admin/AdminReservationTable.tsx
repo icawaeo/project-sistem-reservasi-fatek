@@ -208,7 +208,7 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
   return (
     <>
     <div className="space-y-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex flex-row flex-wrap items-center gap-2">
         <label className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
           <ArrowUpDown size={14} className="text-slate-500" />
           <span>Urutkan</span>
@@ -239,7 +239,8 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
         </label>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* Desktop table view */}
+      <div className="hidden lg:block overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
           <table className="min-w-275 w-full border-collapse text-left text-sm">
             <thead className="bg-slate-50">
@@ -358,6 +359,59 @@ export default function AdminReservationTable({ data, adminRole, onStatusUpdated
           </div>
         </div>
       </div>
+    </div>
+
+    {/* Mobile card view */}
+    <div className="lg:hidden space-y-3">
+      {paginatedData.length > 0 ? (
+        paginatedData.map((item, index) => {
+          const isBusy = processing?.id === item.id;
+          return (
+            <div key={item.id} className="flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <div className="flex-1 p-4 space-y-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Nama Pengaju</p>
+                  <p className="text-sm font-semibold text-slate-900">{item.user.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Kegiatan</p>
+                  <p className="text-sm text-slate-700">{item.activityName}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ruangan</p>
+                  <p className="text-sm font-semibold text-slate-900">{item.room.name}</p>
+                  <p className="text-xs text-slate-500">{item.room.building}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Peminjaman</p>
+                  <p className="text-sm text-slate-700">{formatDate(item.startTime)}</p>
+                  <p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Pengajuan</p>
+                  <p className="text-sm text-slate-700">{formatDate(item.createdAt)}</p>
+                  <p className="text-xs text-slate-500">{formatTime(item.createdAt)}</p>
+                </div>
+              </div>
+              <div className="border-t border-slate-200 p-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRow(item)}
+                  disabled={isBusy}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-slate-800 bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition-all duration-150 hover:-translate-y-0.5 hover:bg-slate-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Eye size={16} />
+                  Tinjau &amp; Proses
+                </button>
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-white px-4 py-10 text-center">
+          <p className="text-sm text-slate-500">Belum ada data pengajuan.</p>
+        </div>
+      )}
     </div>
 
     <AdminReservationDetailModal
