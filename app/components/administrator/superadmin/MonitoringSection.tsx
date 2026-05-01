@@ -38,31 +38,31 @@ export default function MonitoringSection({
             {/* <p className="mt-1 text-xs text-slate-400">Last Sync: {lastSync} WITA</p> */}
           </div>
 
-          {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+          {headerAction ? <div className="hidden shrink-0 lg:block">{headerAction}</div> : null}
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-            <ArrowUpDown size={14} className="text-slate-500" />
-            <span>Urutkan</span>
+        <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-row lg:items-center">
+          <label className="flex flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 lg:w-fit lg:px-3">
+            <ArrowUpDown size={14} className="shrink-0 text-slate-500" />
+            <span className="whitespace-nowrap">Urutkan</span>
             <select
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value as "newest" | "oldest")}
-              className="bg-transparent text-sm font-semibold outline-none"
+              className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none lg:flex-none"
             >
               <option value="newest">Terbaru</option>
               <option value="oldest">Terlama</option>
             </select>
           </label>
 
-          <label className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-            <span>Filter Status</span>
+          <label className="flex flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 lg:w-fit lg:px-3">
+            <span className="whitespace-nowrap">Filter</span>
             <select
               value={filterStatus}
               onChange={(event) =>
                 setFilterStatus(event.target.value as "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED")
               }
-              className="bg-transparent text-sm font-semibold outline-none"
+              className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none lg:flex-none"
             >
               <option value="ALL">Semua Status</option>
               <option value="PENDING">Menunggu</option>
@@ -76,6 +76,10 @@ export default function MonitoringSection({
             Status utama: {primaryStatusLabel}
           </span> */}
         </div>
+
+        {headerAction ? (
+          <div className="block lg:hidden">{headerAction}</div>
+        ) : null}
       </div>
 
       <TableMonitoring

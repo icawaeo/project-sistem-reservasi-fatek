@@ -7,8 +7,12 @@ import { categoryLabel, roleLabel } from "./user-types";
 type UserTableProps = {
   users: UserItem[];
   selectedIds: string[];
+  allSelected: boolean;
+  someSelected: boolean;
   onToggleSelectAll: () => void;
   onToggleSelectUser: (id: string) => void;
+  onClearSelection: () => void;
+  onOpenBulkDelete: () => void;
   onEdit: (user: UserItem) => void;
   onDelete: (user: UserItem) => void;
   onSendVerificationLink: (user: UserItem) => void;
@@ -35,8 +39,12 @@ const EmptyState = () => (
 export default function UserTable({
   users,
   selectedIds,
+  allSelected,
+  someSelected,
   onToggleSelectAll,
   onToggleSelectUser,
+  onClearSelection,
+  onOpenBulkDelete,
   onEdit,
   onDelete,
   onSendVerificationLink,
@@ -47,8 +55,6 @@ export default function UserTable({
   }
 
   const selectedSet = new Set(selectedIds);
-  const allSelected = users.every((user) => selectedSet.has(user.id));
-  const someSelected = !allSelected && users.some((user) => selectedSet.has(user.id));
 
   return (
     <>
@@ -67,7 +73,7 @@ export default function UserTable({
                   }}
                   onChange={onToggleSelectAll}
                   className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
-                  aria-label="Pilih semua user di halaman ini"
+                  aria-label="Pilih semua user sesuai filter"
                 />
               </th>
               <th className="px-4 py-3 font-semibold">Nama User</th>
@@ -164,10 +170,33 @@ export default function UserTable({
             }}
             onChange={onToggleSelectAll}
             className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
-            aria-label="Pilih semua user di halaman ini"
+            aria-label="Pilih semua user sesuai filter"
           />
-          <span className="text-sm font-medium text-slate-700">Pilih semua data di halaman ini</span>
+          <span className="text-sm font-medium text-slate-700">Pilih semua data</span>
         </div>
+
+        {selectedIds.length > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm">
+            <p className="text-amber-800">{selectedIds.length} user dipilih.</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClearSelection}
+                className="rounded-md border border-amber-300 px-3 py-1.5 font-semibold text-amber-900 transition-colors hover:bg-amber-100"
+              >
+                Batal Pilih
+              </button>
+              <button
+                type="button"
+                onClick={onOpenBulkDelete}
+                className="inline-flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 font-semibold text-white transition-colors hover:bg-rose-700"
+              >
+                <Trash2 size={14} />
+                Hapus Terpilih
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {users.map((user) => {
           const isSelected = selectedSet.has(user.id);

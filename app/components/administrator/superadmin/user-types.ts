@@ -34,7 +34,7 @@ export const USER_ROLE_OPTIONS: Array<{ value: UserRoleValue; label: string }> =
   { value: "ADMIN", label: "Admin" },
   { value: "ADMIN_DEKAN", label: "Admin (Dekan)" },
   { value: "ADMIN_WD2", label: "Admin (WD2)" },
-  { value: "KAJUR", label: "Kajur" },
+  { value: "KAJUR", label: "Kepala Jurusan" },
   { value: "KEPALA_LAB", label: "Kepala Lab" },
   { value: "SUPERADMIN", label: "Superadmin" },
 ];

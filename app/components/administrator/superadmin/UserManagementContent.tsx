@@ -300,17 +300,22 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
     }
   };
 
-  const toggleSelectAllCurrentPage = () => {
-    const pageIds = paginatedUsers.map((user) => user.id);
-    const allSelected = pageIds.every((id) => selectedIds.includes(id));
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredUsers.map((user) => user.id);
+    const allSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedIds.includes(id));
 
     if (allSelected) {
-      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+      setSelectedIds((prev) => prev.filter((id) => !filteredIds.includes(id)));
       return;
     }
 
-    setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    setSelectedIds((prev) => Array.from(new Set([...prev, ...filteredIds])));
   };
+
+  const allFilteredSelected =
+    filteredUsers.length > 0 && filteredUsers.every((user) => selectedIds.includes(user.id));
+  const someFilteredSelected =
+    !allFilteredSelected && filteredUsers.some((user) => selectedIds.includes(user.id));
 
   const toggleSelectUser = (id: string) => {
     setSelectedIds((prev) => {
@@ -334,7 +339,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            className="hidden w-fit items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 lg:inline-flex"
           >
             <Plus size={16} />
             Tambah User
@@ -347,6 +352,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
           selectedRole={selectedRole}
           selectedVerification={selectedVerification}
           totalUsers={filteredUsers.length}
+          onAddUser={() => setIsCreateModalOpen(true)}
           onSearchChange={(value) => {
             setSearch(value);
             setCurrentPage(1);
@@ -366,7 +372,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
         />
 
         {selectedIds.length > 0 ? (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm">
+          <div className="mt-4 hidden flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm lg:flex">
             <p className="text-amber-800">{selectedIds.length} user dipilih.</p>
             <div className="flex items-center gap-2">
               <button
@@ -392,8 +398,12 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
           <UserTable
             users={paginatedUsers}
             selectedIds={selectedIds}
-            onToggleSelectAll={toggleSelectAllCurrentPage}
+            allSelected={allFilteredSelected}
+            someSelected={someFilteredSelected}
+            onToggleSelectAll={toggleSelectAllFiltered}
             onToggleSelectUser={toggleSelectUser}
+            onClearSelection={() => setSelectedIds([])}
+            onOpenBulkDelete={() => setIsBulkDeleteOpen(true)}
             onEdit={setEditingUser}
             onDelete={setDeletingUser}
             resendCooldownByUserId={resendCooldownByUserId}
