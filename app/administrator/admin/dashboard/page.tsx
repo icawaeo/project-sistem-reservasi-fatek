@@ -6,7 +6,7 @@ import Sidebar from "@/app/components/administrator/ui/Sidebar";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import DashboardContent from "@/app/components/administrator/dashboard/DashboardContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
-import { isSuperadminUser, shouldShowAdminReservation } from "@/lib/admin-access";
+import { shouldShowAdminReservation } from "@/lib/admin-access";
 
 export default async function AdminDashboardPage() {
 	const session = await getServerSession(authOptions);
