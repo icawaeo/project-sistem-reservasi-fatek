@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import AdminDashboardContent from "@/app/components/administrator/admin/AdminDashboardContent";
+import DashboardContent from "@/app/components/administrator/superadmin/dashboard/DashboardContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
 import { isSuperadminUser, shouldShowAdminReservation } from "@/lib/admin-access";
 
@@ -68,6 +68,16 @@ export default async function AdminDashboardPage() {
 			res_date: "desc",
 		},
 	});
+
+	const allRooms = await prisma.room.findMany({
+		select: {
+			room_building: true,
+		},
+	});
+
+	const totalRooms = allRooms.length;
+	const totalBuildings = new Set(allRooms.map((room) => room.room_building)).size;
+	const totalUsers = await prisma.user.count();
 
 	const visibleReservations = reservations.filter((item) =>
 		shouldShowAdminReservation(
@@ -138,7 +148,15 @@ export default async function AdminDashboardPage() {
 						role="admin"
 					/>
 
-					<AdminDashboardContent initialData={tableData} adminRole={adminRole} lastSync={lastSync} />
+					<DashboardContent
+						adminData={tableData}
+						mode="admin"
+						totalRooms={totalRooms}
+						totalBuildings={totalBuildings}
+						totalUsers={totalUsers}
+						lastSync={lastSync}
+						adminRole={adminRole}
+					/>
 				</div>
 			</div>
 		</div>

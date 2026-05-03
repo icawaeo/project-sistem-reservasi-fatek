@@ -90,6 +90,7 @@ export default function MonitoringSection({
         onFilterStatusChange={setFilterStatus}
         onDeleteSuccess={onDeleteSuccess}
         showControls={false}
+        showDelete={false}
       />
     </SectionCard>
   );

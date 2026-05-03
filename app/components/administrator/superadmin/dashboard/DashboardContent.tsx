@@ -3,34 +3,50 @@
 import { useMemo, useState } from "react";
 import { Clock, Building2, DoorOpen, Users } from "lucide-react";
 import StatCard from "@/app/components/administrator/superadmin/ui/StatCard";
-import DashboardStatGrid from "@/app/components/administrator/dashboard/DashboardStatGrid";
-import MonitoringSection from "./MonitoringSection";
+import DashboardStatGrid from "@/app/components/administrator/superadmin/dashboard/DashboardStatGrid";
+import SuperadminMonitoringContent from "../monitoring-pengajuan/SuperadminMonitoringContent";
 import type { MonitoringReservation } from "../monitoring-pengajuan/monitoring-types";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
+import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/common/reservationStatus";
 
 type DashboardContentProps = {
-  initialData: MonitoringReservation[];
+  initialData?: MonitoringReservation[];
+  adminData?: AdminReservationRecord[];
+  mode?: "superadmin" | "admin";
   totalRooms: number;
   totalBuildings: number;
   totalUsers: number;
   lastSync: string;
+  adminRole?: AdminRole;
 };
 
 export default function DashboardContent({
-  initialData,
+  initialData = [],
+  adminData = [],
+  mode = "superadmin",
   totalRooms,
   totalBuildings,
   totalUsers,
   lastSync,
+  adminRole = "ADMIN",
 }: DashboardContentProps) {
   const [tableData, setTableData] = useState<MonitoringReservation[]>(initialData);
+  const [adminTableData, setAdminTableData] = useState<AdminReservationRecord[]>(adminData);
 
-  const totalPending = useMemo(
-    () => tableData.filter((item) => item.status.toUpperCase() === "PENDING").length,
-    [tableData]
-  );
+  const totalPending = useMemo(() => {
+    if (mode === "admin") {
+      return adminTableData.reduce((count, item) => {
+        const computed = computeReservationStatus(item.status, item.endTime);
+        const group = resolveReservationStatusGroup(computed);
+        return group === "PENDING" ? count + 1 : count;
+      }, 0);
+    }
 
-  const handleDeleteSuccess = (deletedId: string) => {
-    setTableData((prev) => prev.filter((item) => item.id !== deletedId));
+    return tableData.filter((item) => item.status.toUpperCase() === "PENDING").length;
+  }, [adminTableData, mode, tableData]);
+
+  const handleAdminStatusUpdated = (id: string, updates: Partial<AdminReservationRecord>) => {
+    setAdminTableData((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)));
   };
 
   return (
@@ -70,11 +86,12 @@ export default function DashboardContent({
         />
       </DashboardStatGrid>
 
-      <MonitoringSection
-        data={tableData}
+      <SuperadminMonitoringContent
+        initialData={tableData}
+        adminData={adminTableData}
         lastSync={lastSync}
-        primaryStatusLabel="Menunggu Persetujuan"
-        onDeleteSuccess={handleDeleteSuccess}
+        adminMode={mode === "admin"}
+        adminRole={adminRole}
       />
     </main>
   );

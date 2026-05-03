@@ -3,6 +3,12 @@
 import { Pencil, Trash2 } from "lucide-react";
 import type { UserItem } from "./user-types";
 import { categoryLabel, roleLabel } from "./user-types";
+import {
+  SuperAdminTableCard,
+  SuperAdminTableScroll,
+  SuperAdminTable,
+  SuperAdminTableBody,
+} from "../ui/SuperAdminTable";
 
 type UserTableProps = {
   users: UserItem[];
@@ -58,8 +64,10 @@ export default function UserTable({
 
   return (
     <>
-      <div className="hidden overflow-hidden rounded-xl border border-slate-200 lg:block">
-        <table className="w-full text-left">
+      <div className="hidden lg:block">
+        <SuperAdminTableCard className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <SuperAdminTableScroll>
+            <SuperAdminTable className="w-full text-left">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="w-12 px-4 py-3 font-semibold">
@@ -155,7 +163,9 @@ export default function UserTable({
               );
             })}
           </tbody>
-        </table>
+            </SuperAdminTable>
+          </SuperAdminTableScroll>
+        </SuperAdminTableCard>
       </div>
 
       <div className="grid gap-3 lg:hidden">

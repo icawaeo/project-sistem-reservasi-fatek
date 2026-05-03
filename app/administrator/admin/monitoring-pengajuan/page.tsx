@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser, shouldShowAdminReservation } from "@/lib/admin-access";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import AdminMonitoringContent from "@/app/components/administrator/admin/AdminMonitoringContent";
+import SuperadminMonitoringContent from "@/app/components/administrator/superadmin/monitoring-pengajuan/SuperadminMonitoringContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
 
 const splitReservationPurpose = (value: string | null) => {
@@ -141,7 +141,12 @@ export default async function AdminMonitoringPengajuanPage() {
 						userName={session.user.name || "Admin"}
 					/>
 
-					<AdminMonitoringContent initialData={tableData} adminRole={adminRole} lastSync={lastSync} />
+					<SuperadminMonitoringContent
+						adminData={tableData}
+						lastSync={lastSync}
+						adminMode={true}
+						adminRole={adminRole}
+					/>
 				</div>
 			</div>
 		</div>

@@ -3,6 +3,12 @@
 import Image from "next/image";
 import { Pencil, Trash2 } from "lucide-react";
 import type { BuildingItem } from "./building-types";
+import {
+  SuperAdminTableCard,
+  SuperAdminTableScroll,
+  SuperAdminTable,
+  SuperAdminTableBody,
+} from "../ui/SuperAdminTable";
 
 type BuildingTableProps = {
   buildings: BuildingItem[];
@@ -29,67 +35,71 @@ export default function BuildingTable({ buildings, onEdit, onDelete }: BuildingT
 
   return (
     <>
-      <div className="hidden overflow-hidden rounded-xl border border-slate-200 lg:block">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Nama Gedung</th>
-              <th className="px-4 py-3 font-semibold">Waktu Operasional</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200 bg-white text-sm text-slate-700">
-            {buildings.map((building) => (
-              <tr key={building.id}>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
-                      {building.imageUrl ? (
-                        <Image src={building.imageUrl} alt={building.name} fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No Img</div>
-                      )}
-                    </div>
-                    <p className="font-semibold text-slate-900">{building.name}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-3">{formatOperational(building)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                      building.status === "aktif"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {building.status === "aktif" ? "Aktif" : "Maintenance"}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => onEdit(building)}
-                      className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                      aria-label={`Edit ${building.name}`}
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(building)}
-                      className="rounded-md p-2 text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
-                      aria-label={`Hapus ${building.name}`}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="hidden lg:block">
+        <SuperAdminTableCard className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <SuperAdminTableScroll>
+            <SuperAdminTable className="w-full text-left">
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Nama Gedung</th>
+                  <th className="px-4 py-3 font-semibold">Waktu Operasional</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Aksi</th>
+                </tr>
+              </thead>
+              <SuperAdminTableBody className="bg-white text-sm text-slate-700">
+                {buildings.map((building) => (
+                  <tr key={building.id}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-slate-100">
+                          {building.imageUrl ? (
+                            <Image src={building.imageUrl} alt={building.name} fill className="object-cover" unoptimized />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-xs font-semibold text-slate-400">No Img</div>
+                          )}
+                        </div>
+                        <p className="font-semibold text-slate-900">{building.name}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">{formatOperational(building)}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                          building.status === "aktif"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {building.status === "aktif" ? "Aktif" : "Maintenance"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onEdit(building)}
+                          className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                          aria-label={`Edit ${building.name}`}
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(building)}
+                          className="rounded-md p-2 text-rose-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                          aria-label={`Hapus ${building.name}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </SuperAdminTableBody>
+            </SuperAdminTable>
+          </SuperAdminTableScroll>
+        </SuperAdminTableCard>
       </div>
 
       <div className="grid gap-3 lg:hidden">

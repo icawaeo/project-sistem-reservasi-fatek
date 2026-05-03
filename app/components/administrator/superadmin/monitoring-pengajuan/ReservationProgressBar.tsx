@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 
-import type { AdminReservationRecord } from "./types";
+import type { AdminReservationRecord } from "@/app/components/administrator/admin/types";
 import { computeReservationStatus } from "@/app/components/administrator/common/reservationStatus";
 
 type StepState = "done" | "current" | "pending" | "rejected";
@@ -86,13 +86,11 @@ function resolveProgressState(statusRaw: string, flow: AdminReservationRecord["f
 		return { currentIndex: lastIndex, isComplete: true, rejectedIndex: null as number | null };
 	}
 
-	// Jika ditolak, berhenti di step "Disetujui/Ditolak".
 	if (isRejected) {
 		const decisionIndex = Math.max(0, steps.findIndex((step) => step.key === "DECISION"));
 		return { currentIndex: decisionIndex, isComplete: false, rejectedIndex: decisionIndex };
 	}
 
-	// Jika sudah disetujui tapi belum selesai, proses lanjut ke tahap "Selesai".
 	if (isApproved) {
 		const decisionIndex = Math.max(0, steps.findIndex((step) => step.key === "DECISION"));
 		return { currentIndex: decisionIndex, isComplete: false, rejectedIndex: null as number | null };
@@ -138,7 +136,6 @@ function resolveProgressState(statusRaw: string, flow: AdminReservationRecord["f
 		return { currentIndex: 0, isComplete: false, rejectedIndex: null };
 	}
 
-	// Fallback: anggap masih di tahap awal.
 	return { currentIndex: 0, isComplete: false, rejectedIndex: null };
 }
 
@@ -170,7 +167,6 @@ function resolveSecondaryText(params: { stepIndex: number; state: StepState; dat
 		if (step.key === "WAITING_KEPALA_LAB") return data.waitingKepalaLabAt;
 		if (step.key === "DECISION") return data.decisionAt;
 		if (step.key === "COMPLETED") {
-			// Selesai ditampilkan hanya jika sudah disetujui / sudah selesai.
 			if (isCompleted || isApproved) return data.endTime;
 			if (isRejected) return null;
 			return null;
@@ -213,10 +209,7 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 	const totalSteps = steps.length;
 	const current = Math.min(Math.max(progress.currentIndex, 0), totalSteps - 1);
 
-	// Center posisi step di grid-cols-5 berada di 10%, 30%, 50%, 70%, 90%.
-	const progressWidth = progress.isComplete
-        ? "100%"
-        : `${(current / (totalSteps - 1)) * 80 + 10}%`;
+	const progressWidth = progress.isComplete ? "100%" : `${(current / (totalSteps - 1)) * 80 + 10}%`;
 
 	const progressColorClass = (() => {
 		if (progress.isComplete) return "bg-emerald-600";
@@ -226,12 +219,8 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 
 	return (
 		<div className="w-full">
-			{/* Row 1: circles + line */}
 			<div className="relative">
-				<div
-					className="relative z-10 grid h-10"
-					style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
-				>
+				<div className="relative z-10 grid h-10" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
 					{steps.map((step, index) => {
 						const state = resolveStepState({
 							stepIndex: index,
@@ -243,21 +232,14 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 						return (
 							<div key={step.key} className="flex h-10 items-center justify-center">
 								{state === "current" ? (
-                                    <div
-                                        className="relative z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[13px] font-bold text-amber-600"
-                                        style={{
-                                        border: "3px solid #f59e0b",
-                                        boxShadow: "0 0 0 3px #f59e0b, 0 0 0 6px #fef3c7",
-                                        }}
-                                    >
-                                        {index + 1}
-                                    </div>
-                                ) : (
 									<div
-										className={`relative flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-bold ${circleClass(
-											state
-										)}`}
+										className="relative z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[13px] font-bold text-amber-600"
+										style={{ border: "3px solid #f59e0b", boxShadow: "0 0 0 3px #f59e0b, 0 0 0 6px #fef3c7" }}
 									>
+										{index + 1}
+									</div>
+								) : (
+									<div className={`relative flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-bold ${circleClass(state)}`}>
 										{state === "done" ? <Check size={14} /> : index + 1}
 									</div>
 								)}
@@ -266,25 +248,15 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 					})}
 				</div>
 
-				{/* Base line abu-abu */}
-                <div
-                    className="absolute top-1/2 z-0 h-1 -translate-y-1/2 rounded-full bg-slate-200"
-                    style={{ left: "10%", right: "10%" }}
-                    aria-hidden="true"
-                />
-                {/* Progress line hijau */}
-                <div
-                    className={`absolute top-1/2 z-0 h-1 -translate-y-1/2 rounded-full ${progressColorClass}`}
-                    style={{ left: "10%", width: `calc(${progressWidth} - 10%)` }}
-                    aria-hidden="true"
-                />
+				<div className="absolute top-1/2 z-0 h-1 -translate-y-1/2 rounded-full bg-slate-200" style={{ left: "10%", right: "10%" }} aria-hidden="true" />
+				<div
+					className={`absolute top-1/2 z-0 h-1 -translate-y-1/2 rounded-full ${progressColorClass}`}
+					style={{ left: "10%", width: `calc(${progressWidth} - 10%)` }}
+					aria-hidden="true"
+				/>
 			</div>
 
-			{/* Row 2: labels + timestamps */}
-			<div
-				className="mt-2 grid"
-				style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
-			>
+			<div className="mt-2 grid" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
 				{steps.map((step, index) => {
 					const label = step.key === "DECISION" ? resolveDecisionLabel(computedStatus) : step.label;
 					const state = resolveStepState({
@@ -298,16 +270,10 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 
 					return (
 						<div key={step.key} className="px-2 text-center">
-							<div
-								className={`h-8 overflow-hidden text-[11px] font-semibold leading-snug whitespace-normal wrap-break-word ${labelClass(
-									state
-								)}`}
-							>
+							<div className={`h-8 overflow-hidden text-[11px] font-semibold leading-snug whitespace-normal wrap-break-word ${labelClass(state)}`}>
 								{label}
 							</div>
-							<div className={`mt-1 text-xs font-medium leading-tight ${secondary.className}`}>
-                                {secondary.text}
-                            </div>
+							<div className={`mt-1 text-xs font-medium leading-tight ${secondary.className}`}>{secondary.text}</div>
 						</div>
 					);
 				})}

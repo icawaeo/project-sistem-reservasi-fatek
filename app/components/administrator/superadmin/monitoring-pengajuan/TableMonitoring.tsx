@@ -1,22 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpDown, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 import type { MonitoringReservation } from "./monitoring-types";
-import StatusBadge from "../ui/StatusBadge";
+import StatusBadge from "@/app/components/administrator/superadmin/ui/StatusBadge";
 import MonitoringDetailModal from "./MonitoringDetailModal";
-import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
-import {
-  computeReservationStatus,
-  resolveReservationStatusGroup,
-} from "@/app/components/administrator/common/reservationStatus";
-import PaginationBar from "@/app/components/administrator/common/PaginationBar";
-import ToolbarSelect from "@/app/components/administrator/common/ToolbarSelect";
-import { getPaginationItems } from "@/app/components/administrator/common/pagination";
-import { formatDateIdShort, formatTimeIdShort } from "@/app/components/administrator/common/datetime";
+import DeleteConfirmationModal from "@/app/components/administrator/superadmin/ui/DeleteConfirmationModal";
+import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/common/reservationStatus";
 
 const PAGE_SIZE = 10;
+
+function formatDate(dateInput: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(dateInput));
+}
+
+function formatTime(dateInput: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(dateInput));
+}
 
 type TableMonitoringProps = {
   data: MonitoringReservation[];
@@ -26,6 +34,7 @@ type TableMonitoringProps = {
   onFilterStatusChange?: (value: "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED") => void;
   onDeleteSuccess?: (deletedId: string) => void;
   showControls?: boolean;
+  showDelete?: boolean;
 };
 
 export default function TableMonitoring({
@@ -36,6 +45,7 @@ export default function TableMonitoring({
   onFilterStatusChange,
   onDeleteSuccess,
   showControls = true,
+  showDelete = true,
 }: TableMonitoringProps) {
   const { pushToast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,36 +159,75 @@ export default function TableMonitoring({
   }, [currentPage, filteredAndSortedData]);
 
   const pageItems = useMemo(() => {
-    return getPaginationItems(currentPage, totalPages);
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    const items: Array<number | "ellipsis-left" | "ellipsis-right"> = [1];
+    let start = Math.max(2, currentPage - 1);
+    let end = Math.min(totalPages - 1, currentPage + 1);
+
+    if (currentPage <= 3) {
+      start = 2;
+      end = 4;
+    }
+
+    if (currentPage >= totalPages - 2) {
+      start = totalPages - 3;
+      end = totalPages - 1;
+    }
+
+    if (start > 2) {
+      items.push("ellipsis-left");
+    }
+
+    for (let page = start; page <= end; page += 1) {
+      items.push(page);
+    }
+
+    if (end < totalPages - 1) {
+      items.push("ellipsis-right");
+    }
+
+    items.push(totalPages);
+    return items;
   }, [currentPage, totalPages]);
 
   return (
     <>
       {showControls ? (
         <div className="mb-3 flex flex-row flex-wrap items-center gap-2">
-          <ToolbarSelect
-            label="Urutkan"
+        <label className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+          <ArrowUpDown size={14} className="text-slate-500" />
+          <span>Urutkan</span>
+          <select
             value={activeSortOrder}
-            onChange={handleSortOrderChange}
-            prefix={<ArrowUpDown size={14} className="text-slate-500" />}
-            options={[
-              { value: "newest", label: "Terbaru" },
-              { value: "oldest", label: "Terlama" },
-            ]}
-          />
+            onChange={(event) => handleSortOrderChange(event.target.value as "newest" | "oldest")}
+            className="bg-transparent text-sm font-semibold outline-none"
+          >
+            <option value="newest">Terbaru</option>
+            <option value="oldest">Terlama</option>
+          </select>
+        </label>
 
-          <ToolbarSelect
-            label="Filter Status"
+        <label className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+          <span>Filter Status</span>
+          <select
             value={activeFilterStatus}
-            onChange={handleFilterStatusChange}
-            options={[
-              { value: "ALL", label: "Semua Status" },
-              { value: "PENDING", label: "Menunggu" },
-              { value: "APPROVED", label: "Disetujui" },
-              { value: "COMPLETED", label: "Selesai" },
-              { value: "REJECTED", label: "Ditolak" },
-            ]}
-          />
+            onChange={(event) =>
+              handleFilterStatusChange(
+                event.target.value as "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED"
+              )
+            }
+            className="bg-transparent text-sm font-semibold outline-none"
+          >
+            <option value="ALL">Semua Status</option>
+            <option value="PENDING">Menunggu</option>
+            <option value="APPROVED">Disetujui</option>
+            <option value="COMPLETED">Selesai</option>
+            <option value="REJECTED">Ditolak</option>
+          </select>
+        </label>
         </div>
       ) : null}
 
@@ -197,7 +246,7 @@ export default function TableMonitoring({
                 <th className="px-4 py-3">Ruangan</th>
                 <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-4 py-3 text-center">Detail</th>
-                <th className="px-4 py-3 text-center">Aksi</th>
+                {showDelete ? <th className="px-4 py-3 text-center">Aksi</th> : <th className="px-4 py-3 text-center">Detail</th>}
               </tr>
             </thead>
             <tbody>
@@ -210,9 +259,9 @@ export default function TableMonitoring({
                     <td className="px-4 py-3 font-semibold text-slate-900">{item.user.name}</td>
                     <td className="px-4 py-3">{item.activityName}</td>
                     <td className="px-4 py-3">{item.purpose}</td>
-                    <td className="px-4 py-3">{formatDateIdShort(item.startTime)}</td>
+                    <td className="px-4 py-3">{formatDate(item.startTime)}</td>
                     <td className="px-4 py-3">
-                      {formatTimeIdShort(item.startTime)} - {formatTimeIdShort(item.endTime)}
+                      {formatTime(item.startTime)} - {formatTime(item.endTime)}
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-semibold text-slate-900">{item.room.name}</p>
@@ -239,24 +288,26 @@ export default function TableMonitoring({
                           </button>
                         </div>
                       </td>
-                      <td className="px-2 py-3 text-center align-middle">
-                        <div className="flex w-full justify-center">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteClick(item)}
-                            className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 p-2 text-rose-600 transition-colors hover:bg-rose-100"
-                            title="Hapus Data Pengajuan"
-                            aria-label={`Hapus pengajuan ${item.activityName}`}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
+                      {showDelete ? (
+                        <td className="px-2 py-3 text-center align-middle">
+                          <div className="flex w-full justify-center">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteClick(item)}
+                              className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 p-2 text-rose-600 transition-colors hover:bg-rose-100"
+                              title="Hapus Data Pengajuan"
+                              aria-label={`Hapus pengajuan ${item.activityName}`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      ) : null}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="px-4 py-10 text-center text-sm text-slate-500">
+                  <td colSpan={showDelete ? 10 : 9} className="px-4 py-10 text-center text-sm text-slate-500">
                     Belum ada data pengajuan terbaru.
                   </td>
                 </tr>
@@ -265,17 +316,61 @@ export default function TableMonitoring({
           </table>
         </div>
 
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageItems={pageItems}
-          onPageChange={setCurrentPage}
-          summary={
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Menampilkan {paginatedData.length} dari {filteredAndSortedData.length} data
-            </span>
-          }
-        />
+        <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Menampilkan {paginatedData.length} dari {filteredAndSortedData.length} data
+          </span>
+
+          <div className="flex items-center gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Halaman sebelumnya"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {pageItems.map((item, index) => {
+              if (typeof item !== "number") {
+                return (
+                  <span key={`${item}-${index}`} className="px-1 text-slate-400">
+                    ...
+                  </span>
+                );
+              }
+
+              const isActive = item === currentPage;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setCurrentPage(item)}
+                  className={`inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-3 font-semibold transition-colors ${
+                    isActive
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                  }`}
+                  aria-label={`Halaman ${item}`}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {item}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Halaman berikutnya"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Mobile card view */}
@@ -303,10 +398,8 @@ export default function TableMonitoring({
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal &amp; Waktu</p>
-                  <p className="text-sm text-slate-700">{formatDateIdShort(item.startTime)}</p>
-                  <p className="text-xs text-slate-500">
-                    {formatTimeIdShort(item.startTime)} - {formatTimeIdShort(item.endTime)}
-                  </p>
+                  <p className="text-sm text-slate-700">{formatDate(item.startTime)}</p>
+                  <p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</p>
@@ -328,15 +421,17 @@ export default function TableMonitoring({
                 >
                   Lihat Detail
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteClick(item)}
-                  className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"
-                  title="Hapus Data Pengajuan"
-                  aria-label={`Hapus pengajuan ${item.activityName}`}
-                >
-                  <Trash2 size={16} />
-                </button>
+                {showDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteClick(item)}
+                    className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"
+                    title="Hapus Data Pengajuan"
+                    aria-label={`Hapus pengajuan ${item.activityName}`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                ) : null}
               </div>
             </div>
           ))
