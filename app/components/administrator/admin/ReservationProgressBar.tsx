@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 
 import type { AdminReservationRecord } from "./types";
-import { computeReservationStatus } from "@/app/components/administrator/reservations/reservationStatus";
+import { computeReservationStatus } from "@/app/components/administrator/common/reservationStatus";
 
 type StepState = "done" | "current" | "pending" | "rejected";
 

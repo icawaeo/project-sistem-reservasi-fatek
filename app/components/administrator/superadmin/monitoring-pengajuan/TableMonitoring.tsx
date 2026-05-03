@@ -10,7 +10,7 @@ import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import {
   computeReservationStatus,
   resolveReservationStatusGroup,
-} from "@/app/components/administrator/reservations/reservationStatus";
+} from "@/app/components/administrator/common/reservationStatus";
 import PaginationBar from "@/app/components/administrator/common/PaginationBar";
 import ToolbarSelect from "@/app/components/administrator/common/ToolbarSelect";
 import { getPaginationItems } from "@/app/components/administrator/common/pagination";

@@ -6,7 +6,7 @@ import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
 import DashboardContent from "@/app/components/administrator/superadmin/dashboard/DashboardContent";
 import type { MonitoringReservation } from "@/app/components/administrator/superadmin/monitoring-pengajuan/monitoring-types";
-import { computeReservationStatus } from "@/app/components/administrator/reservations/reservationStatus";
+import { computeReservationStatus } from "@/app/components/administrator/common/reservationStatus";
 
 const splitReservationPurpose = (value: string | null) => {
 	if (!value) {

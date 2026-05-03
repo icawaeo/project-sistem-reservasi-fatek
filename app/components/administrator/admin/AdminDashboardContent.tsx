@@ -4,14 +4,11 @@ import { useMemo, useState } from "react";
 import { CheckCircle, Clock, FileText, XCircle } from "lucide-react";
 
 import StatCard from "@/app/components/administrator/superadmin/ui/StatCard";
-import DashboardStatGrid from "@/app/components/administrator/dashboard/DashboardStatGrid";
 import {
   computeReservationStatus,
   resolveReservationStatusGroup,
-} from "@/app/components/administrator/reservations/reservationStatus";
+} from "@/app/components/administrator/common/reservationStatus";
 import AdminReservationTable from "@/app/components/administrator/admin/AdminReservationTable";
-import SectionCard from "@/app/components/administrator/common/SectionCard";
-import SectionHeader from "@/app/components/administrator/common/SectionHeader";
 import type { AdminReservationRecord, AdminRole } from "./types";
 
 type AdminDashboardContentProps = {
@@ -51,7 +48,7 @@ export default function AdminDashboardContent({ initialData, adminRole }: AdminD
 
   return (
     <main className="space-y-5 p-4 lg:p-7">
-      <DashboardStatGrid>
+      <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StatCard
           icon={Clock}
           label="Pengajuan Pending"
@@ -84,18 +81,16 @@ export default function AdminDashboardContent({ initialData, adminRole }: AdminD
           color="slate"
           iconColor="slate"
         />
-      </DashboardStatGrid>
+      </section>
 
-      <SectionCard>
+      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
         <div className="mb-4">
-          <SectionHeader
-            title="Pengajuan Masuk"
-            description="Tinjau detail pengajuan lalu proses sesuai role."
-          />
+          <h2 className="text-base font-bold text-slate-900">Pengajuan Masuk</h2>
+          <p className="text-sm text-slate-500">Tinjau detail pengajuan lalu proses sesuai role.</p>
         </div>
 
         <AdminReservationTable data={tableData} adminRole={adminRole} onStatusUpdated={handleStatusUpdated} />
-      </SectionCard>
+      </section>
     </main>
   );
 }
