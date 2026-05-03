@@ -3,9 +3,9 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
-import SectionCard from "@/app/components/administrator/common/SectionCard";
-import ToolbarSelect from "@/app/components/administrator/common/ToolbarSelect";
-import TableMonitoring from "../monitoring-pengajuan/TableMonitoring";
+import SectionCard from "@/app/components/administrator/ui/SectionCard";
+import ToolbarSelect from "@/app/components/administrator/ui/ToolbarSelect";
+import UniversalReservationTable from "@/app/components/administrator/ui/UniversalReservationTable";
 import type { MonitoringReservation } from "../monitoring-pengajuan/monitoring-types";
 
 type MonitoringSectionProps = {
@@ -82,15 +82,12 @@ export default function MonitoringSection({
         ) : null}
       </div>
 
-      <TableMonitoring
+      <UniversalReservationTable
         data={data}
-        sortOrder={sortOrder}
-        filterStatus={filterStatus}
-        onSortOrderChange={setSortOrder}
-        onFilterStatusChange={setFilterStatus}
-        onDeleteSuccess={onDeleteSuccess}
+        mode="superadmin"
         showControls={false}
         showDelete={false}
+        onDeleteSuccess={onDeleteSuccess}
       />
     </SectionCard>
   );

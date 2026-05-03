@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Building2, Filter, Plus, Search } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import SectionCard from "@/app/components/administrator/common/SectionCard";
-import SectionHeader from "@/app/components/administrator/common/SectionHeader";
-import { buildErrorMessage } from "@/app/components/administrator/common/http";
+import SectionCard from "@/app/components/administrator/ui/SectionCard";
+import SectionHeader from "@/app/components/administrator/ui/SectionHeader";
+import { buildErrorMessage } from "@/app/components/administrator/ui/http";
 import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import RoomFormModal from "./RoomFormModal";
 

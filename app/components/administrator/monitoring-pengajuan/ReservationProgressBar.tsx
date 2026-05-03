@@ -2,8 +2,8 @@
 
 import { Check } from "lucide-react";
 
-import type { AdminReservationRecord } from "@/app/components/administrator/admin/types";
-import { computeReservationStatus } from "@/app/components/administrator/common/reservationStatus";
+import type { AdminReservationRecord } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
+import { computeReservationStatus } from "@/app/components/administrator/ui/reservationStatus";
 
 type StepState = "done" | "current" | "pending" | "rejected";
 

@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
 import TemplateSuratManagementContent, {
 	type TemplateSummary,
-} from "@/app/components/administrator/superadmin/kelola-template-surat/TemplateSuratManagementContent";
+} from "@/app/components/administrator/kelola-template-surat/TemplateSuratManagementContent";
 import { listTemplates } from "@/lib/template-store";
 
 export default async function SuperadminKelolaTemplateSuratPage() {

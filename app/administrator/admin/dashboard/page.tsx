@@ -2,10 +2,10 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
-import DashboardContent from "@/app/components/administrator/superadmin/dashboard/DashboardContent";
-import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
+import DashboardContent from "@/app/components/administrator/dashboard/DashboardContent";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import { isSuperadminUser, shouldShowAdminReservation } from "@/lib/admin-access";
 
 export default async function AdminDashboardPage() {

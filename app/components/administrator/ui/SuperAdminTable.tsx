@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import SectionCard from "@/app/components/administrator/common/SectionCard";
+import SectionCard from "@/app/components/administrator/ui/SectionCard";
 
 function cx(...parts: Array<string | false | null | undefined>) {
 	return parts.filter(Boolean).join(" ");

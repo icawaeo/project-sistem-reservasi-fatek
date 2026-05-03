@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { Clock, Building2, DoorOpen, Users } from "lucide-react";
-import StatCard from "@/app/components/administrator/superadmin/ui/StatCard";
-import DashboardStatGrid from "@/app/components/administrator/superadmin/dashboard/DashboardStatGrid";
-import SuperadminMonitoringContent from "../monitoring-pengajuan/SuperadminMonitoringContent";
-import type { MonitoringReservation } from "../monitoring-pengajuan/monitoring-types";
-import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
-import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/common/reservationStatus";
+import StatCard from "@/app/components/administrator/ui/StatCard";
+import DashboardStatGrid from "@/app/components/administrator/dashboard/DashboardStatGrid";
+import SuperadminMonitoringContent from "@/app/components/administrator/monitoring-pengajuan/SuperadminMonitoringContent";
+import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
+import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/ui/reservationStatus";
 
 type DashboardContentProps = {
   initialData?: MonitoringReservation[];

@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
-import UserManagementContent from "@/app/components/administrator/superadmin/kelola-user/UserManagementContent";
-import type { UserItem } from "@/app/components/administrator/superadmin/kelola-user/user-types";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
+import UserManagementContent from "@/app/components/administrator/kelola-user/UserManagementContent";
+import type { UserItem } from "@/app/components/administrator/kelola-user/user-types";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 

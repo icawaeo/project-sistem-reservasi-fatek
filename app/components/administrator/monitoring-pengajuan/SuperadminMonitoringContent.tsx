@@ -3,11 +3,11 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 
-import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import type { MonitoringReservation } from "./monitoring-types";
 import AddReservationModal from "./AddReservationModal";
 import MonitoringSection from "../dashboard/MonitoringSection";
-import ReservationActionTable from "./ReservationActionTable";
+import UniversalReservationTable from "@/app/components/administrator/ui/UniversalReservationTable";
 
 export type SuperadminMonitoringContentProps = {
   lastSync: string;
@@ -50,8 +50,9 @@ export default function SuperadminMonitoringContent({
   return (
     <main className="p-4 lg:p-7">
       {adminMode ? (
-        <ReservationActionTable
+        <UniversalReservationTable
           data={adminTableData}
+          mode="admin"
           adminRole={adminRole}
           onStatusUpdated={handleAdminStatusUpdated}
         />

@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
-import ProfileForm from "@/app/components/administrator/ProfileForm";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
+import ProfileForm from "@/app/components/administrator/ui/ProfileForm";
 
 type ProfilePageProps = {
 	searchParams?: Record<string, string | string[] | undefined>;

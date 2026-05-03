@@ -2,9 +2,9 @@
 
 import { X } from "lucide-react";
 
-import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/admin/types";
+import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import ReservationProgressBar from "./ReservationProgressBar";
-import { computeReservationStatus } from "@/app/components/administrator/common/reservationStatus";
+import { computeReservationStatus } from "@/app/components/administrator/ui/reservationStatus";
 
 type ReservationDetailModalProps = {
 	data: AdminReservationRecord | null;

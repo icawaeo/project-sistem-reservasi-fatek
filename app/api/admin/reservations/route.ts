@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import type { MonitoringReservation } from "@/app/components/administrator/superadmin/monitoring-pengajuan/monitoring-types";
+import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const parseDateTime = (date: string, time: string) => {
