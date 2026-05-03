@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import ImageUpload from "./ImageUpload";
+import ImageUpload from "../ui/ImageUpload";
 import type { LabProgramValue, RoomItem, RoomPayload, RoomStatus } from "./room-types";
 
 type RoomFormModalProps = {

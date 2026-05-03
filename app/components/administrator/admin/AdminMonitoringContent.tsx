@@ -3,6 +3,8 @@
 import { useState } from "react";
 
 import AdminReservationTable from "@/app/components/administrator/admin/AdminReservationTable";
+import SectionCard from "@/app/components/administrator/common/SectionCard";
+import SectionHeader from "@/app/components/administrator/common/SectionHeader";
 import type { AdminReservationRecord, AdminRole } from "./types";
 
 type AdminMonitoringContentProps = {
@@ -20,14 +22,16 @@ export default function AdminMonitoringContent({ initialData, adminRole }: Admin
 
   return (
     <main className="p-4 lg:p-7">
-      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
+      <SectionCard>
         <div className="mb-4">
-          <h2 className="text-base font-bold text-slate-900">Monitoring Pengajuan</h2>
-          <p className="text-sm text-slate-500">Pantau, tinjau detail, lalu proses pengajuan.</p>
+          <SectionHeader
+            title="Monitoring Pengajuan"
+            description="Pantau, tinjau detail, lalu proses pengajuan."
+          />
         </div>
 
         <AdminReservationTable data={tableData} adminRole={adminRole} onStatusUpdated={handleStatusUpdated} />
-      </section>
+      </SectionCard>
     </main>
   );
 }

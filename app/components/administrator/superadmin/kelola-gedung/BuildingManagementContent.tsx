@@ -3,26 +3,16 @@
 import { useMemo, useState } from "react";
 import { Building2, Filter, Plus, Search } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import SectionCard from "@/app/components/administrator/common/SectionCard";
+import SectionHeader from "@/app/components/administrator/common/SectionHeader";
+import { buildErrorMessage } from "@/app/components/administrator/common/http";
+import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import BuildingFormModal from "./BuildingFormModal";
-import BuildingTable from "./BuildingTable";
 import type { BuildingItem, BuildingPayload } from "./building-types";
+import BuildingTable from "./BuildingTable";
 
 type BuildingManagementContentProps = {
   initialBuildings: BuildingItem[];
-};
-
-const buildErrorMessage = async (response: Response, fallbackMessage: string) => {
-  try {
-    const body = await response.json();
-    if (typeof body?.error === "string" && body.error.trim()) {
-      return body.error;
-    }
-  } catch {
-    return fallbackMessage;
-  }
-
-  return fallbackMessage;
 };
 
 export default function BuildingManagementContent({ initialBuildings }: BuildingManagementContentProps) {
@@ -137,25 +127,24 @@ export default function BuildingManagementContent({ initialBuildings }: Building
 
   return (
     <main className="space-y-5 overflow-hidden p-4 lg:p-7">
-      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">Daftar Gedung</h2>
-            <p className="text-sm text-slate-500">Kelola data gedung dan waktu operasional untuk reservasi.</p>
-          </div>
-
-          {/* Desktop add button (hidden on mobile) */}
-          <div className="hidden md:block">
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex w-auto items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-            >
-              <Plus size={16} />
-              Tambah Gedung
-            </button>
-          </div>
-        </div>
+      <SectionCard>
+        <SectionHeader
+          size="lg"
+          title="Daftar Gedung"
+          description="Kelola data gedung dan waktu operasional untuk reservasi."
+          actions={
+            <div className="hidden md:block">
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex w-auto items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                <Plus size={16} />
+                Tambah Gedung
+              </button>
+            </div>
+          }
+        />
 
         <div className="mt-4">
           {/* Search input on its own row */}
@@ -239,13 +228,9 @@ export default function BuildingManagementContent({ initialBuildings }: Building
         </div>
 
         <div className="mt-4">
-          <BuildingTable
-            buildings={filteredBuildings}
-            onEdit={setEditingBuilding}
-            onDelete={setDeletingBuilding}
-          />
+          <BuildingTable buildings={filteredBuildings} onEdit={setEditingBuilding} onDelete={setDeletingBuilding} />
         </div>
-      </section>
+      </SectionCard>
 
       <BuildingFormModal
         isOpen={isCreateModalOpen}

@@ -3,12 +3,15 @@
 import { useMemo, useState } from "react";
 import { CheckCircle, Clock, FileText, XCircle } from "lucide-react";
 
-import StatCard from "@/app/components/administrator/StatCard";
+import StatCard from "@/app/components/administrator/superadmin/ui/StatCard";
+import DashboardStatGrid from "@/app/components/administrator/dashboard/DashboardStatGrid";
 import {
   computeReservationStatus,
   resolveReservationStatusGroup,
-} from "@/app/components/administrator/superadmin/reservationStatus";
+} from "@/app/components/administrator/reservations/reservationStatus";
 import AdminReservationTable from "@/app/components/administrator/admin/AdminReservationTable";
+import SectionCard from "@/app/components/administrator/common/SectionCard";
+import SectionHeader from "@/app/components/administrator/common/SectionHeader";
 import type { AdminReservationRecord, AdminRole } from "./types";
 
 type AdminDashboardContentProps = {
@@ -48,7 +51,7 @@ export default function AdminDashboardContent({ initialData, adminRole }: AdminD
 
   return (
     <main className="space-y-5 p-4 lg:p-7">
-      <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+      <DashboardStatGrid>
         <StatCard
           icon={Clock}
           label="Pengajuan Pending"
@@ -81,16 +84,18 @@ export default function AdminDashboardContent({ initialData, adminRole }: AdminD
           color="slate"
           iconColor="slate"
         />
-      </section>
+      </DashboardStatGrid>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
+      <SectionCard>
         <div className="mb-4">
-          <h2 className="text-base font-bold text-slate-900">Pengajuan Masuk</h2>
-          <p className="text-sm text-slate-500">Tinjau detail pengajuan lalu proses sesuai role.</p>
+          <SectionHeader
+            title="Pengajuan Masuk"
+            description="Tinjau detail pengajuan lalu proses sesuai role."
+          />
         </div>
 
         <AdminReservationTable data={tableData} adminRole={adminRole} onStatusUpdated={handleStatusUpdated} />
-      </section>
+      </SectionCard>
     </main>
   );
 }

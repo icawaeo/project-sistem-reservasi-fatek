@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import ImageUpload from "./ImageUpload";
+import ImageUpload from "../ui/ImageUpload";
 import type { BuildingItem, BuildingPayload, BuildingStatus } from "./building-types";
 
 type BuildingFormModalProps = {

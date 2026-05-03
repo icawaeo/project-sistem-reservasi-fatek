@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import MonitoringSection from "./MonitoringSection";
-import AddReservationModal from "@/app/components/administrator/superadmin/AddReservationModal";
-import type { MonitoringReservation } from "./types";
+import MonitoringSection from "../dashboard/MonitoringSection";
+import AddReservationModal from "@/app/components/administrator/superadmin/monitoring-pengajuan/AddReservationModal";
+import type { MonitoringReservation } from "./monitoring-types";
 
 type SuperadminMonitoringContentProps = {
   initialData: MonitoringReservation[];

@@ -1,8 +1,8 @@
 "use client";
 
 import { X, FileText } from "lucide-react";
-import type { MonitoringReservation } from "./types";
-import StatusBadge from "./StatusBadge";
+import type { MonitoringReservation } from "./monitoring-types";
+import StatusBadge from "../ui/StatusBadge";
 
 type MonitoringDetailModalProps = {
   data: MonitoringReservation | null;

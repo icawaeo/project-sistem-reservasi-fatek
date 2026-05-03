@@ -5,8 +5,8 @@ import { isSuperadminUser } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import RoomManagementContent from "@/app/components/administrator/superadmin/RoomManagementContent";
-import type { RoomItem } from "@/app/components/administrator/superadmin/room-types";
+import RoomManagementContent from "@/app/components/administrator/superadmin/kelola-ruangan/RoomManagementContent";
+import type { RoomItem } from "@/app/components/administrator/superadmin/kelola-ruangan/room-types";
 
 const normalizeFloor = (value: string) => {
 	const trimmed = value.trim();
@@ -95,11 +95,8 @@ export default async function SuperadminKelolaRuanganPage() {
 		orderBy: [{ building_name: "asc" }],
 	});
 
-	const initialRooms = rooms.map(mapRoom).map((room) => ({
-		...room,
-		floor: room.floor,
-	}));
-	const initialBuildings = buildings.map((building) => building.building_name);
+	const initialRooms = rooms.map(mapRoom);
+	const initialBuildings = buildings.map((building: { building_name: any; }) => building.building_name);
 
 	return (
 		<div className="min-h-screen bg-slate-100">

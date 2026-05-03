@@ -4,7 +4,7 @@ import { FileText, X } from "lucide-react";
 
 import type { AdminReservationRecord, AdminRole } from "./types";
 import ReservationProgressBar from "@/app/components/administrator/admin/ReservationProgressBar";
-import { computeReservationStatus } from "@/app/components/administrator/superadmin/reservationStatus";
+import { computeReservationStatus } from "@/app/components/administrator/reservations/reservationStatus";
 
 type AdminReservationDetailModalProps = {
 	data: AdminReservationRecord | null;

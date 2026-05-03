@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { FileText, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { buildErrorMessage } from "@/app/components/administrator/common/http";
+import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 
 type TemplateType = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -38,19 +39,6 @@ const formatDateTime = (value: string) => {
     timeStyle: "short",
     timeZone: "Asia/Makassar",
   }).format(date);
-};
-
-const buildErrorMessage = async (response: Response, fallbackMessage: string) => {
-  try {
-    const body = await response.json();
-    if (typeof body?.error === "string" && body.error.trim()) {
-      return body.error;
-    }
-  } catch {
-    return fallbackMessage;
-  }
-
-  return fallbackMessage;
 };
 
 export default function TemplateSuratManagementContent({

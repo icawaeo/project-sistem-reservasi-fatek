@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { Clock, Building2, DoorOpen, Users } from "lucide-react";
-import StatCard from "@/app/components/administrator/StatCard";
+import StatCard from "@/app/components/administrator/superadmin/ui/StatCard";
+import DashboardStatGrid from "@/app/components/administrator/dashboard/DashboardStatGrid";
 import MonitoringSection from "./MonitoringSection";
-import type { MonitoringReservation } from "./types";
+import type { MonitoringReservation } from "../monitoring-pengajuan/monitoring-types";
 
 type DashboardContentProps = {
   initialData: MonitoringReservation[];
@@ -34,7 +35,7 @@ export default function DashboardContent({
 
   return (
     <main className="space-y-5 p-4 lg:p-7">
-      <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+      <DashboardStatGrid>
         <StatCard
           icon={Clock}
           label="Total Pengajuan Tertunda"
@@ -67,7 +68,7 @@ export default function DashboardContent({
           color="blue"
           iconColor="blue"
         />
-      </section>
+      </DashboardStatGrid>
 
       <MonitoringSection
         data={tableData}

@@ -7,7 +7,7 @@ import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
 import TemplateSuratManagementContent, {
 	type TemplateSummary,
-} from "@/app/components/administrator/superadmin/TemplateSuratManagementContent";
+} from "@/app/components/administrator/superadmin/kelola-template-surat/TemplateSuratManagementContent";
 import { listTemplates } from "@/lib/template-store";
 
 export default async function SuperadminKelolaTemplateSuratPage() {

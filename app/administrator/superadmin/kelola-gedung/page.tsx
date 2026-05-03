@@ -5,8 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import BuildingManagementContent from "@/app/components/administrator/superadmin/BuildingManagementContent";
-import type { BuildingItem } from "@/app/components/administrator/superadmin/building-types";
+import BuildingManagementContent from "@/app/components/administrator/superadmin/kelola-gedung/BuildingManagementContent";
+import type { BuildingItem } from "@/app/components/administrator/superadmin/kelola-gedung/building-types";
 
 export default async function SuperadminKelolaGedungPage() {
 	const session = await getServerSession(authOptions);
@@ -25,7 +25,7 @@ export default async function SuperadminKelolaGedungPage() {
 		},
 	});
 
-	const initialBuildings: BuildingItem[] = buildings.map((building) => ({
+	const initialBuildings: BuildingItem[] = buildings.map((building: { building_id: any; building_name: any; operational_days: any; open_time: any; close_time: any; building_imageUrl: any; building_isActive: any; }) => ({
 		id: building.building_id,
 		name: building.building_name,
 		operationalDays: building.operational_days,

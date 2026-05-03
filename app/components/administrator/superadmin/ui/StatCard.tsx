@@ -9,12 +9,7 @@ type StatCardProps = {
   iconColor?: "blue" | "amber" | "emerald" | "rose" | "slate";
 };
 
-export default function StatCard({
-  icon: Icon,
-  label,
-  value,
-  sublabel,
-}: StatCardProps) {
+export default function StatCard({ icon: Icon, label, value, sublabel }: StatCardProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md md:p-4">
       {Icon && (

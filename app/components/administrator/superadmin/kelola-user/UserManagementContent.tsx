@@ -3,30 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import SectionCard from "@/app/components/administrator/common/SectionCard";
+import SectionHeader from "@/app/components/administrator/common/SectionHeader";
+import { buildErrorMessage } from "@/app/components/administrator/common/http";
+import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import UserFilter from "./UserFilter";
 import UserFormModal from "./UserFormModal";
-import UserTable from "./UserTable";
 import type { UserItem, UserPayload, UserRoleFilter } from "./user-types";
+import UserTable from "./UserTable";
 
 type UserManagementContentProps = {
   initialUsers: UserItem[];
 };
 
 const ITEMS_PER_PAGE = 10;
-
-const buildErrorMessage = async (response: Response, fallbackMessage: string) => {
-  try {
-    const body = await response.json();
-    if (typeof body?.error === "string" && body.error.trim()) {
-      return body.error;
-    }
-  } catch {
-    return fallbackMessage;
-  }
-
-  return fallbackMessage;
-};
 
 export default function UserManagementContent({ initialUsers }: UserManagementContentProps) {
   const { pushToast } = useToast();
@@ -329,22 +319,22 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
 
   return (
     <main className="space-y-5 p-4 lg:p-7">
-      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">Daftar User</h2>
-            <p className="text-sm text-slate-500">Kelola akun user, role, dan hak akses pengguna.</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="hidden w-fit items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 lg:inline-flex"
-          >
-            <Plus size={16} />
-            Tambah User
-          </button>
-        </div>
+      <SectionCard>
+        <SectionHeader
+          size="lg"
+          title="Daftar User"
+          description="Kelola akun user, role, dan hak akses pengguna."
+          actions={
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="hidden w-fit items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 lg:inline-flex"
+            >
+              <Plus size={16} />
+              Tambah User
+            </button>
+          }
+        />
 
         <UserFilter
           search={search}
@@ -461,7 +451,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
             </div>
           </div>
         ) : null}
-      </section>
+      </SectionCard>
 
       <UserFormModal
         isOpen={isCreateModalOpen}

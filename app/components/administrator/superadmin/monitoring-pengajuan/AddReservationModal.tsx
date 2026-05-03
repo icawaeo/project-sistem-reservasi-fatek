@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, Clock, Mail, Phone, User, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import type { MonitoringReservation } from "./types";
+import type { MonitoringReservation } from "./monitoring-types";
 
 type RoomOption = {
   room_id: string;

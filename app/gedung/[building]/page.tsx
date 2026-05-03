@@ -18,7 +18,7 @@ import ReservationSearchWidget, { type ReservationMode } from "@/app/components/
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
 import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
-import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/superadmin/room-types";
+import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/superadmin/kelola-ruangan/room-types";
 
 type RoomWithStatus = {
     room_id: string;

@@ -5,9 +5,9 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import Sidebar from "@/app/components/administrator/Sidebar";
 import Navbar from "@/app/components/administrator/Navbar";
-import SuperadminMonitoringContent from "@/app/components/administrator/superadmin/SuperadminMonitoringContent";
-import type { MonitoringReservation } from "@/app/components/administrator/superadmin/types";
-import { computeReservationStatus } from "@/app/components/administrator/superadmin/reservationStatus";
+import SuperadminMonitoringContent from "@/app/components/administrator/superadmin/monitoring-pengajuan/SuperadminMonitoringContent";
+import type { MonitoringReservation } from "@/app/components/administrator/superadmin/monitoring-pengajuan/monitoring-types";
+import { computeReservationStatus } from "@/app/components/administrator/reservations/reservationStatus";
 
 const splitReservationPurpose = (value: string | null) => {
 	if (!value) {
@@ -57,7 +57,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		},
 	});
 
-	const tableData: MonitoringReservation[] = reservations.map((item) => {
+	const tableData: MonitoringReservation[] = reservations.map((item: { res_purpose: string | null; res_status: string; res_endTime: string | Date; res_id: any; res_date: { toISOString: () => any; }; res_startTime: { toISOString: () => any; }; res_documentUrl: any; user: { name: any; userType: any; identifier: any; email: any; }; room: { room_name: any; room_building: any; room_locDetail: any; }; }) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
 		const computedStatus = computeReservationStatus(item.res_status, item.res_endTime);
 
@@ -65,7 +65,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		id: item.res_id,
 		createdAt: item.res_date.toISOString(),
 		startTime: item.res_startTime.toISOString(),
-		endTime: item.res_endTime.toISOString(),
+		endTime: item.res_endTime.toString(),
 		activityName: parsedPurpose.activityName,
 		purpose: parsedPurpose.purpose,
 		status: computedStatus,
@@ -94,7 +94,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		},
 	});
 
-	const buildingOptions = Array.from(new Set(activeRooms.map((room) => room.room_building))).filter(Boolean);
+	const buildingOptions = Array.from(new Set(activeRooms.map((room: { room_building: any; }) => room.room_building))).filter(Boolean);
 
 	const lastSync = new Intl.DateTimeFormat("id-ID", {
 		dateStyle: "medium",

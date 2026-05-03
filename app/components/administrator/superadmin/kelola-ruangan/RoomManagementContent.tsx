@@ -3,10 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Building2, Filter, Plus, Search } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import SectionCard from "@/app/components/administrator/common/SectionCard";
+import SectionHeader from "@/app/components/administrator/common/SectionHeader";
+import { buildErrorMessage } from "@/app/components/administrator/common/http";
+import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 import RoomFormModal from "./RoomFormModal";
-import RoomTable from "./RoomTable";
+
 import type { RoomItem, RoomPayload } from "./room-types";
+import RoomTable from "./RoomTable";
 
 type RoomManagementContentProps = {
   initialRooms: RoomItem[];
@@ -15,19 +19,6 @@ type RoomManagementContentProps = {
 
 const sortAlphabetically = (values: string[]) => [...values].sort((a, b) => a.localeCompare(b));
 const ITEMS_PER_PAGE = 10;
-
-const buildErrorMessage = async (response: Response, fallbackMessage: string) => {
-  try {
-    const body = await response.json();
-    if (typeof body?.error === "string" && body.error.trim()) {
-      return body.error;
-    }
-  } catch {
-    return fallbackMessage;
-  }
-
-  return fallbackMessage;
-};
 
 export default function RoomManagementContent({
   initialRooms,
@@ -178,25 +169,24 @@ export default function RoomManagementContent({
 
   return (
     <main className="space-y-5 overflow-hidden p-4 lg:p-7">
-      <section className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">Daftar Ruangan</h2>
-            <p className="text-sm text-slate-500">Kelola data ruangan per gedung untuk kebutuhan reservasi.</p>
-          </div>
-
-          {/* Desktop add button (hidden on mobile) */}
-          <div className="hidden md:block">
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex w-auto items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-            >
-              <Plus size={16} />
-              Tambah Ruangan
-            </button>
-          </div>
-        </div>
+      <SectionCard>
+        <SectionHeader
+          size="lg"
+          title="Daftar Ruangan"
+          description="Kelola data ruangan per gedung untuk kebutuhan reservasi."
+          actions={
+            <div className="hidden md:block">
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex w-auto items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                <Plus size={16} />
+                Tambah Ruangan
+              </button>
+            </div>
+          }
+        />
 
         <div className="mt-4">
           {/* Search input on its own row */}
@@ -303,7 +293,7 @@ export default function RoomManagementContent({
         </div>
 
         <div className="mt-4">
-          <RoomTable rooms={paginatedRooms} onEdit={setEditingRoom} onDelete={setDeletingRoom} />
+           <RoomTable rooms={paginatedRooms} onEdit={setEditingRoom} onDelete={setDeletingRoom} />
         </div>
 
         {filteredRooms.length > 0 ? (
@@ -349,7 +339,7 @@ export default function RoomManagementContent({
             </div>
           </div>
         ) : null}
-      </section>
+      </SectionCard>
 
       <RoomFormModal
         isOpen={isCreateModalOpen}
