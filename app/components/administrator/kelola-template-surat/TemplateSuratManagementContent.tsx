@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FileText, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
-import { buildErrorMessage } from "@/app/components/administrator/superadmin/ui/http";
+import { buildErrorMessage } from "@/app/components/administrator/ui/http";
 import DeleteConfirmationModal from "../ui/DeleteConfirmationModal";
 
 type TemplateType = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
