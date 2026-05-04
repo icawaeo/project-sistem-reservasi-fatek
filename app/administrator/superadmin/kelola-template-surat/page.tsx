@@ -45,7 +45,6 @@ export default async function SuperadminKelolaTemplateSuratPage() {
 					<Navbar
 						pageTitle="Kelola Template Surat"
 						pageSubtitle="Upload template .docx dan tinjau preview PDF hasil konversi LibreOffice"
-						userName={session.user.name || "Superadmin"}
 					/>
 
 					<TemplateSuratManagementContent initialTemplates={initialTemplates} />

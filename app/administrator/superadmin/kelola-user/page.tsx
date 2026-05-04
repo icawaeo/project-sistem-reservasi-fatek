@@ -74,7 +74,6 @@ export default async function SuperadminKelolaUserPage() {
           <Navbar
             pageTitle="Kelola User"
             pageSubtitle="Manajemen akun user dan role akses sistem"
-            userName={session.user.name || "Superadmin"}
           />
 
           <UserManagementContent initialUsers={initialUsers} />

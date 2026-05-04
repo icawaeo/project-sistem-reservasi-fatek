@@ -18,7 +18,7 @@ import {
     Upload,
     Users,
 } from "lucide-react";
-import Navbar from "@/app/components/layout/Navbar";
+import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
 const buildingColorMap: Record<string, string> = {

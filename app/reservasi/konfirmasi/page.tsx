@@ -22,7 +22,7 @@ import {
   Download,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import Navbar from "@/app/components/layout/Navbar";
+import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
 const buildingColorMap = {

@@ -19,7 +19,7 @@ import {
   Building2,
   Eye,
 } from "lucide-react";
-import Navbar from "@/app/components/layout/Navbar";
+import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
 type ReservationStatus = "PENDING" | "APPROVED" | "REJECTED" | string;

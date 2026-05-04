@@ -13,7 +13,7 @@ import {
     ExternalLink,
     Home,
 } from "lucide-react";
-import Navbar from "@/app/components/layout/Navbar";
+import Navbar from "@/app/components/layout/NavbarClient";
 import ReservationSearchWidget, { type ReservationMode } from "@/app/components/user/ReservationSearchWidget";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";

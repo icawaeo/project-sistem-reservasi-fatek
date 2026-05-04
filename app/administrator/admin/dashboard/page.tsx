@@ -144,7 +144,6 @@ export default async function AdminDashboardPage() {
 					<Navbar
 						pageTitle="Dashboard Admin"
 						pageSubtitle="Monitoring pengajuan peminjaman ruangan"
-						userName={session.user.name || "Admin"}
 						role="admin"
 					/>
 

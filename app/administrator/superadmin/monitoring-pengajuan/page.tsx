@@ -111,7 +111,6 @@ export default async function SuperadminMonitoringPengajuanPage() {
 					<Navbar
 						pageTitle="Monitoring Pengajuan"
 						pageSubtitle="Pantau seluruh status pengajuan reservasi ruangan"
-						userName={session.user.name || "Superadmin"}
 					/>
 
 					<SuperadminMonitoringContent

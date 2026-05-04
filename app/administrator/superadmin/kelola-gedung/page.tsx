@@ -44,7 +44,6 @@ export default async function SuperadminKelolaGedungPage() {
 					<Navbar
 						pageTitle="Kelola Gedung"
 						pageSubtitle="Manajemen data gedung dan jadwal operasional"
-						userName={session.user.name || "Superadmin"}
 					/>
 
 					<BuildingManagementContent initialBuildings={initialBuildings} />

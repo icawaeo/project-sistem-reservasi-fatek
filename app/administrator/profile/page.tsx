@@ -51,7 +51,6 @@ export default async function AdministratorProfilePage({ searchParams }: Profile
 					<Navbar
 						pageTitle="Profil"
 						pageSubtitle="Perbarui informasi akun administrator"
-						userName={session.user.name || "Admin"}
 						role={sidebarRole}
 					/>
 
