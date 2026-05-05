@@ -18,6 +18,7 @@ export default function CampusMapSection({ mapPoints, allMapView }: CampusMapSec
   const [activeMapPoint, setActiveMapPoint] = useState<number | "all">("all");
   const [isOtherLocationsOpen, setIsOtherLocationsOpen] = useState(false);
   const [pinnedMapPoint, setPinnedMapPoint] = useState<number | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
