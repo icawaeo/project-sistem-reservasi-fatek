@@ -18,6 +18,7 @@ type DashboardContentProps = {
   totalUsers: number;
   lastSync: string;
   adminRole?: AdminRole;
+  buildingOptions?: string[];
 };
 
 export default function DashboardContent({
@@ -29,6 +30,7 @@ export default function DashboardContent({
   totalUsers,
   lastSync,
   adminRole = "ADMIN",
+  buildingOptions = [],
 }: DashboardContentProps) {
   const [tableData, setTableData] = useState<MonitoringReservation[]>(initialData);
   const [adminTableData, setAdminTableData] = useState<AdminReservationRecord[]>(adminData);
@@ -92,6 +94,7 @@ export default function DashboardContent({
         lastSync={lastSync}
         adminMode={mode === "admin"}
         adminRole={adminRole}
+        buildingOptions={buildingOptions}
       />
     </main>
   );

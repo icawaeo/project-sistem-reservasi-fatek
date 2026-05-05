@@ -85,16 +85,19 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		};
 	});
 
-	const activeRooms = await prisma.room.findMany({
+	const activeBuildings = await prisma.building.findMany({
 		where: {
-			room_isActive: true,
+			building_isActive: true,
 		},
 		select: {
-			room_building: true,
+			building_name: true,
+		},
+		orderBy: {
+			building_name: "asc",
 		},
 	});
 
-	const buildingOptions = Array.from(new Set(activeRooms.map((room: { room_building: any; }) => room.room_building))).filter(Boolean);
+	const buildingOptions = activeBuildings.map((building: { building_name: any; }) => building.building_name).filter(Boolean);
 
 	const lastSync = new Intl.DateTimeFormat("id-ID", {
 		dateStyle: "medium",

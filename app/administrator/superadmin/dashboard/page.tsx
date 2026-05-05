@@ -92,6 +92,20 @@ export default async function SuperadminDashboardPage() {
 		};
 	});
 
+	const activeBuildings = await prisma.building.findMany({
+		where: {
+			building_isActive: true,
+		},
+		select: {
+			building_name: true,
+		},
+		orderBy: {
+			building_name: "asc",
+		},
+	});
+
+	const buildingOptions = activeBuildings.map((building: { building_name: any; }) => building.building_name).filter(Boolean);
+
 	const lastSync = new Intl.DateTimeFormat("id-ID", {
 		dateStyle: "medium",
 		timeStyle: "short",
@@ -116,6 +130,7 @@ export default async function SuperadminDashboardPage() {
 						totalBuildings={totalBuildings}
 						totalUsers={totalUsers}
 						lastSync={lastSync}
+						buildingOptions={buildingOptions}
 					/>
 				</div>
 			</div>
