@@ -278,9 +278,15 @@ function ReservasiContent() {
                 <section className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden mb-4">
                     <div className="grid grid-cols-1 md:grid-cols-[180px_1fr]">
                         
-                        <div className="h-28 md:h-full bg-slate-100">
+                        <div className="relative h-28 md:h-full bg-slate-100 overflow-hidden">
                         {roomImageUrl ? (
-                            <img src={roomImageUrl} alt={roomName} className="w-full h-full object-cover" />
+                            <Image 
+                                src={roomImageUrl} 
+                                alt={roomName} 
+                                fill 
+                                sizes="(max-width: 768px) 100vw, 180px"
+                                className="w-full h-full object-cover" 
+                            />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-300">
                             <Building2 size={32} />

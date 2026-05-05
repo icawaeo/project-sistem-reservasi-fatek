@@ -5,7 +5,7 @@ import Navbar from "@/app/components/layout/NavbarClient";
 import { authOptions } from "@/lib/auth";
 
 import type { ReservationRecord, SortOrder } from "../components/user/riwayat/_types";
-import { getUserReservations, normalizeSortOrder } from "../components/user/lib/getUserReservations";
+import { getUserReservations, normalizeSortOrder } from "../components/user/utils/getUserReservations";
 import RiwayatBreadcrumb from "../components/user/riwayat/RiwayatBreadcrumb";
 import RiwayatClient from "../components/user/riwayat/RiwayatClient";
 import RiwayatFooter from "../components/user/riwayat/RiwayatFooter";

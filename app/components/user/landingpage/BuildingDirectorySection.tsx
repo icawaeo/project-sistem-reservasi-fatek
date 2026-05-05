@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export type LandingBuildingCard = {
   name: string;
@@ -36,11 +37,12 @@ export default function BuildingDirectorySection({ buildings }: BuildingDirector
             className="shrink-0 w-[320px] sm:w-105 md:w-112.5 snap-center group relative h-56 rounded-2xl overflow-hidden shadow-sm border border-slate-100 transition-transform duration-300 hover:scale-[1.02]"
           >
             {building.image ? (
-              <img
+              <Image
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 alt={building.name}
                 src={building.image}
-                loading="lazy"
+                fill
+                sizes="(max-width: 768px) 320px, 450px"
               />
             ) : (
               <div className="absolute inset-0 bg-slate-200" />

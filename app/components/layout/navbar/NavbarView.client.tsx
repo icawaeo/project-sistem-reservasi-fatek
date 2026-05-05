@@ -3,8 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import dynamic from "next/dynamic";
 
-import PanduanPeminjamanModal from "@/app/components/user/PanduanPeminjamanModal";
+const PanduanPeminjamanModal = dynamic(() => import("@/app/components/user/PanduanPeminjamanModal"), {
+  ssr: false,
+});
+
 import NavbarAuthDesktop from "./NavbarAuthDesktop";
 import NavbarBrand from "./NavbarBrand";
 import NavbarDesktopNav from "./NavbarDesktopNav";
@@ -134,7 +138,9 @@ export default function NavbarView({ user }: NavbarViewProps) {
         </div>
       </header>
 
-      <PanduanPeminjamanModal open={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
+      {isGuideOpen && (
+        <PanduanPeminjamanModal open={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
+      )}
     </>
   );
 }

@@ -5,11 +5,17 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import { useToast } from "@/app/components/ui/toast";
-import AvailabilityModal, {
+import dynamic from "next/dynamic";
+import {
   type BuildingGroup,
   type RoomAvailability,
 } from "@/app/components/user/landingpage/AvailabilityModal";
 import HeroSection, { type ReservationMode } from "@/app/components/user/landingpage/HeroSection";
+
+const AvailabilityModal = dynamic(
+  () => import("@/app/components/user/landingpage/AvailabilityModal"),
+  { ssr: false }
+);
 import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
 
 export default function LandingAvailabilitySearch() {
@@ -183,13 +189,15 @@ export default function LandingAvailabilitySearch() {
         selectedRoom={selectedRoom}
       />
 
-      <AvailabilityModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        scheduleLabel={scheduleLabel}
-        buildings={availableBuildings}
-        onSelectRoom={handleRoomSelect}
-      />
+      {isModalOpen && (
+        <AvailabilityModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          scheduleLabel={scheduleLabel}
+          buildings={availableBuildings}
+          onSelectRoom={handleRoomSelect}
+        />
+      )}
     </>
   );
 }
