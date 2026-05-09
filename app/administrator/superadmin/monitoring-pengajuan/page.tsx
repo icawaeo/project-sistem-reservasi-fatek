@@ -31,7 +31,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
 	const reservations = await prisma.reservation.findMany({

@@ -85,7 +85,7 @@ export default async function SuperadminKelolaRuanganPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
 	const rooms = await prisma.room.findMany({

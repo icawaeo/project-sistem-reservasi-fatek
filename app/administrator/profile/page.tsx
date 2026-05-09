@@ -1,5 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
@@ -39,13 +41,14 @@ export default async function AdministratorProfilePage({ searchParams }: Profile
 		redirect("/auth");
 	}
 
-	const sidebarRole = isSuperadminUser(session.user) ? "superadmin" : "admin";
+	const isSuperadmin = isSuperadminUser(session.user);
+	const sidebarRole = isSuperadmin ? "superadmin" : "admin";
 	const emailChanged = searchParams?.emailChanged === "1";
 
 	return (
 		<div className="min-h-screen bg-slate-100">
-			<div className="flex min-h-screen">
-				<Sidebar role={sidebarRole} />
+			<div className={`flex min-h-screen ${isSuperadmin ? "" : "flex-col"}`}>
+				{isSuperadmin ? <Sidebar role="superadmin" /> : null}
 
 				<div className="flex min-w-0 flex-1 flex-col">
 					<Navbar
@@ -56,6 +59,16 @@ export default async function AdministratorProfilePage({ searchParams }: Profile
 
 					<main className="flex-1 p-4 lg:p-7">
 						<div className="mx-auto w-full max-w-3xl">
+							{!isSuperadmin ? (
+								<Link
+									href="/administrator/admin"
+									className="mb-4 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200/60 hover:text-slate-900"
+								>
+									<ArrowLeft size={16} />
+									Kembali
+								</Link>
+							) : null}
+
 							<ProfileForm
 								initialName={user.name}
 								initialEmail={user.email}

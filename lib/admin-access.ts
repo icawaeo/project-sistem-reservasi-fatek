@@ -73,7 +73,7 @@ export function shouldShowAdminReservation(viewer: AdminReservationViewer, reser
   return false;
 }
 
-export const ADMIN_DASHBOARD_PATH = "/administrator/admin/dashboard";
+export const ADMIN_DASHBOARD_PATH = "/administrator/admin";
 export const SUPERADMIN_DASHBOARD_PATH = "/administrator/superadmin/dashboard";
 
 export function isSuperadminUser(user: SessionLikeUser | null | undefined) {

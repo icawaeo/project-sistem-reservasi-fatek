@@ -66,14 +66,9 @@ const navByRole: Record<Role, NavItem[]> = {
   ],
   admin: [
     {
-      href: "/administrator/admin/dashboard",
+      href: "/administrator/admin",
       label: "Dashboard",
       icon: <LayoutGrid size={16} />,
-    },
-    {
-      href: "/administrator/admin/monitoring-pengajuan",
-      label: "Monitoring Pengajuan",
-      icon: <ClipboardList size={16} />,
     },
   ],
 };

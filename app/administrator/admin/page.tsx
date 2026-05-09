@@ -2,9 +2,8 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import Sidebar from "@/app/components/administrator/ui/Sidebar";
 import Navbar from "@/app/components/administrator/ui/Navbar";
-import DashboardContent from "@/app/components/administrator/dashboard/DashboardContent";
+import AdminDashboardContent from "@/app/components/administrator/dashboard/AdminDashboardContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import { shouldShowAdminReservation } from "@/lib/admin-access";
 
@@ -69,16 +68,6 @@ export default async function AdminDashboardPage() {
 		},
 	});
 
-	const allRooms = await prisma.room.findMany({
-		select: {
-			room_building: true,
-		},
-	});
-
-	const totalRooms = allRooms.length;
-	const totalBuildings = new Set(allRooms.map((room) => room.room_building)).size;
-	const totalUsers = await prisma.user.count();
-
 	const visibleReservations = reservations.filter((item) =>
 		shouldShowAdminReservation(
 			{
@@ -137,26 +126,18 @@ export default async function AdminDashboardPage() {
 
 	return (
 		<div className="min-h-screen bg-slate-100">
-			<div className="flex min-h-screen">
-				<Sidebar role="admin" />
+			<div className="flex min-h-screen flex-col">
+				<Navbar
+					pageTitle="Dashboard Admin"
+					pageSubtitle="Monitoring pengajuan peminjaman ruangan"
+					role="admin"
+				/>
 
-				<div className="flex min-w-0 flex-1 flex-col">
-					<Navbar
-						pageTitle="Dashboard Admin"
-						pageSubtitle="Monitoring pengajuan peminjaman ruangan"
-						role="admin"
-					/>
-
-					<DashboardContent
-						adminData={tableData}
-						mode="admin"
-						totalRooms={totalRooms}
-						totalBuildings={totalBuildings}
-						totalUsers={totalUsers}
-						lastSync={lastSync}
-						adminRole={adminRole}
-					/>
-				</div>
+				<AdminDashboardContent
+					adminData={tableData}
+					adminRole={adminRole}
+					lastSync={lastSync}
+				/>
 			</div>
 		</div>
 	);

@@ -16,7 +16,7 @@ export default async function SuperadminKelolaGedungPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
 	const buildings = await prisma.building.findMany({

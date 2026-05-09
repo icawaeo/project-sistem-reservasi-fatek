@@ -31,7 +31,7 @@ export default async function SuperadminKelolaUserPage() {
   }
 
   if (!isSuperadminUser(session.user)) {
-    redirect("/administrator/admin/dashboard");
+    redirect("/administrator/admin");
   }
 
   const users = await prisma.user.findMany({

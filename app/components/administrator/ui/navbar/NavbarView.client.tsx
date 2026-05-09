@@ -53,11 +53,15 @@ export default function NavbarView({ pageTitle, pageSubtitle, userName, role }: 
     };
   }, []);
 
+  const hasSidebar = detectedRole !== "admin";
+
   return (
     <NavbarShell>
       <div className="flex items-center justify-between gap-2 lg:gap-3">
         <div className="flex min-w-0 items-center gap-2 lg:gap-3">
-          <NavbarMobileSidebarButton onClick={() => setIsMobileSidebarOpen(true)} />
+          {hasSidebar ? (
+            <NavbarMobileSidebarButton onClick={() => setIsMobileSidebarOpen(true)} />
+          ) : null}
           <NavbarTitles title={pageTitle} subtitle={pageSubtitle} />
         </div>
 
@@ -78,11 +82,13 @@ export default function NavbarView({ pageTitle, pageSubtitle, userName, role }: 
         </div>
       </div>
 
-      <NavbarMobileSidebarDrawer
-        open={isMobileSidebarOpen}
-        role={detectedRole}
-        onClose={() => setIsMobileSidebarOpen(false)}
-      />
+      {hasSidebar ? (
+        <NavbarMobileSidebarDrawer
+          open={isMobileSidebarOpen}
+          role={detectedRole}
+          onClose={() => setIsMobileSidebarOpen(false)}
+        />
+      ) : null}
     </NavbarShell>
   );
 }
