@@ -49,7 +49,7 @@ export default function HeroSection({
     : null;
 
   return (
-    <section className="relative" style={{ minHeight: "100dvh" }}>
+    <section className="relative min-h-dvh">
       <div className="absolute inset-0 overflow-hidden bg-linear-to-br from-slate-700 via-slate-600 to-slate-800">
         <Image
           src="/hero.jpeg"
@@ -63,19 +63,16 @@ export default function HeroSection({
       </div>
 
       <div
-        className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-10 px-4 py-28 text-center"
-        style={{ minHeight: "100dvh" }}
+        className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col items-center justify-center gap-10 px-4 py-28 text-center"
       >
         <div>
           <h1
-            style={{ fontSize: "clamp(3rem, 7vw, 3rem)" }}
-            className="text-balance font-black leading-[0.95] tracking-tight text-white"
+            className="text-5xl md:text-[3.5rem] lg:text-6xl text-balance font-black leading-[0.95] tracking-tight text-white"
           >
             Sistem Reservasi Ruangan
           </h1>
           <p
-            style={{ fontSize: "clamp(1.125rem, 2.2vw, 1.25rem)" }}
-            className="mt-3 max-w-2xl text-white/70"
+            className="mt-3 text-lg md:text-xl max-w-2xl text-white/70"
           >
             Cari dan pinjam ruangan untuk kegiatan akademik dan organisasi dengan mudah.
           </p>

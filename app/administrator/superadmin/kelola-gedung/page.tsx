@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
-import BuildingManagementContent from "@/app/components/administrator/superadmin/BuildingManagementContent";
-import type { BuildingItem } from "@/app/components/administrator/superadmin/building-types";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
+import BuildingManagementContent from "@/app/components/administrator/kelola-gedung/BuildingManagementContent";
+import type { BuildingItem } from "@/app/components/administrator/kelola-gedung/building-types";
 
 export default async function SuperadminKelolaGedungPage() {
 	const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export default async function SuperadminKelolaGedungPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
 	const buildings = await prisma.building.findMany({
@@ -25,7 +25,7 @@ export default async function SuperadminKelolaGedungPage() {
 		},
 	});
 
-	const initialBuildings: BuildingItem[] = buildings.map((building) => ({
+	const initialBuildings: BuildingItem[] = buildings.map((building: { building_id: any; building_name: any; operational_days: any; open_time: any; close_time: any; building_imageUrl: any; building_isActive: any; }) => ({
 		id: building.building_id,
 		name: building.building_name,
 		operationalDays: building.operational_days,
@@ -44,7 +44,6 @@ export default async function SuperadminKelolaGedungPage() {
 					<Navbar
 						pageTitle="Kelola Gedung"
 						pageSubtitle="Manajemen data gedung dan jadwal operasional"
-						userName={session.user.name || "Superadmin"}
 					/>
 
 					<BuildingManagementContent initialBuildings={initialBuildings} />

@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
-import UserManagementContent from "@/app/components/administrator/superadmin/UserManagementContent";
-import type { UserItem } from "@/app/components/administrator/superadmin/user-types";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
+import UserManagementContent from "@/app/components/administrator/kelola-user/UserManagementContent";
+import type { UserItem } from "@/app/components/administrator/kelola-user/user-types";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -31,7 +31,7 @@ export default async function SuperadminKelolaUserPage() {
   }
 
   if (!isSuperadminUser(session.user)) {
-    redirect("/administrator/admin/dashboard");
+    redirect("/administrator/admin");
   }
 
   const users = await prisma.user.findMany({
@@ -54,14 +54,14 @@ export default async function SuperadminKelolaUserPage() {
     },
   });
 
-  const initialUsers: UserItem[] = users.map((user) => ({
+  const initialUsers: UserItem[] = users.map((user: { user_id: any; name: any; email: any; userType: string; role: any; createdAt: { toISOString: () => any; }; passwordSetupTokens: any[]; }) => ({
     id: user.user_id,
     name: user.name,
     email: user.email,
     userCategory: user.userType === "PUBLIC" ? "umum" : "unsrat",
     role: user.role,
     createdAt: user.createdAt.toISOString(),
-    isVerified: user.passwordSetupTokens.every((token) => token.usedAt !== null),
+    isVerified: user.passwordSetupTokens.every((token: { usedAt: null; }) => token.usedAt !== null),
     resendCooldownSeconds: getResendCooldownSeconds(user.passwordSetupTokens),
   }));
 
@@ -74,7 +74,6 @@ export default async function SuperadminKelolaUserPage() {
           <Navbar
             pageTitle="Kelola User"
             pageSubtitle="Manajemen akun user dan role akses sistem"
-            userName={session.user.name || "Superadmin"}
           />
 
           <UserManagementContent initialUsers={initialUsers} />

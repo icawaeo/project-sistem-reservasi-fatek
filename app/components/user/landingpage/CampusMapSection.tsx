@@ -18,6 +18,7 @@ export default function CampusMapSection({ mapPoints, allMapView }: CampusMapSec
   const [activeMapPoint, setActiveMapPoint] = useState<number | "all">("all");
   const [isOtherLocationsOpen, setIsOtherLocationsOpen] = useState(false);
   const [pinnedMapPoint, setPinnedMapPoint] = useState<number | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -145,18 +146,31 @@ export default function CampusMapSection({ mapPoints, allMapView }: CampusMapSec
         </div>
 
         <div className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_22px_55px_rgba(15,23,42,0.18)]">
-          <div className="h-96 md:h-140">
-            <iframe
-              key={currentMap.name}
-              src={currentMap.embedUrl}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title={currentMap.name}
-            />
+          <div className="relative h-96 md:h-140 bg-slate-200">
+            {!isMapLoaded ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100/50">
+                <MapPin size={48} className="text-slate-400 mb-4" />
+                <button
+                  onClick={() => setIsMapLoaded(true)}
+                  type="button"
+                  className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  Tampilkan Peta Interaktif
+                </button>
+              </div>
+            ) : (
+              <iframe
+                key={currentMap.name}
+                src={currentMap.embedUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title={currentMap.name}
+              />
+            )}
           </div>
 
           <div className="flex justify-end border-t border-slate-200 bg-white px-4 py-3">

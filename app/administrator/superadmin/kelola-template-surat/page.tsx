@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import Sidebar from "@/app/components/administrator/Sidebar";
-import Navbar from "@/app/components/administrator/Navbar";
+import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Navbar from "@/app/components/administrator/ui/Navbar";
 import TemplateSuratManagementContent, {
 	type TemplateSummary,
-} from "@/app/components/administrator/superadmin/TemplateSuratManagementContent";
+} from "@/app/components/administrator/kelola-template-surat/TemplateSuratManagementContent";
 import { listTemplates } from "@/lib/template-store";
 
 export default async function SuperadminKelolaTemplateSuratPage() {
@@ -18,7 +18,7 @@ export default async function SuperadminKelolaTemplateSuratPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
 	const templates = await listTemplates();
@@ -45,7 +45,6 @@ export default async function SuperadminKelolaTemplateSuratPage() {
 					<Navbar
 						pageTitle="Kelola Template Surat"
 						pageSubtitle="Upload template .docx dan tinjau preview PDF hasil konversi LibreOffice"
-						userName={session.user.name || "Superadmin"}
 					/>
 
 					<TemplateSuratManagementContent initialTemplates={initialTemplates} />

@@ -13,12 +13,12 @@ import {
     ExternalLink,
     Home,
 } from "lucide-react";
-import Navbar from "@/app/components/layout/Navbar";
+import Navbar from "@/app/components/layout/NavbarClient";
 import ReservationSearchWidget, { type ReservationMode } from "@/app/components/user/ReservationSearchWidget";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
 import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
-import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/superadmin/room-types";
+import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/kelola-ruangan/room-types";
 
 type RoomWithStatus = {
     room_id: string;
@@ -523,11 +523,13 @@ export default function BuildingPage() {
                                 className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col sm:flex-row"
                             >
                                 {/* Image / placeholder */}
-                                <div className="sm:w-36 w-full h-32 sm:h-auto bg-slate-100 shrink-0 flex items-center justify-center">
+                                <div className="relative sm:w-36 w-full h-32 sm:h-auto bg-slate-100 shrink-0 flex items-center justify-center overflow-hidden">
                                     {room.room_imageUrl ? (
-                                        <img
+                                        <Image
                                             src={room.room_imageUrl}
                                             alt={room.room_name}
+                                            fill
+                                            sizes="(max-width: 640px) 100vw, 144px"
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
