@@ -99,6 +99,21 @@ model EmailChangeToken {
   @@index([newEmail])
 }
 
+model PendingRegistration {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  identifier   String
+  passwordHash String
+  otpHash      String
+  expiresAt    DateTime
+  attempts     Int      @default(0)
+  lastSentAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
 model Room {
   room_id        String  @id @default(cuid())
   room_name      String

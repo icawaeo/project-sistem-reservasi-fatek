@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
+import IdleLogoutProvider from "@/app/components/providers/IdleLogoutProvider";
 import { ToastProvider } from "@/app/components/ui/toast";
 
 const manrope = Manrope({
@@ -30,7 +31,9 @@ export default function RootLayout({
         className={`${manrope.variable} ${geistMono.variable} antialiased`}
       >
         <NextAuthProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <IdleLogoutProvider>{children}</IdleLogoutProvider>
+          </ToastProvider>
         </NextAuthProvider>
       </body>
     </html>

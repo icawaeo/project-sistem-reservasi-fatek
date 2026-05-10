@@ -109,6 +109,13 @@ export default function BuildingPage() {
     const [selectedLabDepartment, setSelectedLabDepartment] = useState<"" | LabDepartmentValue>("");
     const [selectedLabProgram, setSelectedLabProgram] = useState<"" | LabProgramValue>("");
 
+    const [buildingInfo, setBuildingInfo] = useState<{ 
+        building_imageUrl: string | null;
+        operational_days: string[];
+        open_time: string;
+        close_time: string;
+    } | null>(null);
+
     // Search form state
     const [reservationMode, setReservationMode] = useState<ReservationMode>("per-day");
     const [startDate, setStartDate] = useState("");
@@ -121,7 +128,7 @@ export default function BuildingPage() {
     const [currentPage, setCurrentPage] = useState(1);
 
     const buildingGradient = getBuildingGradient(buildingName);
-    const buildingHeroImage = buildingImageMap[buildingName] ?? "/hero.jpeg";
+    const buildingHeroImage = buildingInfo?.building_imageUrl || buildingImageMap[buildingName] || "/hero.jpeg";
     const buildingMap = mapPoints[buildingName] ?? null;
     const isLabBuildingFlag = isLabBuilding(buildingName);
 
@@ -151,6 +158,22 @@ export default function BuildingPage() {
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedLabDepartment, selectedLabProgram]);
+
+    // Load building info
+    useEffect(() => {
+        const loadBuilding = async () => {
+            try {
+                const res = await fetch(`/api/buildings?name=${encodeURIComponent(buildingName)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setBuildingInfo(data);
+                }
+            } catch (err) {
+                console.error("Failed to load building info", err);
+            }
+        };
+        loadBuilding();
+    }, [buildingName]);
 
     // Load all rooms for this building on mount
     useEffect(() => {
@@ -276,8 +299,9 @@ export default function BuildingPage() {
         if (!hasSearched) {
             pushToast({
                 type: "error",
-                message: "Silakan cek ketersediaan terlebih dahulu sebelum melakukan reservasi.",
+                message: "Silakan lengkapi form dan cek ketersediaan terlebih dahulu sebelum melakukan reservasi.",
             });
+            document.getElementById("search-widget")?.scrollIntoView({ behavior: "smooth", block: "center" });
             return;
         }
         const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
@@ -340,13 +364,25 @@ export default function BuildingPage() {
                     <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">
                         {buildingName}
                     </h1>
-                    <p className="text-white/70 mt-2 text-sm lg:text-base max-w-md">
-                        Cek ketersediaan dan reservasi ruangan di gedung ini.
-                    </p>
+                    {buildingInfo ? (
+                        <div className="mt-6 w-full max-w-[90vw] sm:max-w-sm md:max-w-md text-white/90 text-sm md:text-base font-medium tracking-wide bg-black/20 px-6 py-4 rounded-3xl backdrop-blur-md border border-white/10 mx-auto">
+                            <p className="text-[11px] md:text-xs text-white/70 uppercase tracking-widest font-bold mb-1.5">
+                                Waktu Operasional
+                            </p>
+                            <p>
+                                {buildingInfo.operational_days.join(", ")}
+                            </p>
+                            <p className="mt-0.5">
+                                {buildingInfo.open_time} - {buildingInfo.close_time} WITA
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="mt-6 h-24 w-full max-w-[90vw] sm:max-w-sm md:max-w-md animate-pulse bg-white/10 rounded-3xl mx-auto" />
+                    )}
                 </div>
 
                 {/* Search Widget */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-full max-w-4xl px-4">
+                <div id="search-widget" className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-full max-w-4xl px-4">
                     <ReservationSearchWidget
                         reservationMode={reservationMode}
                         onReservationModeChange={(mode) => {
