@@ -23,7 +23,8 @@ export default function RegisterView() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.name === "identifier" ? e.target.value.replace(/\D/g, "") : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,10 +98,12 @@ export default function RegisterView() {
                         NIM / NIP
                     </label>
                     <input
-                        name="identifier" 
-                        value={formData.identifier} 
+                        name="identifier"
+                        value={formData.identifier}
                         onChange={handleChange}
-                        required 
+                        required
+                        inputMode="numeric"
+                        pattern="\d*"
                         placeholder="Masukkan NIM atau NIP Anda"
                         className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                     />
