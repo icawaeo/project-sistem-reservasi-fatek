@@ -43,6 +43,11 @@ const statusMeta: Record<string, StatusMeta> = {
     badge: "bg-rose-100 text-rose-700 border-rose-200",
     icon: XCircle,
   },
+  COMPLETED: {
+    label: "Selesai",
+    badge: "bg-blue-100 text-blue-700 border-blue-200",
+    icon: CheckCircle2,
+  },
 };
 
 type Props = {
@@ -114,8 +119,11 @@ export default function HistorySection({
 
             <div className="divide-y divide-slate-200">
               {items.map((item) => {
-                const status = statusMeta[item.res_status] || {
-                  label: item.res_status,
+                const isCompleted = item.res_status === "APPROVED" && new Date(item.res_endTime).getTime() <= Date.now();
+                const effectiveStatus = isCompleted ? "COMPLETED" : item.res_status;
+
+                const status = statusMeta[effectiveStatus] || {
+                  label: effectiveStatus,
                   badge: "bg-slate-100 text-slate-700 border-slate-200",
                   icon: History,
                 };

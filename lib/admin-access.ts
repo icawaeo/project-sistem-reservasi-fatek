@@ -25,7 +25,27 @@ type AdminReservationRecordLike = {
 
 const normalizeReservationStatus = (status: string) => (status ?? "").toUpperCase();
 
-const GENERAL_ADMIN_ROLES: AdminReservationRole[] = ["ADMIN", "ADMIN_DEKAN", "ADMIN_WD2"];
+const DEKAN_VISIBLE_STATUSES = new Set([
+  "PENDING_DEKAN",
+  "REJECTED_DEKAN",
+  "PENDING_WD2",
+  "PENDING_WAKIL_DEKAN_2",
+  "REJECTED_WD2",
+  "APPROVED",
+  "DISETUJUI",
+  "COMPLETED",
+  "SELESAI",
+]);
+
+const WD2_VISIBLE_STATUSES = new Set([
+  "PENDING_WD2",
+  "PENDING_WAKIL_DEKAN_2",
+  "REJECTED_WD2",
+  "APPROVED",
+  "DISETUJUI",
+  "COMPLETED",
+  "SELESAI",
+]);
 
 const KAJUR_VISIBLE_STATUSES = new Set([
   "PENDING_KAJUR",
@@ -48,11 +68,22 @@ const KEPALA_LAB_VISIBLE_STATUSES = new Set([
 ]);
 
 export function shouldShowAdminReservation(viewer: AdminReservationViewer, reservation: AdminReservationRecordLike) {
-  if (GENERAL_ADMIN_ROLES.includes(viewer.role)) {
+  if (viewer.role === "ADMIN") {
     return true;
   }
 
   const status = normalizeReservationStatus(reservation.status);
+
+  if (viewer.role === "ADMIN_DEKAN") {
+    if (reservation.flow !== "GENERAL") return false;
+    return DEKAN_VISIBLE_STATUSES.has(status);
+  }
+
+  if (viewer.role === "ADMIN_WD2") {
+    if (reservation.flow !== "GENERAL") return false;
+    return WD2_VISIBLE_STATUSES.has(status);
+  }
+
 
   if (viewer.role === "KAJUR") {
     if (!viewer.departmentScope || reservation.flow !== "LAB_LAINNYA") {

@@ -62,6 +62,27 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    // Cek apakah user masih memiliki reservasi aktif (PENDING atau APPROVED belum selesai)
+    const activeReservation = await prisma.reservation.findFirst({
+      where: {
+        user_id: session.user.id,
+        OR: [
+          { res_status: "PENDING" },
+          {
+            res_status: "APPROVED",
+            res_endTime: { gt: new Date() },
+          },
+        ],
+      },
+    });
+
+    if (activeReservation) {
+      return NextResponse.json(
+        { error: "Anda masih memiliki pengajuan reservasi aktif yang belum selesai." },
+        { status: 400 }
+      );
+    }
+
     // Validasi sederhana
     if (!body.room_id || !body.res_startTime || !body.res_endTime || !body.res_purpose) {
       return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });

@@ -65,10 +65,12 @@ model User {
   signatureUrl String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  
+   
   reservations Reservation[]
   passwordSetupTokens PasswordSetupToken[]
   emailChangeTokens EmailChangeToken[]
+  fcmTokens FcmToken[]
+  notifications Notification[]
 }
 
 model PasswordSetupToken {
@@ -189,12 +191,39 @@ model Reservation {
 model ReservationItem {
   // Primary key gabungan atau ID unik
   id String @id @default(cuid())
-
+  
   res_id      String
   reservation Reservation @relation(fields: [res_id], references: [res_id])
-
+  
   fac_id   String
   facility Facility @relation(fields: [fac_id], references: [fac_id])
-
+  
   resItem_qty Int
+}
+
+// NEW MODELS FOR FCM AND NOTIFICATIONS
+
+model FcmToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model Notification {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  title         String
+  body          String
+  data          Json     // For custom data like reservationId, type, etc.
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  
+  @@index([userId])
+  @@index([userId, isRead])
 }

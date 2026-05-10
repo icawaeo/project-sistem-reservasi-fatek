@@ -15,6 +15,7 @@ import {
   SuperAdminTableMessageRow,
 } from "@/app/components/administrator/ui/SuperAdminTable";
 import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/ui/reservationStatus";
+import ActionConfirmationModal from "@/app/components/administrator/ui/ActionConfirmationModal";
 
 const PAGE_SIZE = 10;
 
@@ -64,6 +65,28 @@ function resolveFilterStatusGroup(status: string, endTimeInput: string) {
   return "PENDING";
 }
 
+function canAdminAct(role: string, status: string) {
+  const normStatus = (status || "").toUpperCase();
+  const normRole = (role || "").toUpperCase();
+
+  if (normRole === "ADMIN") {
+    return normStatus === "PENDING" || normStatus === "PENDING_KABAG";
+  }
+  if (normRole === "ADMIN_DEKAN") {
+    return normStatus === "PENDING_DEKAN";
+  }
+  if (normRole === "ADMIN_WD2") {
+    return normStatus === "PENDING_WD2" || normStatus === "PENDING_WAKIL_DEKAN_2";
+  }
+  if (normRole === "KAJUR") {
+    return normStatus === "PENDING_KAJUR";
+  }
+  if (normRole === "KEPALA_LAB") {
+    return normStatus === "PENDING_KEPALA_LAB";
+  }
+  return false;
+}
+
 export default function UniversalReservationTable({
   data,
   mode = "superadmin",
@@ -81,6 +104,7 @@ export default function UniversalReservationTable({
   const [selectedRow, setSelectedRow] = useState<GenericReservation | null>(null);
   const [tableData, setTableData] = useState<GenericReservation[]>(data);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; item: GenericReservation | null }>({ isOpen: false, item: null });
+  const [decisionConfirm, setDecisionConfirm] = useState<{ isOpen: boolean; item: GenericReservation | null; action: "APPROVE" | "REJECT" | null }>({ isOpen: false, item: null, action: null });
   const isAdminMode = mode === "admin";
 
   useEffect(() => setTableData(data), [data]);
@@ -232,7 +256,7 @@ export default function UniversalReservationTable({
                         <td className="px-4 py-3"><p className="text-slate-900">{formatDate(item.createdAt)}</p><p className="text-xs text-slate-500">{formatTime(item.createdAt)}</p></td>
                         <td className="px-4 py-3"><p className="font-semibold text-slate-900">{item.room.name}</p><p className="text-xs text-slate-500">{item.room.building}</p></td>
                         <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><StatusBadge status={computeReservationStatus(item.status, item.endTime)} /></div></td>
-                        {isAdminMode ? (
+                        {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
                           <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700">Tinjau &amp; Proses</button></div></td>
                         ) : (
                           <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button></div></td>
@@ -301,7 +325,7 @@ export default function UniversalReservationTable({
 
                 {/* Action */}
                 <div className="border-t border-slate-100 px-4 py-3 flex gap-2">
-                  {isAdminMode ? (
+                  {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
                     <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-slate-800 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700 active:bg-slate-900">Tinjau &amp; Proses</button>
                   ) : (
                     <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 active:bg-blue-200">Lihat Detail</button>
@@ -338,11 +362,11 @@ export default function UniversalReservationTable({
         <ReservationDetailModal
           data={selectedRow as any}
           adminRole={adminRole as any}
-          isActionable={Boolean(selectedRow)}
+          isActionable={Boolean(selectedRow && canAdminAct(adminRole || "", selectedRow.status))}
           isBusy={Boolean(selectedRow && processing?.id === selectedRow.id)}
           onClose={() => setSelectedRow(null)}
-          onApprove={() => selectedRow && handleDecision(selectedRow.id, "APPROVE")}
-          onReject={() => selectedRow && handleDecision(selectedRow.id, "REJECT")}
+          onApprove={() => selectedRow && setDecisionConfirm({ isOpen: true, item: selectedRow, action: "APPROVE" })}
+          onReject={() => selectedRow && setDecisionConfirm({ isOpen: true, item: selectedRow, action: "REJECT" })}
         />
       ) : (
         <MonitoringDetailModal data={selectedRow as any} onClose={() => setSelectedRow(null)} />
@@ -355,6 +379,21 @@ export default function UniversalReservationTable({
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         isLoading={false}
+      />
+
+      <ActionConfirmationModal
+        isOpen={decisionConfirm.isOpen}
+        action={decisionConfirm.action}
+        title={decisionConfirm.action === "APPROVE" ? "Setujui Pengajuan" : "Tolak Pengajuan"}
+        description={`Anda yakin ingin ${decisionConfirm.action === "APPROVE" ? "menyetujui" : "menolak"} pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}"?`}
+        onConfirm={async () => {
+          if (decisionConfirm.item && decisionConfirm.action) {
+            await handleDecision(decisionConfirm.item.id, decisionConfirm.action);
+            setDecisionConfirm({ isOpen: false, item: null, action: null });
+          }
+        }}
+        onCancel={() => setDecisionConfirm({ isOpen: false, item: null, action: null })}
+        isLoading={Boolean(processing)}
       />
     </>
   );

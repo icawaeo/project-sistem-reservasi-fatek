@@ -44,10 +44,21 @@ export default function LandingAvailabilitySearch() {
   }, [endDate, endTime, reservationMode, startDate, startTime]);
 
   const handleRoomSelect = useCallback(
-    (room: RoomAvailability) => {
+    async (room: RoomAvailability) => {
       if (!session?.user || isPrivilegedStaff) {
         router.push("/?tab=login");
         return;
+      }
+
+      try {
+        const activeRes = await fetch("/api/reservasi/active");
+        const activeData = await activeRes.json();
+        if (activeData.hasActive) {
+            pushToast({ type: "error", message: "Anda masih memiliki pengajuan reservasi aktif yang belum selesai." });
+            return;
+        }
+      } catch (e) {
+          // Lanjutkan jika terjadi error saat mengecek
       }
 
       const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;

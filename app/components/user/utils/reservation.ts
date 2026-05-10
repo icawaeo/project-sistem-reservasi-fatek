@@ -18,11 +18,20 @@ export const isDecisionLetterReady = (status: string | null | undefined) => {
   );
 };
 
-export const getLatestPendingReservation = (reservations: ReservationRecord[]) => {
-  const pending = reservations.filter((item) => item.res_status === "PENDING");
-  if (pending.length === 0) return null;
+export const isReservationActive = (reservation: { res_status: string; res_endTime: string | Date }) => {
+  const status = (reservation.res_status || "").toUpperCase();
+  if (status === "PENDING") return true;
+  if (status === "APPROVED") {
+    return new Date(reservation.res_endTime).getTime() > Date.now();
+  }
+  return false;
+};
 
-  return pending.reduce((latest, current) =>
+export const getActiveReservation = (reservations: ReservationRecord[]) => {
+  const activeReservations = reservations.filter(isReservationActive);
+  if (activeReservations.length === 0) return null;
+
+  return activeReservations.reduce((latest, current) =>
     new Date(current.res_startTime).getTime() > new Date(latest.res_startTime).getTime()
       ? current
       : latest

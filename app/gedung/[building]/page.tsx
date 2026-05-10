@@ -286,7 +286,7 @@ export default function BuildingPage() {
         }
     };
 
-    const handleReservasi = (room: RoomWithStatus) => {
+    const handleReservasi = async (room: RoomWithStatus) => {
         if (sessionStatus === "loading") {
             return;
         }
@@ -304,6 +304,18 @@ export default function BuildingPage() {
             document.getElementById("search-widget")?.scrollIntoView({ behavior: "smooth", block: "center" });
             return;
         }
+
+        try {
+            const activeRes = await fetch("/api/reservasi/active");
+            const activeData = await activeRes.json();
+            if (activeData.hasActive) {
+                pushToast({ type: "error", message: "Anda masih memiliki pengajuan reservasi aktif yang belum selesai." });
+                return;
+            }
+        } catch (e) {
+            // Lanjutkan jika terjadi error saat mengecek
+        }
+
         const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
 
         try {

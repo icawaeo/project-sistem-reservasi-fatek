@@ -201,16 +201,12 @@ export default function ReservationDetailModal({
 				</div>
 
 				<footer className="flex items-center justify-end gap-4 border-t border-slate-200 bg-slate-50/50 px-8 py-6">
-					{isActionable ? (
-						<>
-							<button type="button" onClick={onReject} disabled={isBusy} className="rounded-xl border border-rose-200 bg-rose-50 px-8 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40">
-								Tolak Pengajuan
-							</button>
-							<button type="button" onClick={onApprove} disabled={isBusy} className="rounded-xl border border-emerald-200 bg-emerald-50 px-10 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">
-								Setujui Pengajuan
-							</button>
-						</>
-					) : null}
+					<button type="button" onClick={onReject} disabled={isBusy || !isActionable} className="rounded-xl border border-rose-200 bg-rose-50 px-8 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40">
+						Tolak Pengajuan
+					</button>
+					<button type="button" onClick={onApprove} disabled={isBusy || !isActionable} className="rounded-xl border border-emerald-200 bg-emerald-50 px-10 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">
+						Setujui Pengajuan
+					</button>
 				</footer>
 			</div>
 		</div>
