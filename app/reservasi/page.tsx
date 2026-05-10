@@ -21,16 +21,7 @@ import {
 import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
-const buildingColorMap: Record<string, string> = {
-    "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
-    "Gedung Jurusan Teknik Sipil": "from-blue-900 to-blue-700",
-    "Gedung Jurusan Teknik Arsitektur": "from-slate-800 to-slate-600",
-    "Gedung Jurusan Teknik Elektro": "from-green-800 to-green-600",
-    "Gedung Jurusan Teknik Mesin": "from-indigo-900 to-indigo-700",
-    "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
-};
-
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding as isLabBuildingUtil, getBuildingGradient } from "@/app/utils/building";
 
 type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -108,7 +99,7 @@ function ReservasiContent() {
     const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
     const isCivitas = publicSessionUser?.userType === "STUDENT";
-    const isLabBuilding = roomBuilding === LAB_BUILDING_NAME;
+    const isLabBuilding = isLabBuildingUtil(roomBuilding);
 
     const [borrowerName, setBorrowerName] = useState<string | null>(null);
     const [identifier, setIdentifier] = useState<string | null>(null);
@@ -160,7 +151,7 @@ function ReservasiContent() {
         reader.readAsDataURL(file);
     };
 
-    const buildingGradient = buildingColorMap[roomBuilding] ?? "from-slate-700 via-slate-600 to-slate-800";
+    const buildingGradient = getBuildingGradient(roomBuilding);
 
     const scheduleLabel = useMemo(() => {
         const dateLabel = startDate === endDate ? startDate : `${startDate} s/d ${endDate}`;

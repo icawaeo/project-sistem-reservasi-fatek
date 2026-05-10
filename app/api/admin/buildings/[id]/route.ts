@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
+import { saveBase64Image } from "@/lib/image-upload";
 
 type RouteParams = {
   params: Promise<{
@@ -91,7 +92,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const operationalDays = normalizeDays(body?.operationalDays);
     const openTime = normalizeTime(body?.openTime);
     const closeTime = normalizeTime(body?.closeTime);
-    const imageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
+    const rawImageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
+    const imageUrl = await saveBase64Image(rawImageUrl, "building");
     const status = parseStatus(body?.status);
 
     if (!name || operationalDays.length === 0 || !openTime || !closeTime || openTime >= closeTime) {

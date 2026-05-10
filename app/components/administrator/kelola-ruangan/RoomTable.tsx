@@ -10,7 +10,7 @@ import {
   SuperAdminTableBody,
 } from "../ui/SuperAdminTable";
 
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding } from "@/app/utils/building";
 
 const PROGRAM_LABEL: Record<LabProgramValue, string> = {
   ELEKTRO: "Teknik Elektro",
@@ -38,7 +38,7 @@ const formatFloorLabel = (value: string) => {
 const formatRoomMetaLabel = (room: RoomItem) => {
   const floorLabel = formatFloorLabel(room.floor);
 
-  if (room.building !== LAB_BUILDING_NAME) {
+  if (!isLabBuilding(room.building)) {
     return floorLabel;
   }
 

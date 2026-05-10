@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { logServerError } from "@/lib/server-logger";
+import { saveBase64Image } from "@/lib/image-upload";
 
 const parseFacilities = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -17,7 +18,7 @@ const parseFacilities = (value: unknown): string[] => {
 
 const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
 
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding } from "@/app/utils/building";
 
 const LAB_PROGRAM_VALUES = [
   "IT",
@@ -185,14 +186,15 @@ export async function POST(request: Request) {
     const floor = typeof body?.floor === "string" ? normalizeFloor(body.floor) : "";
     const capacity = Number(body?.capacity);
     const facilities = parseFacilities(body?.facilities);
-    const imageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
+    const rawImageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
+    const imageUrl = await saveBase64Image(rawImageUrl, "room");
     const status = parseStatus(body?.status);
 
-    const isLabBuilding = building === LAB_BUILDING_NAME;
-    const labProgram = isLabBuilding ? parseLabProgram(body?.labProgram) : null;
+    const isLabBuildingFlag = isLabBuilding(building);
+    const labProgram = isLabBuildingFlag ? parseLabProgram(body?.labProgram) : null;
     const labDepartment = labProgram ? PROGRAM_TO_DEPARTMENT[labProgram] : null;
 
-    if (isLabBuilding && !labProgram) {
+    if (isLabBuildingFlag && !labProgram) {
       return NextResponse.json({ error: "Program studi lab wajib dipilih" }, { status: 400 });
     }
 

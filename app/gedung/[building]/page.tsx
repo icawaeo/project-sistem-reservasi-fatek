@@ -32,7 +32,7 @@ type RoomWithStatus = {
     labDepartment: LabDepartmentValue | null;
 };
 
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding, getBuildingGradient } from "@/app/utils/building";
 
 const LAB_PROGRAM_LABELS: Record<LabProgramValue, string> = {
     IT: "Informatika",
@@ -54,14 +54,7 @@ const LAB_DEPARTMENT_LABELS: Record<LabDepartmentValue, string> = {
 const LAB_DEPARTMENT_OPTIONS: LabDepartmentValue[] = ["ELEKTRO", "ARSITEKTUR", "SIPIL", "MESIN"];
 const LAB_PROGRAM_OPTIONS: LabProgramValue[] = ["IT", "ELEKTRO", "ARSITEKTUR", "PWK", "SIPIL", "LINGKUNGAN", "MESIN"];
 
-const buildingColorMap: Record<string, string> = {
-    "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
-    "Gedung Jurusan Teknik Sipil": "from-blue-900 to-blue-700",
-    "Gedung Jurusan Teknik Arsitektur": "from-slate-800 to-slate-600",
-    "Gedung Jurusan Teknik Elektro": "from-green-800 to-green-600",
-    "Gedung Jurusan Teknik Mesin": "from-indigo-900 to-indigo-700",
-    "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
-};
+
 
 const buildingImageMap: Record<string, string> = {
     "Gedung Dekanat Fakultas Teknik": "/images/building/dekanat.jpeg",
@@ -127,14 +120,14 @@ export default function BuildingPage() {
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
 
-    const buildingGradient = buildingColorMap[buildingName] ?? "from-slate-700 via-slate-600 to-slate-800";
+    const buildingGradient = getBuildingGradient(buildingName);
     const buildingHeroImage = buildingImageMap[buildingName] ?? "/hero.jpeg";
     const buildingMap = mapPoints[buildingName] ?? null;
-    const isLabBuilding = buildingName === LAB_BUILDING_NAME;
+    const isLabBuildingFlag = isLabBuilding(buildingName);
 
     const filteredRooms = useMemo(() => {
         return rooms.filter((room) => {
-            if (!isLabBuilding) return true;
+            if (!isLabBuildingFlag) return true;
 
             if (selectedLabDepartment && room.labDepartment !== selectedLabDepartment) {
                 return false;
@@ -146,7 +139,7 @@ export default function BuildingPage() {
 
             return true;
         });
-    }, [isLabBuilding, rooms, selectedLabDepartment, selectedLabProgram]);
+    }, [isLabBuildingFlag, rooms, selectedLabDepartment, selectedLabProgram]);
 
     const totalPages = Math.max(1, Math.ceil(filteredRooms.length / ROOMS_PER_PAGE));
     const paginatedRooms = filteredRooms.slice((currentPage - 1) * ROOMS_PER_PAGE, currentPage * ROOMS_PER_PAGE);
@@ -442,7 +435,7 @@ export default function BuildingPage() {
                     )}
                 </div>
 
-                {isLabBuilding ? (
+                {isLabBuildingFlag ? (
                     <div className="mb-6 flex w-full items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:w-auto sm:justify-start">
                         <label className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs md:text-sm lg:text-base text-slate-700">
                             <span className="whitespace-nowrap font-semibold">Filter Jurusan</span>
@@ -574,7 +567,7 @@ export default function BuildingPage() {
                                             <Users size={11} className="shrink-0" />
                                             <span>Kapasitas: {room.room_capacity} Orang</span>
                                         </div>
-                                        {isLabBuilding && room.labProgram && room.labDepartment ? (
+                                        {isLabBuildingFlag && room.labProgram && room.labDepartment ? (
                                             <div className="flex items-center gap-1.5 text-[11px] lg:text-sm text-slate-500 mb-1">
                                                 <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
                                                     Program Studi: {LAB_PROGRAM_LABELS[room.labProgram]}

@@ -25,16 +25,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
-const buildingColorMap = {
-  "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
-  "Gedung Jurusan Teknik Sipil": "from-blue-900 to-blue-700",
-  "Gedung Jurusan Teknik Arsitektur": "from-slate-800 to-slate-600",
-  "Gedung Jurusan Teknik Elektro": "from-green-800 to-green-600",
-  "Gedung Jurusan Teknik Mesin": "from-indigo-900 to-indigo-700",
-  "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
-};
-
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding, getBuildingGradient } from "@/app/utils/building";
 
 type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -156,8 +147,7 @@ export default function KonfirmasiReservasiPage() {
 
   if (!reservation) return null;
 
-  const buildingGradient =
-    buildingColorMap[reservation.room_building as keyof typeof buildingColorMap] || "from-slate-700 via-slate-600 to-slate-800";
+  const buildingGradient = getBuildingGradient(reservation.room_building);
 
   const reservationDate =
     reservation.startDate === reservation.endDate
@@ -242,7 +232,7 @@ export default function KonfirmasiReservasiPage() {
         res_documentUrl: null as string | null,
       };
 
-      const isLab = reservation.room_building === LAB_BUILDING_NAME;
+      const isLab = isLabBuilding(reservation.room_building);
       if (isLab) {
         if (payload.res_flow !== "LAB_SKRIPSI" && payload.res_flow !== "LAB_LAINNYA") {
           pushToast({

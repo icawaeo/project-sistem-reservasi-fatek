@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding } from "@/app/utils/building";
 
 type IncomingReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ruangan tidak ditemukan atau tidak aktif" }, { status: 404 });
     }
 
-    const isLabRoom = room.room_building === LAB_BUILDING_NAME;
+    const isLabRoom = isLabBuilding(room.room_building);
     const requestedFlow = normalizeFlow(body.res_flow);
 
     let resolvedFlow: IncomingReservationFlow = "GENERAL";
