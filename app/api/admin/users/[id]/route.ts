@@ -14,13 +14,7 @@ type RouteParams = {
   }>;
 };
 
-const mapUserCategoryToType = (value: unknown): UserType => {
-  if (value === "unsrat") {
-    return UserType.STAFF;
-  }
 
-  return UserType.PUBLIC;
-};
 
 const parseRole = (value: unknown): UserRole => {
   if (
@@ -60,7 +54,7 @@ const mapUser = (user: {
   id: user.user_id,
   name: user.name,
   email: user.email,
-  userCategory: user.userType === UserType.PUBLIC ? "umum" : "unsrat",
+
   role: user.role,
   createdAt: user.createdAt.toISOString(),
   isVerified: (user.passwordSetupTokens ?? []).every((token) => token.usedAt !== null),
@@ -94,7 +88,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const body = await request.json();
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
-    const userType = mapUserCategoryToType(body?.userCategory);
     const role = parseRole(body?.role);
 
     if (!name) {
@@ -114,7 +107,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
       },
       data: {
         name,
-        userType,
         role,
       },
       select: {

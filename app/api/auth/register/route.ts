@@ -11,18 +11,20 @@ export async function POST(request: NextRequest) {
     console.log("Registration attempt:", { name, email, userTypeIdentifier: identifier ? "provided" : "not provided" });
 
     // Validasi input
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword || !identifier) {
       return NextResponse.json(
         { error: "Semua field wajib diisi" },
         { status: 400 }
       );
     }
 
-    // Validasi email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Validasi email format - hanya menerima domain UNSRAT
+    const isStudentEmail = email.endsWith("@student.unsrat.ac.id");
+    const isStaffEmail = email.endsWith("@unsrat.ac.id");
+
+    if (!isStudentEmail && !isStaffEmail) {
       return NextResponse.json(
-        { error: "Format email tidak valid" },
+        { error: "Hanya email UNSRAT (@unsrat.ac.id atau @student.unsrat.ac.id) yang dapat digunakan untuk mendaftar" },
         { status: 400 }
       );
     }
@@ -43,23 +45,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Klasifikasi user berdasarkan email domain
-    let userType: UserType;
-    if (email.endsWith("@student.unsrat.ac.id")) {
-      userType = UserType.STUDENT;
-    } else if (email.endsWith("@unsrat.ac.id")) {
-      userType = UserType.STAFF;
-    } else {
-      userType = UserType.PUBLIC;
-    }
-
-    // Validasi identifier wajib untuk STUDENT dan STAFF
-    if ((userType === UserType.STUDENT || userType === UserType.STAFF) && !identifier) {
-      return NextResponse.json(
-        { error: "NIM/NIP wajib diisi untuk mahasiswa dan staff" },
-        { status: 400 }
-      );
-    }
+    // Semua user yang mendaftar via form registrasi adalah USER (civitas UNSRAT)
+    const userType = UserType.USER;
 
     // Cek apakah email sudah terdaftar
     const existingUser = await prisma.user.findUnique({
@@ -82,7 +69,7 @@ export async function POST(request: NextRequest) {
         name,
         email: email.toLowerCase(),
         passwordHash,
-        identifier: identifier || null,
+        identifier,
         userType,
         role: UserRole.USER,
       },

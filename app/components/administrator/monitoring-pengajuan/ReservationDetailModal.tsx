@@ -79,7 +79,7 @@ export default function ReservationDetailModal({
 	if (!data) return null;
 
 	const applicantSubtitle =
-		data.user.userType === "PUBLIC" ? "Umum" : data.user.userType === "STAFF" ? "Staff" : "Mahasiswa";
+		data.user.identifier ? `NIM/NIP: ${data.user.identifier}` : "Civitas UNSRAT";
 	const purposeLabel = data.purpose && data.purpose !== "-" ? data.purpose : data.rawPurpose;
 	const roleLabel = resolveRoleLabel(adminRole);
 	const computedStatus = computeReservationStatus(data.status, data.endTime);

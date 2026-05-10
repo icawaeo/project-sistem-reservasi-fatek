@@ -98,7 +98,7 @@ function ReservasiContent() {
     const startTime = searchParams.get("startTime") ?? storedDraft?.startTime ?? "";
     const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
-    const isCivitas = publicSessionUser?.userType === "STUDENT";
+    const isCivitas = publicSessionUser?.userType === "USER";
     const isLabBuilding = isLabBuildingUtil(roomBuilding);
 
     const [borrowerName, setBorrowerName] = useState<string | null>(null);

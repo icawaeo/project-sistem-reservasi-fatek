@@ -1,5 +1,3 @@
-export type UserCategory = "umum" | "unsrat";
-
 export type UserRoleValue =
   | "USER"
   | "ADMIN"
@@ -15,7 +13,6 @@ export type UserItem = {
   id: string;
   name: string;
   email: string;
-  userCategory: UserCategory;
   role: UserRoleValue;
   createdAt: string;
   isVerified: boolean;
@@ -25,7 +22,6 @@ export type UserItem = {
 export type UserPayload = {
   name: string;
   email: string;
-  userCategory: UserCategory;
   role: UserRoleValue;
 };
 
@@ -39,14 +35,7 @@ export const USER_ROLE_OPTIONS: Array<{ value: UserRoleValue; label: string }> =
   { value: "SUPERADMIN", label: "Superadmin" },
 ];
 
-export const USER_CATEGORY_OPTIONS: Array<{ value: UserCategory; label: string }> = [
-  { value: "umum", label: "Umum" },
-  { value: "unsrat", label: "Unsrat" },
-];
-
 export const roleLabel = (role: UserRoleValue) => {
   const option = USER_ROLE_OPTIONS.find((item) => item.value === role);
   return option?.label ?? role;
 };
-
-export const categoryLabel = (value: UserCategory) => (value === "unsrat" ? "Unsrat" : "Umum");

@@ -31,7 +31,6 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
     }, {});
   });
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<"ALL" | "umum" | "unsrat">("ALL");
   const [selectedRole, setSelectedRole] = useState<UserRoleFilter>("ALL");
   const [selectedVerification, setSelectedVerification] = useState<"ALL" | "VERIFIED" | "UNVERIFIED">("ALL");
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,13 +48,12 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
     const loweredSearch = search.trim().toLowerCase();
 
     return users.filter((user) => {
-      const matchesCategory = selectedCategory === "ALL" || user.userCategory === selectedCategory;
       const matchesRole = selectedRole === "ALL" || user.role === selectedRole;
       const matchesVerification =
         selectedVerification === "ALL" ||
         (selectedVerification === "VERIFIED" ? user.isVerified : !user.isVerified);
 
-      if (!matchesCategory || !matchesRole || !matchesVerification) {
+      if (!matchesRole || !matchesVerification) {
         return false;
       }
 
@@ -65,7 +63,7 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
 
       return user.name.toLowerCase().includes(loweredSearch) || user.email.toLowerCase().includes(loweredSearch);
     });
-  }, [users, search, selectedCategory, selectedRole, selectedVerification]);
+  }, [users, search, selectedRole, selectedVerification]);
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / ITEMS_PER_PAGE));
 
@@ -338,17 +336,12 @@ export default function UserManagementContent({ initialUsers }: UserManagementCo
 
         <UserFilter
           search={search}
-          selectedCategory={selectedCategory}
           selectedRole={selectedRole}
           selectedVerification={selectedVerification}
           totalUsers={filteredUsers.length}
           onAddUser={() => setIsCreateModalOpen(true)}
           onSearchChange={(value) => {
             setSearch(value);
-            setCurrentPage(1);
-          }}
-          onCategoryChange={(value) => {
-            setSelectedCategory(value);
             setCurrentPage(1);
           }}
           onRoleChange={(value) => {

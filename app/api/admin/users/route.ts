@@ -12,13 +12,7 @@ import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-l
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESEND_COOLDOWN_SECONDS = 60;
 
-const mapUserCategoryToType = (value: unknown): UserType => {
-  if (value === "unsrat") {
-    return UserType.STAFF;
-  }
 
-  return UserType.PUBLIC;
-};
 
 const parseRole = (value: unknown): UserRole => {
   if (
@@ -69,7 +63,7 @@ const mapUser = (user: {
   id: user.user_id,
   name: user.name,
   email: user.email,
-  userCategory: user.userType === UserType.PUBLIC ? "umum" : "unsrat",
+
   role: user.role,
   createdAt: user.createdAt.toISOString(),
   isVerified: (user.passwordSetupTokens ?? []).every((token) => token.usedAt !== null),
@@ -136,7 +130,7 @@ export async function POST(request: Request) {
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
-    const userType = mapUserCategoryToType(body?.userCategory);
+    const userType = UserType.STAFF;
     const role = parseRole(body?.role);
     const { token, tokenHash, expiresAt } = generatePasswordSetupToken();
 

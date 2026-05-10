@@ -32,7 +32,7 @@ export default function MonitoringDetailModal({
     return null;
   }
 
-  const userCategory = data.user.userType === "PUBLIC" ? "UMUM" : "CIVITAS";
+
 
   return (
     <div
@@ -65,8 +65,8 @@ export default function MonitoringDetailModal({
               <p className="mt-1 text-sm font-semibold text-slate-900">{data.user.name}</p>
             </div>
             <div className="rounded-lg border border-slate-200 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Jenis User</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{userCategory}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">NIM / NIP</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{data.user.identifier || "-"}</p>
             </div>
             <div className="rounded-lg border border-slate-200 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Kegiatan</p>

@@ -15,9 +15,8 @@ datasource db {
 }
 
 enum UserType {
-  STUDENT
+  USER
   STAFF
-  PUBLIC
 }
 
 enum UserRole {
@@ -58,7 +57,7 @@ model User {
   email        String    @unique
   name         String
   passwordHash String
-  identifier   String?   // NIM/NIP - nullable for PUBLIC users
+  identifier   String?   // NIM/NIP - nullable for STAFF (admin) users
   userType     UserType
   role         UserRole  @default(USER)
   departmentScope LabDepartment?

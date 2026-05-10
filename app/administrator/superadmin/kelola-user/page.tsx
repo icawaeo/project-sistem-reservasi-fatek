@@ -58,7 +58,6 @@ export default async function SuperadminKelolaUserPage() {
     id: user.user_id,
     name: user.name,
     email: user.email,
-    userCategory: user.userType === "PUBLIC" ? "umum" : "unsrat",
     role: user.role,
     createdAt: user.createdAt.toISOString(),
     isVerified: user.passwordSetupTokens.every((token: { usedAt: null; }) => token.usedAt !== null),
