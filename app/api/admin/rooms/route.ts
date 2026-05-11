@@ -156,7 +156,7 @@ export async function GET() {
       }),
     ]);
 
-    const buildings = buildingsData.map((item) => item.building_name);
+    const buildings: string[] = buildingsData.map((item: { building_name: string }) => item.building_name);
 
     return NextResponse.json({
       rooms: rooms.map(mapRoom),

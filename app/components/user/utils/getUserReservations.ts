@@ -3,6 +3,19 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import type { ReservationRecord, SortOrder } from "../riwayat/_types";
 
+type UserReservationWithRoom = {
+  res_id: string;
+  res_startTime: Date;
+  res_endTime: Date;
+  res_status: string;
+  res_purpose: string | null;
+  res_documentUrl: string | null;
+  room: {
+    room_name: string;
+    room_building: string | null;
+  };
+};
+
 const allowedSortValues = new Set<SortOrder>(["newest", "oldest"]);
 
 export const normalizeSortOrder = (value: unknown): SortOrder => {
@@ -31,7 +44,7 @@ export async function getUserReservations(userId: string, sort: SortOrder): Prom
     },
   });
 
-  return reservations.map((reservation) => ({
+  return reservations.map((reservation: UserReservationWithRoom) => ({
     res_id: reservation.res_id,
     res_startTime: reservation.res_startTime.toISOString(),
     res_endTime: reservation.res_endTime.toISOString(),

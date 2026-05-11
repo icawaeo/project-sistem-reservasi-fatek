@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { isPrismaKnownRequestError } from "@/lib/prisma-errors";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 import { saveBase64Image } from "@/lib/image-upload";
 
@@ -126,7 +126,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(mapBuilding(building));
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (isPrismaKnownRequestError(error)) {
       if (error.code === "P2025") {
         logServerWarn("[api/admin/buildings/:id] Building not found during update", {
           ...getRequestLogMeta(request),

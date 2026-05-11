@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { UserRole, UserType } from "@prisma/client";
+import { USER_ROLES, USER_TYPES } from "@/lib/user-enums";
 
 const MAX_ATTEMPTS = 5;
 
@@ -90,15 +90,15 @@ export async function POST(request: NextRequest) {
     }
 
     // OTP valid → Buat User baru dan hapus PendingRegistration dalam satu transaksi
-    const user = await prisma.$transaction(async (tx) => {
+    const user = await prisma.$transaction(async (tx: typeof prisma) => {
       const newUser = await tx.user.create({
         data: {
           name: pending.name,
           email: pending.email,
           passwordHash: pending.passwordHash,
           identifier: pending.identifier,
-          userType: UserType.USER,
-          role: UserRole.USER,
+          userType: USER_TYPES.USER,
+          role: USER_ROLES.USER,
         },
       });
 

@@ -8,14 +8,37 @@ import OccupiedRoomsSection, { OccupiedRoomCard } from "@/app/components/user/la
 import LandingAvailabilitySearch from "../components/user/landingpage/LandingAvailabilitySearch.client";
 import { allMapView, mapPoints } from "../components/user/data/landingpage-data";
 
+export const dynamic = "force-dynamic";
+
+type LandingBuildingRecord = {
+  building_name: string;
+  building_imageUrl: string | null;
+};
+
+type LandingRoomRecord = {
+  room_building: string | null;
+};
+
+type LandingReservationRecord = {
+  res_purpose: string | null;
+  res_startTime: Date;
+  res_endTime: Date;
+  room: {
+    room_name: string;
+    room_building: string | null;
+  };
+};
+
 export default async function LandingPage() {
   const [dbBuildings, dbRooms] = await Promise.all([
     prisma.building.findMany({ where: { building_isActive: true } }),
     prisma.room.findMany({ where: { room_isActive: true } }),
   ]);
 
-  const buildings: LandingBuildingCard[] = dbBuildings.map((b) => {
-    const roomCount = dbRooms.filter((r) => r.room_building === b.building_name).length;
+  const activeRooms: LandingRoomRecord[] = dbRooms;
+
+  const buildings: LandingBuildingCard[] = dbBuildings.map((b: LandingBuildingRecord) => {
+    const roomCount = activeRooms.filter((r: LandingRoomRecord) => r.room_building === b.building_name).length;
     return {
       name: b.building_name,
       image: b.building_imageUrl || "/hero.jpeg",
@@ -28,7 +51,7 @@ export default async function LandingPage() {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const todayReservations = await prisma.reservation.findMany({
+  const todayReservations: LandingReservationRecord[] = await prisma.reservation.findMany({
     where: {
       res_status: "APPROVED",
       res_date: {
@@ -46,8 +69,8 @@ export default async function LandingPage() {
     const formatTime = (d: Date) => d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
     return {
       name: res.room.room_name,
-      building: res.room.room_building,
-      activity: res.res_purpose,
+      building: res.room.room_building ?? "-",
+      activity: res.res_purpose ?? "-",
       time: `${formatTime(res.res_startTime)} - ${formatTime(res.res_endTime)} WITA`,
     };
   });

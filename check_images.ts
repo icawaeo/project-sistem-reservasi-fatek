@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 async function check() {
   const rooms = await prisma.room.findMany();
@@ -9,4 +7,4 @@ async function check() {
   }
 }
 
-check().catch(console.error).finally(() => prisma.$disconnect());
+check().catch(console.error);

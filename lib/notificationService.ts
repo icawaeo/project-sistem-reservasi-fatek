@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { messaging } from '@/lib/firebase'; // This is the admin messaging from firebase-admin
+import { getMessagingAdmin } from '@/lib/firebase';
 
 export type NotificationType =
   | 'RESERVATION_NEW'
@@ -7,6 +7,10 @@ export type NotificationType =
   | 'RESERVATION_REJECTED'
   | 'RESERVATION_COMPLETED'
   | 'RESERVATION_CANCELLED';
+
+type FcmTokenRecord = {
+  token: string;
+};
 
 /**
  * Create a notification record and send FCM to user's devices
@@ -34,10 +38,13 @@ export async function sendNotification(
     select: { token: true },
   });
 
+  const activeTokens: FcmTokenRecord[] = tokens;
+
   // 3. Send FCM message if tokens exist
-  if (tokens.length > 0) {
-    const fcmTokens = tokens.map((t) => t.token);
+  if (activeTokens.length > 0) {
+    const fcmTokens = activeTokens.map((t: FcmTokenRecord) => t.token);
     try {
+      const messaging = getMessagingAdmin();
       await messaging.sendEachForMulticast({
         tokens: fcmTokens,
         notification: {
