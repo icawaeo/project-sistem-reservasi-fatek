@@ -12,6 +12,35 @@ type RoomWithReservations = {
 	[key: string]: unknown;
 };
 
+// Status reservasi yang sudah tidak aktif (tidak memblokir slot ruangan)
+const INACTIVE_RESERVATION_STATUSES = [
+  "REJECTED", "REJECTED_KABAG", "REJECTED_DEKAN",
+  "REJECTED_WD2", "REJECTED_KAJUR", "REJECTED_KEPALA_LAB",
+  "COMPLETED", "CANCELLED",
+];
+
+// Buffer 2 jam setelah reservasi selesai sebelum ruangan bisa dipakai lagi
+const BUFFER_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Generate array of date strings (YYYY-MM-DD) from startDate to endDate (inclusive).
+ */
+const getDateRange = (startDate: string, endDate: string): string[] => {
+  const dates: string[] = [];
+  const current = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+
+  while (current <= end) {
+    const yyyy = current.getFullYear();
+    const mm = String(current.getMonth() + 1).padStart(2, "0");
+    const dd = String(current.getDate()).padStart(2, "0");
+    dates.push(`${yyyy}-${mm}-${dd}`);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -24,31 +53,46 @@ export async function GET(request: Request) {
     const hasScheduleParams = !!(startDate && endDate && startTime && endTime);
 
     if (hasScheduleParams) {
-      const requestStart = parseDateTime(startDate as string, startTime as string);
-      const requestEnd = parseDateTime(endDate as string, endTime as string);
+      // Validasi dasar
+      const testStart = parseDateTime(startDate as string, startTime as string);
+      const testEnd = parseDateTime(startDate as string, endTime as string);
 
-      if (!requestStart || !requestEnd) {
+      if (!testStart || !testEnd) {
         return NextResponse.json({ error: "Format tanggal/waktu tidak valid" }, { status: 400 });
       }
 
-      if (requestEnd <= requestStart) {
+      if (testEnd <= testStart) {
         return NextResponse.json(
-          {
-            error:
-              "Jam selesai tidak boleh lebih awal dari jam mulai.",
-          },
+          { error: "Jam selesai tidak boleh lebih awal dari jam mulai." },
           { status: 400 },
         );
       }
 
+      // Generate daftar tanggal (untuk multi-day, cek per hari)
+      const dates = getDateRange(startDate as string, endDate as string);
+
+      // Buat kondisi overlap per hari dengan buffer 2 jam setelah reservasi selesai.
+      // Buffer: jika reservasi berakhir jam 12:00, ruangan baru tersedia jam 14:00.
+      // Rumus: res_endTime + 2h > requestStart  →  res_endTime > requestStart - 2h
+      const dayOverlapConditions = dates.map((date) => {
+        const dayStart = parseDateTime(date, startTime as string)!;
+        const dayEnd = parseDateTime(date, endTime as string)!;
+        const bufferedStart = new Date(dayStart.getTime() - BUFFER_MS);
+        return {
+          res_startTime: { lt: dayEnd },
+          res_endTime: { gt: bufferedStart },
+        };
+      });
+
+      // Ruangan tersedia jika TIDAK ADA reservasi aktif yang overlap di hari manapun
       const rooms = await prisma.room.findMany({
         where: {
           room_isActive: true,
           ...(building ? { room_building: building } : {}),
           reservations: {
             none: {
-              res_startTime: { lt: requestEnd },
-              res_endTime: { gt: requestStart },
+              res_status: { notIn: INACTIVE_RESERVATION_STATUSES },
+              OR: dayOverlapConditions,
             },
           },
         },
@@ -70,6 +114,8 @@ export async function GET(request: Request) {
       include: {
         reservations: {
           where: {
+            // Hanya reservasi aktif yang dianggap "sedang digunakan"
+            res_status: { notIn: INACTIVE_RESERVATION_STATUSES },
             res_startTime: { lte: now },
             res_endTime: { gte: now },
           },

@@ -247,6 +247,33 @@ export default function KonfirmasiReservasiPage() {
         }
       }
 
+      // Re-check ketersediaan ruangan sebelum submit (mencegah bentrok jika user lain sudah mengambil slot)
+      try {
+        const availParams = new URLSearchParams({
+          startDate: reservation.startDate,
+          endDate: reservation.endDate || reservation.startDate,
+          startTime: reservation.startTime,
+          endTime: reservation.endTime,
+          building: reservation.room_building,
+        });
+        const availCheckRes = await fetch(`/api/rooms?${availParams.toString()}`);
+        const availRooms = await availCheckRes.json();
+        if (availCheckRes.ok && Array.isArray(availRooms)) {
+          const stillAvailable = availRooms.some(
+            (r: { room_id: string }) => r.room_id === reservation.room_id
+          );
+          if (!stillAvailable) {
+            pushToast({
+              type: "error",
+              message: "Ruangan sudah tidak tersedia untuk jadwal yang dipilih. Silakan pilih ruangan atau jadwal lain.",
+            });
+            return;
+          }
+        }
+      } catch {
+        // Lanjutkan jika pengecekan gagal — backend tetap akan memvalidasi
+      }
+
       const uploadedDocumentUrl = await uploadSupportingDocument();
       payload.res_documentUrl = uploadedDocumentUrl;
 

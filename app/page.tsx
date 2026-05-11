@@ -21,7 +21,7 @@ function AuthContent() {
 
   return (
       <div className="min-h-screen flex flex-col w-full bg-[radial-gradient(1200px_circle_at_20%_10%,#dbeafe_0%,transparent_55%),radial-gradient(900px_circle_at_80%_30%,#bfdbfe_0%,transparent_60%),linear-gradient(135deg,#c7d2fe_0%,#93c5fd_40%,#60a5fa_100%)] font-sans">
-        <div className="flex-1 flex items-center justify-center px-4 py-4">
+        <div className="flex-1 flex items-center justify-center px-4 py-10">
           <div className="w-full max-w-4xl overflow-hidden rounded-[32px] bg-white/25 backdrop-blur-xl ring-1 ring-white/40 shadow-[0_30px_100px_rgba(2,6,23,0.20)]">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* LEFT COLUMN */}

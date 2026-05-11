@@ -15,7 +15,15 @@ export async function GET(request: Request) {
       where: {
         user_id: session.user.id,
         OR: [
-          { res_status: "PENDING" },
+          {
+            res_status: {
+              in: [
+                "PENDING", "PENDING_KABAG", "PENDING_DEKAN",
+                "PENDING_WD2", "PENDING_WAKIL_DEKAN_2",
+                "PENDING_KAJUR", "PENDING_KEPALA_LAB",
+              ],
+            },
+          },
           {
             res_status: "APPROVED",
             res_endTime: { gt: new Date() },
