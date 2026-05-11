@@ -88,7 +88,7 @@ export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
           <div className="flex items-center justify-between gap-3 px-5 py-5 border-b border-slate-200">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/Logo_Fatek_Unsrat.png"
+                src="/Logo_Fatek_Unsrat.png"
                 alt="Logo Fakultas Teknik Universitas Sam Ratulangi"
                 width={38}
                 height={38}
@@ -165,7 +165,7 @@ export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
           }`}
         >
           <Image
-            src="/images/Logo_Fatek_Unsrat.png"
+            src="/Logo_Fatek_Unsrat.png"
             alt="Logo Fakultas Teknik Universitas Sam Ratulangi"
             width={38}
             height={38}
