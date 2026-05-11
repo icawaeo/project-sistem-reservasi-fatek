@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
+import { sendNotification } from "@/lib/notificationService";
 
 import { isLabBuilding } from "@/app/utils/building";
 
@@ -169,6 +170,30 @@ export async function POST(request: Request) {
         user: true,
       },
     });
+
+    // Send notification to Kabag (ADMIN) and Superadmin only — other roles get notified via cascade
+    try {
+      const admins = await prisma.user.findMany({
+        where: {
+          role: {
+            in: ['ADMIN', 'SUPERADMIN']
+          }
+        },
+        select: { user_id: true }
+      });
+
+      for (const admin of admins) {
+        await sendNotification(
+          admin.user_id,
+          'RESERVATION_NEW',
+          'Pengajuan Reservasi Baru',
+          `${reservasi.user.name} meminjam ${reservasi.room.room_name}`,
+          { reservationId: reservasi.res_id }
+        );
+      }
+    } catch (error) {
+      console.error('Error sending new reservation notification:', error);
+    }
 
     return NextResponse.json(reservasi);
   } catch (error) {

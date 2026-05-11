@@ -207,6 +207,7 @@ model FcmToken {
   id        String   @id @default(cuid())
   token     String   @unique
   userId    String
+  isActive  Boolean  @default(true)
   user      User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
+import { sendNotification, NotificationType } from "@/lib/notificationService";
 
 type DecisionAction = "APPROVE" | "REJECT";
 
@@ -274,6 +275,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const updated = await prisma.reservation.findUnique({
       where: { res_id: reservationId },
       select: {
+        res_id: true,
         res_status: true,
         res_processedAt: true,
         res_waitingDekanAt: true,
@@ -281,6 +283,19 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         res_waitingKajurAt: true,
         res_waitingKepalaLabAt: true,
         res_decisionAt: true,
+        res_labDepartment: true,
+        res_labProgram: true,
+        user: {
+          select: {
+            user_id: true,
+            name: true,
+          },
+        },
+        room: {
+          select: {
+            room_name: true,
+          },
+        },
       },
     });
 
@@ -288,8 +303,77 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       return NextResponse.json({ error: "Pengajuan tidak ditemukan" }, { status: 404 });
     }
 
+    // --- Notifications ---
+    try {
+      const normalizedStatus = updated.res_status.toUpperCase();
+      const roomName = updated.room.room_name;
+      const userName = updated.user?.name ?? "User";
+
+      // 1. Notify the requesting USER on final decisions (APPROVED / REJECTED)
+      if (normalizedStatus === 'APPROVED' && updated.user) {
+        await sendNotification(
+          updated.user.user_id,
+          'RESERVATION_APPROVED',
+          'Reservasi Disetujui',
+          `Pengajuan Anda untuk ${roomName} telah disetujui`,
+          { reservationId: updated.res_id }
+        );
+      } else if (normalizedStatus.startsWith('REJECTED') && updated.user) {
+        await sendNotification(
+          updated.user.user_id,
+          'RESERVATION_REJECTED',
+          'Reservasi Ditolak',
+          `Pengajuan Anda untuk ${roomName} telah ditolak`,
+          { reservationId: updated.res_id }
+        );
+      }
+
+      // 2. Cascade: notify next-stage admin(s) when approval progresses
+      let nextAdminRole: string | null = null;
+      let nextAdminWhere: Record<string, any> = {};
+
+      if (normalizedStatus === 'PENDING_DEKAN') {
+        nextAdminRole = 'ADMIN_DEKAN';
+        nextAdminWhere = { role: 'ADMIN_DEKAN' };
+      } else if (normalizedStatus === 'PENDING_WD2' || normalizedStatus === 'PENDING_WAKIL_DEKAN_2') {
+        nextAdminRole = 'ADMIN_WD2';
+        nextAdminWhere = { role: 'ADMIN_WD2' };
+      } else if (normalizedStatus === 'PENDING_KAJUR') {
+        nextAdminRole = 'KAJUR';
+        nextAdminWhere = {
+          role: 'KAJUR',
+          ...(updated.res_labDepartment ? { departmentScope: updated.res_labDepartment } : {}),
+        };
+      } else if (normalizedStatus === 'PENDING_KEPALA_LAB') {
+        nextAdminRole = 'KEPALA_LAB';
+        nextAdminWhere = {
+          role: 'KEPALA_LAB',
+          ...(updated.res_labProgram ? { programScope: updated.res_labProgram } : {}),
+        };
+      }
+
+      if (nextAdminRole && Object.keys(nextAdminWhere).length > 0) {
+        const nextAdmins = await prisma.user.findMany({
+          where: nextAdminWhere,
+          select: { user_id: true },
+        });
+
+        for (const admin of nextAdmins) {
+          await sendNotification(
+            admin.user_id,
+            'RESERVATION_NEW',
+            'Pengajuan Menunggu Verifikasi Anda',
+            `Pengajuan ${userName} untuk ${roomName} memerlukan persetujuan Anda`,
+            { reservationId: updated.res_id }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error sending reservation decision notification:', error);
+    }
+
     return NextResponse.json({
-      id: reservationId,
+      id: updated.res_id,
       status: updated.res_status,
       processedAt: updated.res_processedAt ? updated.res_processedAt.toISOString() : null,
       waitingDekanAt: updated.res_waitingDekanAt ? updated.res_waitingDekanAt.toISOString() : null,
