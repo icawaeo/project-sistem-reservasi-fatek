@@ -490,7 +490,7 @@ function ReservasiContent() {
                                     onChange={handleSupportingFileChange}
                                 />
                                 <Upload size={24} className="mx-auto text-slate-400" />
-                                <p className="mt-2 text-sm lg:text-base font-semibold text-slate-700">
+                                <p className="mt-2 text-sm lg:text-base font-semibold text-slate-700 truncate px-2 w-full">
                                     {supportingFileLabel}
                                 </p>
                                 <p className="text-[11px] lg:text-xs text-slate-500 mt-1">Format: PDF/JPG/PNG (maks 5 MB)</p>
