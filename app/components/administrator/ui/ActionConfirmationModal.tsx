@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle, Loader2, X } from "lucide-react";
 
 type ActionConfirmationModalProps = {
   isOpen: boolean;
-  action: "APPROVE" | "REJECT" | null;
+  action: "APPROVE" | "REJECT" | "COMPLETE" | null;
   title: string;
   description?: string;
   onConfirm: () => Promise<void> | void;
@@ -39,12 +39,12 @@ export default function ActionConfirmationModal({
     return null;
   }
 
-  const isApprove = action === "APPROVE";
-  const iconBg = isApprove ? "bg-emerald-100" : "bg-rose-100";
-  const iconColor = isApprove ? "text-emerald-600" : "text-rose-600";
-  const Icon = isApprove ? CheckCircle : AlertTriangle;
+  const isApproveOrComplete = action === "APPROVE" || action === "COMPLETE";
+  const iconBg = isApproveOrComplete ? "bg-emerald-100" : "bg-rose-100";
+  const iconColor = isApproveOrComplete ? "text-emerald-600" : "text-rose-600";
+  const Icon = isApproveOrComplete ? CheckCircle : AlertTriangle;
 
-  const btnBg = isApprove ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700";
+  const btnBg = isApproveOrComplete ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700";
 
   return (
     <div

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, Trash2, CheckCircle } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 import StatusBadge from "@/app/components/administrator/ui/StatusBadge";
 import DeleteConfirmationModal from "@/app/components/administrator/ui/DeleteConfirmationModal";
@@ -100,11 +100,11 @@ export default function UniversalReservationTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED">("ALL");
-  const [processing, setProcessing] = useState<{ id: string; action: "APPROVE" | "REJECT" } | null>(null);
+  const [processing, setProcessing] = useState<{ id: string; action: "APPROVE" | "REJECT" | "COMPLETE" } | null>(null);
   const [selectedRow, setSelectedRow] = useState<GenericReservation | null>(null);
   const [tableData, setTableData] = useState<GenericReservation[]>(data);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; item: GenericReservation | null }>({ isOpen: false, item: null });
-  const [decisionConfirm, setDecisionConfirm] = useState<{ isOpen: boolean; item: GenericReservation | null; action: "APPROVE" | "REJECT" | null }>({ isOpen: false, item: null, action: null });
+  const [decisionConfirm, setDecisionConfirm] = useState<{ isOpen: boolean; item: GenericReservation | null; action: "APPROVE" | "REJECT" | "COMPLETE" | null }>({ isOpen: false, item: null, action: null });
   const isAdminMode = mode === "admin";
 
   useEffect(() => setTableData(data), [data]);
@@ -173,6 +173,31 @@ export default function UniversalReservationTable({
       onStatusUpdated?.(id, updates);
       setSelectedRow((prev) => (prev && prev.id === id ? { ...prev, ...updates } : prev));
       pushToast({ type: "success", message: action === "APPROVE" ? "Pengajuan berhasil disetujui." : "Pengajuan berhasil ditolak." });
+    } catch (error) {
+      pushToast({ type: "error", message: error instanceof Error ? error.message : "Terjadi kesalahan saat memproses." });
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleComplete = async (id: string) => {
+    if (isAdminMode || processing) return;
+    setProcessing({ id, action: "COMPLETE" });
+
+    try {
+      const response = await fetch(`/api/reservasi/complete?id=${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload.status) throw new Error(payload.error || "Gagal menyelesaikan pengajuan");
+
+      const updates: Partial<GenericReservation> = { status: payload.status, processedAt: payload.processedAt ?? null };
+      onStatusUpdated?.(id, updates);
+      setSelectedRow((prev) => (prev && prev.id === id ? { ...prev, ...updates } : prev));
+      setTableData((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)));
+      pushToast({ type: "success", message: "Pengajuan berhasil diselesaikan." });
     } catch (error) {
       pushToast({ type: "error", message: error instanceof Error ? error.message : "Terjadi kesalahan saat memproses." });
     } finally {
@@ -259,7 +284,14 @@ export default function UniversalReservationTable({
                         {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
                           <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700">Tinjau &amp; Proses</button></div></td>
                         ) : (
-                          <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button></div></td>
+                          <td className="px-2 py-3 text-center align-middle">
+                            {/* Superadmin actions container */}
+                            <div className="flex w-full justify-center gap-1.5">
+                              <button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button>
+                              <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) === 'APPROVED' || computeReservationStatus(item.status, item.endTime) === 'COMPLETED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={16} /></button>
+                              {!isAdminMode && <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"><Trash2 size={16} /></button>}
+                            </div>
+                          </td>
                         )}
                       </tr>
                     ))
@@ -328,11 +360,14 @@ export default function UniversalReservationTable({
                   {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
                     <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-slate-800 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700 active:bg-slate-900">Tinjau &amp; Proses</button>
                   ) : (
-                    <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 active:bg-blue-200">Lihat Detail</button>
+                    <>
+                      <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 active:bg-blue-200">Lihat Detail</button>
+                      <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) === 'APPROVED' || computeReservationStatus(item.status, item.endTime) === 'COMPLETED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-emerald-600 transition-colors hover:bg-emerald-100 active:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={18} /></button>
+                    </>
                   )}
 
-                  {showDelete && !isAdminMode ? (
-                    <button type="button" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 text-rose-600 transition-colors hover:bg-rose-100 active:bg-rose-200"><Trash2 size={16} /></button>
+                  {!isAdminMode ? (
+                    <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-rose-600 transition-colors hover:bg-rose-100 active:bg-rose-200"><Trash2 size={18} /></button>
                   ) : null}
                 </div>
               </div>
@@ -384,11 +419,19 @@ export default function UniversalReservationTable({
       <ActionConfirmationModal
         isOpen={decisionConfirm.isOpen}
         action={decisionConfirm.action}
-        title={decisionConfirm.action === "APPROVE" ? "Setujui Pengajuan" : "Tolak Pengajuan"}
-        description={`Anda yakin ingin ${decisionConfirm.action === "APPROVE" ? "menyetujui" : "menolak"} pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}"?`}
+        title={decisionConfirm.action === "COMPLETE" ? "Selesaikan Pengajuan" : decisionConfirm.action === "APPROVE" ? "Setujui Pengajuan" : "Tolak Pengajuan"}
+        description={
+          decisionConfirm.action === "COMPLETE"
+            ? `Anda yakin ingin menyelesaikan pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}" secara langsung?`
+            : `Anda yakin ingin ${decisionConfirm.action === "APPROVE" ? "menyetujui" : "menolak"} pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}"?`
+        }
         onConfirm={async () => {
           if (decisionConfirm.item && decisionConfirm.action) {
-            await handleDecision(decisionConfirm.item.id, decisionConfirm.action);
+            if (decisionConfirm.action === "COMPLETE") {
+              await handleComplete(decisionConfirm.item.id);
+            } else {
+              await handleDecision(decisionConfirm.item.id, decisionConfirm.action);
+            }
             setDecisionConfirm({ isOpen: false, item: null, action: null });
           }
         }}
