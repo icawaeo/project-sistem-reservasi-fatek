@@ -95,10 +95,8 @@ export default function RegisterView() {
 
   // — OTP input handlers —
   const handleOtpChange = (index: number, value: string) => {
-    // Hanya terima digit
     const digit = value.replace(/\D/g, "");
     if (digit.length > 1) {
-      // Handle paste into a single field
       const digits = digit.slice(0, 6).split("");
       const newOtp = [...otpDigits];
       digits.forEach((d, i) => {
@@ -246,7 +244,7 @@ export default function RegisterView() {
             <ShieldCheck size={22} className="text-emerald-700" />
           </div>
           <div>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900">Verifikasi Email</h2>
+            <h2 className="text-xl lg:text-2xl font-extrabold text-slate-900">Verifikasi Email</h2>
           </div>
         </div>
 
@@ -255,11 +253,11 @@ export default function RegisterView() {
           <span className="font-semibold text-slate-800">{maskedEmail}</span>
         </p>
 
-        <div className="mt-6 rounded-3xl bg-white/35 p-5 lg:p-6 ring-1 ring-white/20">
+        <div className="mt-5 rounded-3xl bg-white/35 p-4 lg:p-5 ring-1 ring-white/20">
           {/* OTP Illustration */}
-          <div className="flex justify-center mb-5">
-            <div className="h-14 w-14 rounded-2xl bg-blue-50 grid place-items-center ring-1 ring-blue-100/60">
-              <Mail size={28} className="text-blue-600" />
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-2xl bg-blue-50 grid place-items-center ring-1 ring-blue-100/60">
+              <Mail size={24} className="text-blue-600" />
             </div>
           </div>
 
@@ -293,7 +291,7 @@ export default function RegisterView() {
             type="button"
             onClick={handleVerifyOtp}
             disabled={otpLoading || otpDigits.join("").length !== 6}
-            className="mt-6 w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="mt-5 w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-2.5 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {otpLoading ? (
               <>
@@ -306,7 +304,7 @@ export default function RegisterView() {
           </button>
 
           {/* Countdown & Resend */}
-          <div className="mt-5 text-center">
+          <div className="mt-4 text-center">
             {countdown > 0 ? (
               <p className="text-sm text-slate-500">
                 Kirim ulang kode dalam{" "}
@@ -330,7 +328,7 @@ export default function RegisterView() {
           </p>
         </div>
 
-        <p className="pt-4 text-center text-sm lg:text-base text-slate-700">
+        <p className="pt-3 text-center text-sm lg:text-base text-slate-700">
           Sudah memiliki akun?{" "}
           <Link className="font-semibold hover:underline" href="/?tab=login">
             Masuk di sini
@@ -340,30 +338,17 @@ export default function RegisterView() {
     );
   }
 
-  // ─────────────────────────────────────────
-  // STEP 1: Registration Form
-  // ─────────────────────────────────────────
   return (
     <div>
-      <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900">Buat Akun Baru</h2>
-      <p className="mt-2 text-sm lg:text-base text-slate-700/80">
+      <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900">Buat Akun Baru</h2>
+      <p className="mt-1 text-sm lg:text-base text-slate-700/80">
         Daftar sebagai civitas UNSRAT untuk menggunakan sistem reservasi ruangan.
       </p>
 
-      <div className="mt-6">
-        <div className="rounded-3xl bg-white/30 p-5 ring-1 ring-white/25">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-slate-900/10 grid place-items-center ring-1 ring-white/25">
-              <span className="text-slate-900">🎓</span>
-            </div>
-            <div>
-              <div className="text-base lg:text-lg font-extrabold text-slate-900">Civitas UNSRAT</div>
-              <div className="text-xs lg:text-sm text-slate-700/80">Mahasiswa &amp; Dosen Fakultas Teknik</div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white/35 p-5 ring-1 ring-white/20">
-            <form className="space-y-4" onSubmit={handleSubmit}>
+      <div className="mt-5">
+        <div className="rounded-3xl bg-white/30 p-4 ring-1 ring-white/25">
+          <div className="rounded-3xl bg-white/35 p-4 ring-1 ring-white/20">
+            <form className="space-y-3" onSubmit={handleSubmit}>
               <div>
                 <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                   NAMA LENGKAP
@@ -374,7 +359,7 @@ export default function RegisterView() {
                   onChange={handleChange}
                   required
                   placeholder="Masukkan nama lengkap Anda"
-                  className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+                  className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                 />
               </div>
 
@@ -390,7 +375,7 @@ export default function RegisterView() {
                   inputMode="numeric"
                   pattern="\d*"
                   placeholder="Masukkan NIM atau NIP Anda"
-                  className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+                  className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                 />
               </div>
 
@@ -405,7 +390,7 @@ export default function RegisterView() {
                   onChange={handleChange}
                   required
                   placeholder="nama@student.unsrat.ac.id"
-                  className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+                  className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                 />
                 <p className="mt-1.5 text-[11px] lg:text-xs text-slate-600/80">
                   Gunakan email <span className="font-semibold">@student.unsrat.ac.id</span> atau <span className="font-semibold">@unsrat.ac.id</span>
@@ -417,7 +402,7 @@ export default function RegisterView() {
                   <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                     KATA SANDI
                   </label>
-                  <div className="relative mt-2">
+                  <div className="relative mt-1.5">
                     <input
                       name="password"
                       value={formData.password}
@@ -425,7 +410,7 @@ export default function RegisterView() {
                       required
                       type={showPassword ? "text" : "password"}
                       placeholder="Masukkan kata sandi"
-                      className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+                      className="w-full rounded-2xl bg-white/70 px-4 py-2.5 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                     />
                     <button
                       type="button"
@@ -440,7 +425,7 @@ export default function RegisterView() {
                   <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
                     KONFIRMASI
                   </label>
-                  <div className="relative mt-2">
+                  <div className="relative mt-1.5">
                     <input
                       name="confirmPassword"
                       value={formData.confirmPassword}
@@ -448,7 +433,7 @@ export default function RegisterView() {
                       required
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Konfirmasi kata sandi"
-                      className="mt-2 w-full rounded-2xl bg-white/70 px-4 py-3 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+                      className="w-full rounded-2xl bg-white/70 px-4 py-2.5 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
                     />
                     <button
                       type="button"
@@ -464,7 +449,7 @@ export default function RegisterView() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-3 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-2.5 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {loading ? <Loader2 className="animate-spin" size={20} /> : "Daftar Akun"}
               </button>
@@ -472,7 +457,7 @@ export default function RegisterView() {
           </div>
         </div>
 
-        <p className="pt-4 text-center text-sm lg:text-base text-slate-700">
+        <p className="pt-3 text-center text-sm lg:text-base text-slate-700">
           Sudah memiliki akun?{" "}
           <Link className="font-semibold hover:underline" href="/?tab=login">
             Masuk di sini
