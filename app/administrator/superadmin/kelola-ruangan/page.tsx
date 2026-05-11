@@ -8,6 +8,8 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import RoomManagementContent from "@/app/components/administrator/kelola-ruangan/RoomManagementContent";
 import type { RoomItem } from "@/app/components/administrator/kelola-ruangan/room-types";
 
+export const dynamic = "force-dynamic";
+
 const normalizeFloor = (value: string) => {
 	const trimmed = value.trim();
 	const matchedNumber = trimmed.match(/\d+/);

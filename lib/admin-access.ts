@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { LabDepartment, LabProgram } from "@prisma/client";
+import type { LabDepartmentValue, LabProgramValue } from "@/lib/lab-enums";
 
 type SessionLikeUser = {
   email?: string | null;
@@ -12,15 +12,15 @@ type AdminReservationRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "K
 
 type AdminReservationViewer = {
   role: AdminReservationRole;
-  departmentScope?: LabDepartment | null;
-  programScope?: LabProgram | null;
+  departmentScope?: LabDepartmentValue | null;
+  programScope?: LabProgramValue | null;
 };
 
 type AdminReservationRecordLike = {
   flow: "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
   status: string;
-  labDepartment: LabDepartment | null;
-  labProgram: LabProgram | null;
+  labDepartment: LabDepartmentValue | null;
+  labProgram: LabProgramValue | null;
 };
 
 const normalizeReservationStatus = (status: string) => (status ?? "").toUpperCase();

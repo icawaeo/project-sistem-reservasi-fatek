@@ -1,8 +1,11 @@
 import "dotenv/config";
-import { PrismaClient, UserRole, type LabDepartment, type LabProgram } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
+import { USER_ROLES, type UserRoleValue } from "@/lib/user-enums";
+import { type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
+
+const { PrismaClient } = require("@prisma/client");
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -22,9 +25,9 @@ type SeedUser = {
   email: string;
   identifier: string;
   userType: "STAFF";
-  role: UserRole;
-  departmentScope?: LabDepartment;
-  programScope?: LabProgram;
+  role: UserRoleValue;
+  departmentScope?: LabDepartmentValue;
+  programScope?: LabProgramValue;
 };
 
 const dummyPassword = "Admin12345";
@@ -35,28 +38,28 @@ const userSeeds: SeedUser[] = [
     email: "superadmin@unsrat.ac.id",
     identifier: "19870001",
     userType: "STAFF",
-    role: UserRole.SUPERADMIN,
+    role: USER_ROLES.SUPERADMIN,
   },
   {
     name: "Admin Dummy",
     email: "admin@unsrat.ac.id",
     identifier: "19870002",
     userType: "STAFF",
-    role: UserRole.ADMIN,
+    role: USER_ROLES.ADMIN,
   },
   {
     name: "Admin Dekan Dummy",
     email: "dekan@unsrat.ac.id",
     identifier: "19870003",
     userType: "STAFF",
-    role: UserRole.ADMIN_DEKAN,
+    role: USER_ROLES.ADMIN_DEKAN,
   },
   {
     name: "Admin Wakil Dekan 2 Dummy",
     email: "wd2@unsrat.ac.id",
     identifier: "19870004",
     userType: "STAFF",
-    role: UserRole.ADMIN_WD2,
+    role: USER_ROLES.ADMIN_WD2,
   },
 
   // Kajur (4 jurusan)
@@ -65,7 +68,7 @@ const userSeeds: SeedUser[] = [
     email: "kajur-elektro@unsrat.ac.id",
     identifier: "19871001",
     userType: "STAFF",
-    role: UserRole.KAJUR,
+    role: USER_ROLES.KAJUR,
     departmentScope: "ELEKTRO",
   },
   {
@@ -73,7 +76,7 @@ const userSeeds: SeedUser[] = [
     email: "kajur-arsitektur@unsrat.ac.id",
     identifier: "19871002",
     userType: "STAFF",
-    role: UserRole.KAJUR,
+    role: USER_ROLES.KAJUR,
     departmentScope: "ARSITEKTUR",
   },
   {
@@ -81,7 +84,7 @@ const userSeeds: SeedUser[] = [
     email: "kajur-sipil@unsrat.ac.id",
     identifier: "19871003",
     userType: "STAFF",
-    role: UserRole.KAJUR,
+    role: USER_ROLES.KAJUR,
     departmentScope: "SIPIL",
   },
   {
@@ -89,7 +92,7 @@ const userSeeds: SeedUser[] = [
     email: "kajur-mesin@unsrat.ac.id",
     identifier: "19871004",
     userType: "STAFF",
-    role: UserRole.KAJUR,
+    role: USER_ROLES.KAJUR,
     departmentScope: "MESIN",
   },
 
@@ -99,7 +102,7 @@ const userSeeds: SeedUser[] = [
     email: "kalab-it@unsrat.ac.id",
     identifier: "19872001",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "IT",
   },
   {
@@ -107,7 +110,7 @@ const userSeeds: SeedUser[] = [
     email: "kalab-elektro@unsrat.ac.id",
     identifier: "19872002",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "ELEKTRO",
   },
   {
@@ -115,7 +118,7 @@ const userSeeds: SeedUser[] = [
     email: "kalab-arsitektur@unsrat.ac.id",
     identifier: "19872003",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "ARSITEKTUR",
   },
   {
@@ -123,7 +126,7 @@ const userSeeds: SeedUser[] = [
     email: "kalab-pwk@unsrat.ac.id",
     identifier: "19872004",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "PWK",
   },
   {
@@ -131,7 +134,7 @@ const userSeeds: SeedUser[] = [
     email: "kalab-sipil@unsrat.ac.id",
     identifier: "19872005",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "SIPIL",
   },
   {
@@ -139,7 +142,7 @@ const userSeeds: SeedUser[] = [
     email: "kalab-lingkungan@unsrat.ac.id",
     identifier: "19872006",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "LINGKUNGAN",
   },
   {
@@ -147,21 +150,21 @@ const userSeeds: SeedUser[] = [
     email: "kalab-mesin@unsrat.ac.id",
     identifier: "19872007",
     userType: "STAFF",
-    role: UserRole.KEPALA_LAB,
+    role: USER_ROLES.KEPALA_LAB,
     programScope: "MESIN",
   },
 ];
 
 const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
 
-const programToDepartment = (program: LabProgram): LabDepartment => {
+const programToDepartment = (program: LabProgramValue): LabDepartmentValue => {
   if (program === "IT" || program === "ELEKTRO") return "ELEKTRO";
   if (program === "ARSITEKTUR" || program === "PWK") return "ARSITEKTUR";
   if (program === "SIPIL" || program === "LINGKUNGAN") return "SIPIL";
   return "MESIN";
 };
 
-const resolveLabProgramFromRoomName = (roomName: string): LabProgram => {
+const resolveLabProgramFromRoomName = (roomName: string): LabProgramValue => {
   const normalized = roomName.toLowerCase();
 
   if (normalized.includes("perangkat lunak") || normalized.includes("keamanan") || normalized.includes("multimedia")) {

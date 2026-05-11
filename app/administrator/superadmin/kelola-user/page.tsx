@@ -8,6 +8,8 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import UserManagementContent from "@/app/components/administrator/kelola-user/UserManagementContent";
 import type { UserItem } from "@/app/components/administrator/kelola-user/user-types";
 
+export const dynamic = "force-dynamic";
+
 const RESEND_COOLDOWN_SECONDS = 60;
 
 const getResendCooldownSeconds = (tokens: Array<{ createdAt: Date; usedAt: Date | null }>) => {

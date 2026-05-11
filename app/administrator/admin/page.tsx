@@ -6,6 +6,39 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import AdminDashboardContent from "@/app/components/administrator/dashboard/AdminDashboardContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import { shouldShowAdminReservation } from "@/lib/admin-access";
+import type { LabDepartmentValue, LabProgramValue } from "@/lib/lab-enums";
+
+export const dynamic = "force-dynamic";
+
+type AdminDashboardReservation = {
+	res_id: string;
+	res_date: Date;
+	res_processedAt: Date | null;
+	res_waitingDekanAt: Date | null;
+	res_waitingWd2At: Date | null;
+	res_waitingKajurAt: Date | null;
+	res_waitingKepalaLabAt: Date | null;
+	res_decisionAt: Date | null;
+	res_flow: "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
+	res_startTime: Date;
+	res_endTime: Date;
+	res_purpose: string | null;
+	res_status: string;
+	res_documentUrl: string | null;
+	res_labDepartment: LabDepartmentValue | null;
+	res_labProgram: LabProgramValue | null;
+	user: {
+		name: string | null;
+		userType: string | null;
+		identifier: string | null;
+		email: string | null;
+	};
+	room: {
+		room_name: string;
+		room_building: string | null;
+		room_locDetail: string | null;
+	};
+};
 
 export default async function AdminDashboardPage() {
 	const session = await getServerSession(authOptions);
@@ -45,7 +78,7 @@ export default async function AdminDashboardPage() {
 		};
 	};
 
-	const reservations = await prisma.reservation.findMany({
+	const reservations: AdminDashboardReservation[] = await prisma.reservation.findMany({
 		include: {
 			user: {
 				select: {
@@ -105,15 +138,15 @@ export default async function AdminDashboardPage() {
 			status: item.res_status,
 			documentUrl: item.res_documentUrl,
 			user: {
-				name: item.user.name,
-				userType: item.user.userType,
+				name: item.user.name ?? "-",
+				userType: (item.user.userType ?? "USER") as "USER" | "STAFF",
 				identifier: item.user.identifier,
-				email: item.user.email,
+				email: item.user.email ?? "-",
 			},
 			room: {
 				name: item.room.room_name,
-				building: item.room.room_building,
-				location: item.room.room_locDetail,
+				building: item.room.room_building ?? "-",
+				location: item.room.room_locDetail ?? "-",
 			},
 		};
 	});

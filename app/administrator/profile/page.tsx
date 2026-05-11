@@ -10,6 +10,8 @@ import Sidebar from "@/app/components/administrator/ui/Sidebar";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import ProfileForm from "@/app/components/administrator/ui/ProfileForm";
 
+export const dynamic = "force-dynamic";
+
 type ProfilePageProps = {
 	searchParams?: Record<string, string | string[] | undefined>;
 };

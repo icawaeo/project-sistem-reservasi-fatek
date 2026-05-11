@@ -1,9 +1,14 @@
-import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 
+const { PrismaClient } = require('@prisma/client') as {
+  PrismaClient: new (...args: any[]) => any
+}
+
+type PrismaClientInstance = InstanceType<typeof PrismaClient>
+
 const globalForPrisma = global as unknown as {
-  prisma?: PrismaClient
+  prisma?: PrismaClientInstance
   pgPool?: Pool
 }
 

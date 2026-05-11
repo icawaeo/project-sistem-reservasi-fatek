@@ -7,6 +7,11 @@ const parseDateTime = (date: string, time: string) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+type RoomWithReservations = {
+	reservations: Array<{ res_id: string }>;
+	[key: string]: unknown;
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -77,7 +82,7 @@ export async function GET(request: Request) {
       ],
     });
 
-    const result = rooms.map(({ reservations, ...room }) => ({
+    const result = rooms.map(({ reservations, ...room }: RoomWithReservations) => ({
       ...room,
       isCurrentlyOccupied: reservations.length > 0,
     }));

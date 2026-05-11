@@ -8,6 +8,8 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import BuildingManagementContent from "@/app/components/administrator/kelola-gedung/BuildingManagementContent";
 import type { BuildingItem } from "@/app/components/administrator/kelola-gedung/building-types";
 
+export const dynamic = "force-dynamic";
+
 export default async function SuperadminKelolaGedungPage() {
 	const session = await getServerSession(authOptions);
 

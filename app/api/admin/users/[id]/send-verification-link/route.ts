@@ -36,6 +36,11 @@ const buildBaseUrl = (request: Request) => {
   return `${url.protocol}//${url.host}`;
 };
 
+type PasswordSetupTokenRecord = {
+	usedAt: Date | null;
+	createdAt: Date;
+};
+
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const session = await authorize();
@@ -67,17 +72,19 @@ export async function POST(request: Request, { params }: RouteParams) {
       },
     });
 
+    const passwordSetupTokens: PasswordSetupTokenRecord[] = user.passwordSetupTokens;
+
     if (!user) {
       return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
     }
 
-    const isVerified = user.passwordSetupTokens.every((token) => token.usedAt !== null);
+    const isVerified = passwordSetupTokens.every((token) => token.usedAt !== null);
 
     if (isVerified) {
       return NextResponse.json({ error: "Akun sudah terverifikasi" }, { status: 400 });
     }
 
-    const latestToken = user.passwordSetupTokens
+    const latestToken = passwordSetupTokens
       .slice()
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
 
