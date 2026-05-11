@@ -61,15 +61,15 @@ export default function LoginView() {
 
   return (
     <div>
-      <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900">Masuk ke Akun</h2>
-      <p className="mt-1 text-sm lg:text-base text-slate-700/80">
+      <h2 className="text-2xl font-extrabold text-slate-900">Masuk ke Akun</h2>
+      <p className="mt-1 text-sm text-slate-700/80">
         Gunakan email yang sudah didaftarkan untuk melanjutkan.
       </p>
 
-      <div className="mt-5 rounded-3xl bg-white/40 p-5 ring-1 ring-white/30">
+      <div className="mt-4 rounded-3xl bg-white/40 p-4 lg:p-5 ring-1 ring-white/30">
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div>
-            <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
+            <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
               ALAMAT EMAIL
             </label>
             <input
@@ -78,12 +78,12 @@ export default function LoginView() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Masukkan alamat email Anda"
-              className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+              className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
             />
           </div>
 
           <div>
-            <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
+            <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
               KATA SANDI
             </label>
 
@@ -94,7 +94,7 @@ export default function LoginView() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan kata sandi Anda"
-                className="w-full rounded-2xl bg-white/70 px-4 py-2.5 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
+                className="w-full rounded-2xl bg-white/70 px-4 py-2 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
               />
               <button
                 type="button"
@@ -108,7 +108,7 @@ export default function LoginView() {
             <div className="mt-2 text-right">
               <button
                 type="button"
-                className="text-xs lg:text-sm font-semibold text-slate-700 hover:underline"
+                className="text-[11px] lg:text-xs font-semibold text-slate-700 hover:underline"
               >
                 Lupa Kata Sandi
               </button>
@@ -118,14 +118,14 @@ export default function LoginView() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full rounded-2xl bg-slate-900 py-2.5 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="mt-2 w-full rounded-2xl bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? "Memproses..." : "Masuk"}
           </button>
         </form>
       </div>
 
-      <p className="mt-5 text-center text-sm lg:text-base text-slate-700">
+      <p className="mt-4 text-center text-sm text-slate-700">
         Belum punya akun?{" "}
         <Link className="font-semibold hover:underline" href="/?tab=register">
           Daftar

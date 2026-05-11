@@ -233,31 +233,31 @@ export default function RegisterView() {
         <button
           type="button"
           onClick={handleBackToForm}
-          className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-4"
+          className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-3"
         >
           <ArrowLeft size={16} />
           Kembali
         </button>
 
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-11 w-11 rounded-full bg-emerald-100 grid place-items-center ring-1 ring-emerald-200/60">
-            <ShieldCheck size={22} className="text-emerald-700" />
+          <div className="h-10 w-10 rounded-full bg-emerald-100 grid place-items-center ring-1 ring-emerald-200/60">
+            <ShieldCheck size={20} className="text-emerald-700" />
           </div>
           <div>
-            <h2 className="text-xl lg:text-2xl font-extrabold text-slate-900">Verifikasi Email</h2>
+            <h2 className="text-xl font-extrabold text-slate-900">Verifikasi Email</h2>
           </div>
         </div>
 
-        <p className="mt-2 text-sm lg:text-base text-slate-600">
+        <p className="mt-1 text-sm text-slate-600">
           Kode verifikasi 6 digit telah dikirim ke{" "}
           <span className="font-semibold text-slate-800">{maskedEmail}</span>
         </p>
 
-        <div className="mt-5 rounded-3xl bg-white/35 p-4 lg:p-5 ring-1 ring-white/20">
+        <div className="mt-4 rounded-3xl bg-white/40 p-4 lg:p-5 ring-1 ring-white/30">
           {/* OTP Illustration */}
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-2xl bg-blue-50 grid place-items-center ring-1 ring-blue-100/60">
-              <Mail size={24} className="text-blue-600" />
+          <div className="flex justify-center mb-3">
+            <div className="h-10 w-10 rounded-2xl bg-blue-50 grid place-items-center ring-1 ring-blue-100/60">
+              <Mail size={20} className="text-blue-600" />
             </div>
           </div>
 
@@ -274,7 +274,7 @@ export default function RegisterView() {
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
                 disabled={otpLoading}
-                className={`w-11 h-13 sm:w-13 sm:h-15 rounded-xl text-center text-xl sm:text-2xl font-bold outline-none transition-all duration-200
+                className={`w-10 h-12 sm:w-12 sm:h-14 rounded-xl text-center text-lg sm:text-xl font-bold outline-none transition-all duration-200
                   ${digit
                     ? "bg-white ring-2 ring-slate-900/30 text-slate-900"
                     : "bg-white/70 ring-1 ring-white/60 text-slate-400"
@@ -291,11 +291,11 @@ export default function RegisterView() {
             type="button"
             onClick={handleVerifyOtp}
             disabled={otpLoading || otpDigits.join("").length !== 6}
-            className="mt-5 w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-2.5 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="mt-4 w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {otpLoading ? (
               <>
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2 className="animate-spin" size={18} />
                 Memverifikasi...
               </>
             ) : (
@@ -328,7 +328,7 @@ export default function RegisterView() {
           </p>
         </div>
 
-        <p className="pt-3 text-center text-sm lg:text-base text-slate-700">
+        <p className="pt-3 text-center text-sm text-slate-700">
           Sudah memiliki akun?{" "}
           <Link className="font-semibold hover:underline" href="/?tab=login">
             Masuk di sini
@@ -340,130 +340,126 @@ export default function RegisterView() {
 
   return (
     <div>
-      <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900">Buat Akun Baru</h2>
-      <p className="mt-1 text-sm lg:text-base text-slate-700/80">
+      <h2 className="text-2xl font-extrabold text-slate-900">Buat Akun Baru</h2>
+      <p className="mt-1 text-sm text-slate-700/80">
         Daftar sebagai civitas UNSRAT untuk menggunakan sistem reservasi ruangan.
       </p>
 
-      <div className="mt-5">
-        <div className="rounded-3xl bg-white/30 p-4 ring-1 ring-white/25">
-          <div className="rounded-3xl bg-white/35 p-4 ring-1 ring-white/20">
-            <form className="space-y-3" onSubmit={handleSubmit}>
-              <div>
-                <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
-                  NAMA LENGKAP
-                </label>
-                <input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  placeholder="Masukkan nama lengkap Anda"
-                  className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
-                  NIM / NIP
-                </label>
-                <input
-                  name="identifier"
-                  value={formData.identifier}
-                  onChange={handleChange}
-                  required
-                  inputMode="numeric"
-                  pattern="\d*"
-                  placeholder="Masukkan NIM atau NIP Anda"
-                  className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
-                  ALAMAT EMAIL UNSRAT
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="nama@student.unsrat.ac.id"
-                  className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2.5 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
-                />
-                <p className="mt-1.5 text-[11px] lg:text-xs text-slate-600/80">
-                  Gunakan email <span className="font-semibold">@student.unsrat.ac.id</span> atau <span className="font-semibold">@unsrat.ac.id</span>
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
-                    KATA SANDI
-                  </label>
-                  <div className="relative mt-1.5">
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan kata sandi"
-                      className="w-full rounded-2xl bg-white/70 px-4 py-2.5 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-slate-500 hover:text-slate-900"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs lg:text-sm font-bold tracking-wider text-slate-700">
-                    KONFIRMASI
-                  </label>
-                  <div className="relative mt-1.5">
-                    <input
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Konfirmasi kata sandi"
-                      className="w-full rounded-2xl bg-white/70 px-4 py-2.5 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm lg:text-base"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-slate-500 hover:text-slate-900"
-                    >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-2.5 text-sm lg:text-base font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {loading ? <Loader2 className="animate-spin" size={20} /> : "Daftar Akun"}
-              </button>
-            </form>
+      <div className="mt-4 rounded-3xl bg-white/40 p-4 lg:p-5 ring-1 ring-white/30">
+        <form className="space-y-3" onSubmit={handleSubmit}>
+          <div>
+            <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
+              NAMA LENGKAP
+            </label>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              placeholder="Masukkan nama lengkap Anda"
+              className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+            />
           </div>
-        </div>
 
-        <p className="pt-3 text-center text-sm lg:text-base text-slate-700">
-          Sudah memiliki akun?{" "}
-          <Link className="font-semibold hover:underline" href="/?tab=login">
-            Masuk di sini
-          </Link>
-        </p>
+          <div>
+            <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
+              NIM / NIP
+            </label>
+            <input
+              name="identifier"
+              value={formData.identifier}
+              onChange={handleChange}
+              required
+              inputMode="numeric"
+              pattern="\d*"
+              placeholder="Masukkan NIM atau NIP Anda"
+              className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
+              ALAMAT EMAIL UNSRAT
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="nama@student.unsrat.ac.id"
+              className="mt-1.5 w-full rounded-2xl bg-white/70 px-4 py-2 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+            />
+            <p className="mt-1 text-[10px] lg:text-[11px] text-slate-600/80">
+              Gunakan email <span className="font-semibold">@student.unsrat.ac.id</span> atau <span className="font-semibold">@unsrat.ac.id</span>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
+                KATA SANDI
+              </label>
+              <div className="relative mt-1.5">
+                <input
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Masukkan kata sandi"
+                  className="w-full rounded-2xl bg-white/70 px-4 py-2 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 mt-0.5 text-slate-500 hover:text-slate-900"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="text-[11px] lg:text-xs font-bold tracking-wider text-slate-700">
+                KONFIRMASI
+              </label>
+              <div className="relative mt-1.5">
+                <input
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Konfirmasi kata sandi"
+                  className="w-full rounded-2xl bg-white/70 px-4 py-2 pr-12 outline-none ring-1 ring-white/60 focus:ring-2 focus:ring-slate-900/30 text-slate-900 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 mt-0.5 text-slate-500 hover:text-slate-900"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center items-center gap-2 rounded-2xl bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-1"
+          >
+            {loading ? <Loader2 className="animate-spin" size={18} /> : "Daftar Akun"}
+          </button>
+        </form>
       </div>
+
+      <p className="pt-3 text-center text-sm text-slate-700">
+        Sudah memiliki akun?{" "}
+        <Link className="font-semibold hover:underline" href="/?tab=login">
+          Masuk di sini
+        </Link>
+      </p>
     </div>
   );
 }

@@ -25,26 +25,45 @@ type AdminReservationRecordLike = {
 
 const normalizeReservationStatus = (status: string) => (status ?? "").toUpperCase();
 
+const COMMON_FINAL_STATUSES = [
+  "APPROVED",
+  "DISETUJUI",
+  "COMPLETED",
+  "SELESAI",
+  "CANCELLED",
+  "DIBATALKAN",
+];
+
+const KABAG_VISIBLE_STATUSES = new Set([
+  "PENDING",
+  "PENDING_KABAG",
+  "REJECTED_KABAG",
+  "PENDING_DEKAN",
+  "REJECTED_DEKAN",
+  "PENDING_WD2",
+  "PENDING_WAKIL_DEKAN_2",
+  "REJECTED_WD2",
+  "PENDING_KAJUR",
+  "REJECTED_KAJUR",
+  "PENDING_KEPALA_LAB",
+  "REJECTED_KEPALA_LAB",
+  ...COMMON_FINAL_STATUSES,
+]);
+
 const DEKAN_VISIBLE_STATUSES = new Set([
   "PENDING_DEKAN",
   "REJECTED_DEKAN",
   "PENDING_WD2",
   "PENDING_WAKIL_DEKAN_2",
   "REJECTED_WD2",
-  "APPROVED",
-  "DISETUJUI",
-  "COMPLETED",
-  "SELESAI",
+  ...COMMON_FINAL_STATUSES,
 ]);
 
 const WD2_VISIBLE_STATUSES = new Set([
   "PENDING_WD2",
   "PENDING_WAKIL_DEKAN_2",
   "REJECTED_WD2",
-  "APPROVED",
-  "DISETUJUI",
-  "COMPLETED",
-  "SELESAI",
+  ...COMMON_FINAL_STATUSES,
 ]);
 
 const KAJUR_VISIBLE_STATUSES = new Set([
@@ -52,27 +71,21 @@ const KAJUR_VISIBLE_STATUSES = new Set([
   "REJECTED_KAJUR",
   "PENDING_KEPALA_LAB",
   "REJECTED_KEPALA_LAB",
-  "APPROVED",
-  "DISETUJUI",
-  "COMPLETED",
-  "SELESAI",
+  ...COMMON_FINAL_STATUSES,
 ]);
 
 const KEPALA_LAB_VISIBLE_STATUSES = new Set([
   "PENDING_KEPALA_LAB",
   "REJECTED_KEPALA_LAB",
-  "APPROVED",
-  "DISETUJUI",
-  "COMPLETED",
-  "SELESAI",
+  ...COMMON_FINAL_STATUSES,
 ]);
 
 export function shouldShowAdminReservation(viewer: AdminReservationViewer, reservation: AdminReservationRecordLike) {
-  if (viewer.role === "ADMIN") {
-    return true;
-  }
-
   const status = normalizeReservationStatus(reservation.status);
+
+  if (viewer.role === "ADMIN") {
+    return KABAG_VISIBLE_STATUSES.has(status);
+  }
 
   if (viewer.role === "ADMIN_DEKAN") {
     if (reservation.flow !== "GENERAL") return false;
@@ -83,7 +96,6 @@ export function shouldShowAdminReservation(viewer: AdminReservationViewer, reser
     if (reservation.flow !== "GENERAL") return false;
     return WD2_VISIBLE_STATUSES.has(status);
   }
-
 
   if (viewer.role === "KAJUR") {
     if (!viewer.departmentScope || reservation.flow !== "LAB_LAINNYA") {
