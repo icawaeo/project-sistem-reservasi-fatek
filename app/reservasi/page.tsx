@@ -364,10 +364,10 @@ function ReservasiContent() {
                                     <input
                                         type="text"
                                         value={borrowerNameValue}
-                                        onChange={(e) => setBorrowerName(e.target.value)}
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm lg:text-base text-slate-500 cursor-not-allowed outline-none"
                                         placeholder="Masukkan nama lengkap Anda"
                                         required
+                                        readOnly
                                     />
                                 </label>
                                 {isCivitas && (
@@ -378,9 +378,9 @@ function ReservasiContent() {
                                         <input
                                             type="text"
                                             value={identifierValue}
-                                            onChange={(e) => setIdentifier(e.target.value)}
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                            className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm lg:text-base text-slate-500 cursor-not-allowed outline-none"
                                             placeholder="Masukkan Nomor Induk Mahasiswa"
+                                            readOnly
                                         />
                                     </label>
                                 )}
@@ -393,10 +393,10 @@ function ReservasiContent() {
                                         <input
                                             type="email"
                                             value={emailValue}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                            className="w-full rounded-lg border border-slate-200 bg-slate-100 pl-9 pr-3 py-2.5 text-sm lg:text-base text-slate-500 cursor-not-allowed outline-none"
                                             placeholder="Masukkan alamat email Anda"
                                             required
+                                            readOnly
                                         />
                                     </div>
                                 </label>
