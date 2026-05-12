@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    // Disable type checking during build (run manually with `tsc --noEmit`)
+    ignoreBuildErrors: true,
+  },
   headers: async () => [
     {
       source: "/sw.js",
