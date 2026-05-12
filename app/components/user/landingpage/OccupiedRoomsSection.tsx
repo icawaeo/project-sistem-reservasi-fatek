@@ -31,12 +31,12 @@ export default function OccupiedRoomsSection({ rooms }: OccupiedRoomsSectionProp
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 text-sm font-semibold text-slate-500 md:flex">
+            {/* <div className="hidden items-center gap-2 text-sm font-semibold text-slate-500 md:flex">
               <span>Lihat Semua Status</span>
               <span aria-hidden="true" className="text-lg leading-none">
                 &rarr;
               </span>
-            </div>
+            </div> */}
           </div>
 
           <div className="rounded-[26px] border border-slate-200 bg-white p-12 text-center shadow-md">

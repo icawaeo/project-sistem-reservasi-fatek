@@ -79,7 +79,7 @@ export default function ReservationDetailModal({
 	if (!data) return null;
 
 	const applicantSubtitle =
-		data.user.userType === "PUBLIC" ? "Umum" : data.user.userType === "STAFF" ? "Staff" : "Mahasiswa";
+		data.user.identifier ? `NIM/NIP: ${data.user.identifier}` : "Civitas UNSRAT";
 	const purposeLabel = data.purpose && data.purpose !== "-" ? data.purpose : data.rawPurpose;
 	const roleLabel = resolveRoleLabel(adminRole);
 	const computedStatus = computeReservationStatus(data.status, data.endTime);
@@ -112,7 +112,7 @@ export default function ReservationDetailModal({
 
 						<div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
 							<div className="flex h-full flex-col">
-								<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Applicant Info</span>
+								<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Informasi Peminjam</span>
 								<div className="flex h-full flex-1 items-center gap-4 rounded-xl border border-slate-200 bg-white p-4">
 									<div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-lg font-bold text-white">
 										{(data.user.name || "U").slice(0, 1).toUpperCase()}
@@ -126,7 +126,7 @@ export default function ReservationDetailModal({
 							</div>
 
 							<div className="flex h-full flex-col">
-								<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Location &amp; Specs</span>
+								<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Ruangan yang Dipinjam</span>
 								<div className="h-full flex-1 rounded-xl border border-slate-200 bg-white p-4">
 									<h4 className="font-bold text-slate-900">{data.room.name}</h4>
 									<p className="mt-1 text-sm text-slate-500">{data.room.building}</p>
@@ -137,26 +137,25 @@ export default function ReservationDetailModal({
 
 						<div className="mt-4 grid grid-cols-1 items-start gap-6 md:grid-cols-2">
 							<div>
-								<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Activity Details</span>
+								<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Detail Kegiatan</span>
 								<h4 className="text-lg font-bold text-slate-900">{data.activityName}</h4>
 								<p className="mt-1 text-sm leading-relaxed text-slate-700">{purposeLabel || "-"}</p>
 							</div>
 
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Reservation Date</span>
+									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Tanggal Peminjaman</span>
 									<div className="text-sm font-semibold text-slate-900">{formatDate(data.startTime)}</div>
 									<div className="text-xs text-slate-500">{formatTime(data.startTime)} - {formatTime(data.endTime)}</div>
 								</div>
 								<div>
-									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Submitted At</span>
+									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Tanggal Diajukan</span>
 									<div className="text-sm font-semibold text-slate-900">{formatDateTime(data.createdAt)}</div>
 								</div>
 							</div>
 						</div>
 
 						<div className="mt-10">
-							<span className="mb-4 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Supporting Documents</span>
 							<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 								<div>
 									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Surat Pengantar</span>
@@ -202,16 +201,12 @@ export default function ReservationDetailModal({
 				</div>
 
 				<footer className="flex items-center justify-end gap-4 border-t border-slate-200 bg-slate-50/50 px-8 py-6">
-					{isActionable ? (
-						<>
-							<button type="button" onClick={onReject} disabled={isBusy} className="rounded-xl border border-rose-200 bg-rose-50 px-8 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40">
-								Tolak Pengajuan
-							</button>
-							<button type="button" onClick={onApprove} disabled={isBusy} className="rounded-xl border border-emerald-200 bg-emerald-50 px-10 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">
-								Setujui Pengajuan
-							</button>
-						</>
-					) : null}
+					<button type="button" onClick={onReject} disabled={isBusy || !isActionable} className="rounded-xl border border-rose-200 bg-rose-50 px-8 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40">
+						Tolak Pengajuan
+					</button>
+					<button type="button" onClick={onApprove} disabled={isBusy || !isActionable} className="rounded-xl border border-emerald-200 bg-emerald-50 px-10 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">
+						Setujui Pengajuan
+					</button>
 				</footer>
 			</div>
 		</div>

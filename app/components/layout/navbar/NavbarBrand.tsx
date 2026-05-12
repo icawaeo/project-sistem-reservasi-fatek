@@ -8,7 +8,7 @@ export default function NavbarBrand() {
     <div className="flex items-center gap-3 shrink-0">
       <Link href="/landingpage" aria-label="Ke halaman beranda">
         <Image
-          src="/images/Logo_Fatek_Unsrat.png"
+          src="/Logo_Fatek_Unsrat.png"
           alt="Logo Fakultas Teknik Unsrat"
           width={36}
           height={36}

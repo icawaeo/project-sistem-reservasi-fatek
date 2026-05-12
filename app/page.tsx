@@ -22,23 +22,23 @@ function AuthContent() {
   return (
       <div className="min-h-screen flex flex-col w-full bg-[radial-gradient(1200px_circle_at_20%_10%,#dbeafe_0%,transparent_55%),radial-gradient(900px_circle_at_80%_30%,#bfdbfe_0%,transparent_60%),linear-gradient(135deg,#c7d2fe_0%,#93c5fd_40%,#60a5fa_100%)] font-sans">
         <div className="flex-1 flex items-center justify-center px-4 py-10">
-          <div className="w-full max-w-6xl overflow-hidden rounded-[44px] bg-white/25 backdrop-blur-xl ring-1 ring-white/40 shadow-[0_30px_100px_rgba(2,6,23,0.20)]">
+          <div className="w-full max-w-4xl overflow-hidden rounded-[32px] bg-white/25 backdrop-blur-xl ring-1 ring-white/40 shadow-[0_30px_100px_rgba(2,6,23,0.20)]">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* LEFT COLUMN */}
-              <div className="relative p-10 lg:p-14 text-slate-900 bg-white/10 flex flex-col justify-center">
-                <h1 className="mt-6 text-[40px] lg:text-[48px] xl:text-[56px] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900">
+              <div className="relative p-6 lg:p-8 text-slate-900 bg-white/10 flex flex-col justify-center">
+                <h1 className="text-2xl lg:text-3xl xl:text-4xl font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900">
                   Reservasi Ruangan Fakultas Teknik
                   <br />
                   UNSRAT
                 </h1>
-                <p className="mt-4 max-w-md text-base lg:text-lg text-slate-600 leading-relaxed">
+                <p className="mt-3 max-w-sm text-sm text-slate-600 leading-relaxed">
                   Lakukan pemesanan ruangan, cek ketersediaan jadwal, dan kelola penggunaan ruangan 
                   Fakultas Teknik Universitas Sam Ratulangi secara online.
                 </p>
               </div>
 
               {/* RIGHT COLUMN */}
-              <div className="p-8 lg:p-12">
+              <div className="p-5 lg:p-6">
                 <div className="flex justify-center">
                   <div className="relative flex w-full items-center rounded-full bg-white/40 p-1 ring-1 ring-white/30">
                     
@@ -55,7 +55,7 @@ function AuthContent() {
 
                     <button
                       onClick={() => setTab("login")}
-                      className={`relative z-10 flex-1 py-2 text-sm lg:text-base font-semibold transition-colors duration-300 text-center ${
+                      className={`relative z-10 flex-1 py-1.5 text-sm font-semibold transition-colors duration-300 text-center ${
                         tab === "login" ? "text-slate-900" : "text-slate-600"
                       }`}
                     >
@@ -64,7 +64,7 @@ function AuthContent() {
 
                     <button
                       onClick={() => setTab("register")}
-                      className={`relative z-10 flex-1 py-2 text-sm lg:text-base font-semibold transition-colors duration-300 text-center ${
+                      className={`relative z-10 flex-1 py-1.5 text-sm font-semibold transition-colors duration-300 text-center ${
                         tab === "register" ? "text-slate-900" : "text-slate-600"
                       }`}
                     >
@@ -73,7 +73,7 @@ function AuthContent() {
                   </div>
                 </div>
 
-                <div className="mt-8 relative overflow-hidden">
+                <div className="mt-4 relative overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={tab}
@@ -88,15 +88,6 @@ function AuthContent() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="px-8 py-6 text-center text-xs lg:text-sm text-slate-700/80">
-          © {new Date().getFullYear()} PUSAT TEKNOLOGI INFORMASI - UNIVERSITAS SAM RATULANGI MANADO
-          <div className="mt-2 flex items-center justify-center gap-6">
-            <a className="hover:underline" href="#">Syarat & Ketentuan</a>
-            <a className="hover:underline" href="#">Pusat Bantuan</a>
-            <a className="hover:underline" href="#">Kontak</a>
           </div>
         </div>
       </div>

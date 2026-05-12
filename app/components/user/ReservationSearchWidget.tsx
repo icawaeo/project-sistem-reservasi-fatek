@@ -52,13 +52,13 @@ export default function ReservationSearchWidget({
   selectedRoom = null,
 }: ReservationSearchWidgetProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-2xl px-6 py-6 border border-slate-100 text-left">
-      <div className="mb-4">
+    <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl p-4 md:p-6 border border-slate-100 text-left w-full">
+      <div className="mb-3 md:mb-4">
         <span className="text-[10px] md:text-[11px] lg:text-xs font-bold tracking-widest text-slate-500 uppercase">
           Jenis Reservasi
         </span>
-        <div className="mt-2 flex flex-wrap items-center gap-4">
-          <label className="inline-flex items-center gap-2 text-sm md:text-base text-slate-700">
+        <div className="mt-1.5 md:mt-2 flex flex-wrap items-center gap-3 md:gap-4">
+          <label className="inline-flex items-center gap-2 text-xs md:text-sm lg:text-base text-slate-700">
             <input
               type="radio"
               name="reservation-mode"
@@ -69,7 +69,7 @@ export default function ReservationSearchWidget({
             />
             Harian
           </label>
-          <label className="inline-flex items-center gap-2 text-sm md:text-base text-slate-700">
+          <label className="inline-flex items-center gap-2 text-xs md:text-sm lg:text-base text-slate-700">
             <input
               type="radio"
               name="reservation-mode"
@@ -83,7 +83,7 @@ export default function ReservationSearchWidget({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-end gap-4">
+      <div className="flex flex-col md:flex-row md:items-end gap-3 md:gap-4">
         <div className="flex-1 min-w-0">
           <label className="text-[10px] md:text-[11px] lg:text-xs font-bold tracking-widest text-slate-500 uppercase">
             {reservationMode === "per-day" ? "Tanggal" : "Tanggal Mulai"}
@@ -94,7 +94,7 @@ export default function ReservationSearchWidget({
               type="date"
               value={startDate}
               onChange={(e) => onStartDateChange(e.target.value)}
-              className="text-sm md:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+              className="text-xs md:text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0 py-0.5 md:py-1"
             />
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function ReservationSearchWidget({
                 type="date"
                 value={endDate}
                 onChange={(e) => onEndDateChange(e.target.value)}
-                className="text-sm md:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+                className="text-xs md:text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0 py-0.5 md:py-1"
               />
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function ReservationSearchWidget({
               type="time"
               value={startTime}
               onChange={(e) => onStartTimeChange(e.target.value)}
-              className="text-sm md:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+              className="text-xs md:text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0 py-0.5 md:py-1"
             />
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function ReservationSearchWidget({
               type="time"
               value={endTime}
               onChange={(e) => onEndTimeChange(e.target.value)}
-              className="text-sm md:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0"
+              className="text-xs md:text-sm lg:text-base text-slate-600 outline-none w-full bg-transparent appearance-none cursor-pointer min-w-0 py-0.5 md:py-1"
             />
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function ReservationSearchWidget({
           <button
             onClick={onSearch}
             disabled={isSearching}
-            className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl px-6 py-3 text-sm md:text-base font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 whitespace-nowrap disabled:cursor-not-allowed disabled:bg-slate-500"
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl px-4 py-2.5 md:px-6 md:py-3 text-xs md:text-sm lg:text-base font-semibold hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/20 whitespace-nowrap disabled:cursor-not-allowed disabled:bg-slate-500 mt-2 md:mt-0"
             type="button"
           >
             <Search size={15} />

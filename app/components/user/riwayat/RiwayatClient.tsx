@@ -8,7 +8,7 @@ import type {
   ReservationStatus,
   SortOrder,
 } from "./_types";
-import { getLatestPendingReservation } from "../utils/reservation";
+import { getActiveReservation } from "../utils/reservation";
 
 import LatestSubmissionSection from "./LatestSubmissionSection";
 import HistorySection from "./HistorySection";
@@ -50,7 +50,7 @@ export default function RiwayatClient({ initialReservations, initialSort }: Prop
   const sortedReservations = sortOrder === "newest" ? sortedNewest : sortedOldest;
 
   const latestActiveSubmission = useMemo(() => {
-    return getLatestPendingReservation(sortedReservations);
+    return getActiveReservation(sortedReservations);
   }, [sortedReservations]);
 
   const historyItems = useMemo(() => {

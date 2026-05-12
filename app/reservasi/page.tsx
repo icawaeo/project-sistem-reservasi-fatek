@@ -21,16 +21,7 @@ import {
 import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
-const buildingColorMap: Record<string, string> = {
-    "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
-    "Gedung Jurusan Teknik Sipil": "from-blue-900 to-blue-700",
-    "Gedung Jurusan Teknik Arsitektur": "from-slate-800 to-slate-600",
-    "Gedung Jurusan Teknik Elektro": "from-green-800 to-green-600",
-    "Gedung Jurusan Teknik Mesin": "from-indigo-900 to-indigo-700",
-    "Gedung Laboratorium Fakultas Teknik": "from-lime-900 to-lime-700",
-};
-
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding as isLabBuildingUtil, getBuildingGradient } from "@/app/utils/building";
 
 type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -107,8 +98,8 @@ function ReservasiContent() {
     const startTime = searchParams.get("startTime") ?? storedDraft?.startTime ?? "";
     const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
-    const isCivitas = publicSessionUser?.userType === "STUDENT";
-    const isLabBuilding = roomBuilding === LAB_BUILDING_NAME;
+    const isCivitas = publicSessionUser?.userType === "USER";
+    const isLabBuilding = isLabBuildingUtil(roomBuilding);
 
     const [borrowerName, setBorrowerName] = useState<string | null>(null);
     const [identifier, setIdentifier] = useState<string | null>(null);
@@ -160,7 +151,7 @@ function ReservasiContent() {
         reader.readAsDataURL(file);
     };
 
-    const buildingGradient = buildingColorMap[roomBuilding] ?? "from-slate-700 via-slate-600 to-slate-800";
+    const buildingGradient = getBuildingGradient(roomBuilding);
 
     const scheduleLabel = useMemo(() => {
         const dateLabel = startDate === endDate ? startDate : `${startDate} s/d ${endDate}`;
@@ -373,10 +364,10 @@ function ReservasiContent() {
                                     <input
                                         type="text"
                                         value={borrowerNameValue}
-                                        onChange={(e) => setBorrowerName(e.target.value)}
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm lg:text-base text-slate-500 cursor-not-allowed outline-none"
                                         placeholder="Masukkan nama lengkap Anda"
                                         required
+                                        readOnly
                                     />
                                 </label>
                                 {isCivitas && (
@@ -387,9 +378,9 @@ function ReservasiContent() {
                                         <input
                                             type="text"
                                             value={identifierValue}
-                                            onChange={(e) => setIdentifier(e.target.value)}
-                                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                            className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm lg:text-base text-slate-500 cursor-not-allowed outline-none"
                                             placeholder="Masukkan Nomor Induk Mahasiswa"
+                                            readOnly
                                         />
                                     </label>
                                 )}
@@ -402,10 +393,10 @@ function ReservasiContent() {
                                         <input
                                             type="email"
                                             value={emailValue}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none focus:border-slate-400"
+                                            className="w-full rounded-lg border border-slate-200 bg-slate-100 pl-9 pr-3 py-2.5 text-sm lg:text-base text-slate-500 cursor-not-allowed outline-none"
                                             placeholder="Masukkan alamat email Anda"
                                             required
+                                            readOnly
                                         />
                                     </div>
                                 </label>
@@ -499,7 +490,7 @@ function ReservasiContent() {
                                     onChange={handleSupportingFileChange}
                                 />
                                 <Upload size={24} className="mx-auto text-slate-400" />
-                                <p className="mt-2 text-sm lg:text-base font-semibold text-slate-700">
+                                <p className="mt-2 text-sm lg:text-base font-semibold text-slate-700 truncate px-2 w-full">
                                     {supportingFileLabel}
                                 </p>
                                 <p className="text-[11px] lg:text-xs text-slate-500 mt-1">Format: PDF/JPG/PNG (maks 5 MB)</p>

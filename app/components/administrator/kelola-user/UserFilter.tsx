@@ -7,26 +7,22 @@ import { USER_ROLE_OPTIONS } from "./user-types";
 
 type UserFilterProps = {
   search: string;
-  selectedCategory: "ALL" | "umum" | "unsrat";
   selectedRole: UserRoleFilter;
   selectedVerification: "ALL" | "VERIFIED" | "UNVERIFIED";
   totalUsers: number;
   onAddUser: () => void;
   onSearchChange: (value: string) => void;
-  onCategoryChange: (value: "ALL" | "umum" | "unsrat") => void;
   onRoleChange: (value: UserRoleFilter) => void;
   onVerificationChange: (value: "ALL" | "VERIFIED" | "UNVERIFIED") => void;
 };
 
 export default function UserFilter({
   search,
-  selectedCategory,
   selectedRole,
   selectedVerification,
   totalUsers,
   onAddUser,
   onSearchChange,
-  onCategoryChange,
   onRoleChange,
   onVerificationChange,
 }: UserFilterProps) {
@@ -61,27 +57,12 @@ export default function UserFilter({
               }`}
             >
               <Filter size={16} className="text-slate-500" />
-              Filter Jenis, Role, Verifikasi
+              Filter Role, Verifikasi
             </button>
 
             {isFilterOpen ? (
               <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-md lg:w-md">
                 <div className="space-y-2">
-                  <label className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-slate-700">Jenis User</span>
-                    <select
-                      value={selectedCategory}
-                      onChange={(event) =>
-                        onCategoryChange(event.target.value as "ALL" | "umum" | "unsrat")
-                      }
-                      className="w-2/3 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold text-slate-900 outline-none"
-                    >
-                      <option value="ALL">Semua Jenis User</option>
-                      <option value="umum">Umum</option>
-                      <option value="unsrat">Unsrat</option>
-                    </select>
-                  </label>
-
                   <label className="flex items-center justify-between gap-3">
                     <span className="text-sm text-slate-700">Role</span>
                     <select

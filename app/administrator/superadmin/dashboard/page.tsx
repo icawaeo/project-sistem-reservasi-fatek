@@ -8,6 +8,8 @@ import DashboardContent from "@/app/components/administrator/dashboard/Dashboard
 import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import { computeReservationStatus } from "@/app/components/administrator/ui/reservationStatus";
 
+export const dynamic = "force-dynamic";
+
 const splitReservationPurpose = (value: string | null) => {
 	if (!value) {
 		return { activityName: "-", purpose: "-" };

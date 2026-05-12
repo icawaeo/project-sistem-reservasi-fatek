@@ -18,7 +18,7 @@ export default async function SuperadminKelolaTemplateSuratPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
 	const templates = await listTemplates();

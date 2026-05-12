@@ -2,11 +2,43 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import Sidebar from "@/app/components/administrator/ui/Sidebar";
 import Navbar from "@/app/components/administrator/ui/Navbar";
-import DashboardContent from "@/app/components/administrator/dashboard/DashboardContent";
+import AdminDashboardContent from "@/app/components/administrator/dashboard/AdminDashboardContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import { shouldShowAdminReservation } from "@/lib/admin-access";
+import type { LabDepartmentValue, LabProgramValue } from "@/lib/lab-enums";
+
+export const dynamic = "force-dynamic";
+
+type AdminDashboardReservation = {
+	res_id: string;
+	res_date: Date;
+	res_processedAt: Date | null;
+	res_waitingDekanAt: Date | null;
+	res_waitingWd2At: Date | null;
+	res_waitingKajurAt: Date | null;
+	res_waitingKepalaLabAt: Date | null;
+	res_decisionAt: Date | null;
+	res_flow: "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
+	res_startTime: Date;
+	res_endTime: Date;
+	res_purpose: string | null;
+	res_status: string;
+	res_documentUrl: string | null;
+	res_labDepartment: LabDepartmentValue | null;
+	res_labProgram: LabProgramValue | null;
+	user: {
+		name: string | null;
+		userType: string | null;
+		identifier: string | null;
+		email: string | null;
+	};
+	room: {
+		room_name: string;
+		room_building: string | null;
+		room_locDetail: string | null;
+	};
+};
 
 export default async function AdminDashboardPage() {
 	const session = await getServerSession(authOptions);
@@ -46,7 +78,7 @@ export default async function AdminDashboardPage() {
 		};
 	};
 
-	const reservations = await prisma.reservation.findMany({
+	const reservations: AdminDashboardReservation[] = await prisma.reservation.findMany({
 		include: {
 			user: {
 				select: {
@@ -68,16 +100,6 @@ export default async function AdminDashboardPage() {
 			res_date: "desc",
 		},
 	});
-
-	const allRooms = await prisma.room.findMany({
-		select: {
-			room_building: true,
-		},
-	});
-
-	const totalRooms = allRooms.length;
-	const totalBuildings = new Set(allRooms.map((room) => room.room_building)).size;
-	const totalUsers = await prisma.user.count();
 
 	const visibleReservations = reservations.filter((item) =>
 		shouldShowAdminReservation(
@@ -116,15 +138,15 @@ export default async function AdminDashboardPage() {
 			status: item.res_status,
 			documentUrl: item.res_documentUrl,
 			user: {
-				name: item.user.name,
-				userType: item.user.userType,
+				name: item.user.name ?? "-",
+				userType: (item.user.userType ?? "USER") as "USER" | "STAFF",
 				identifier: item.user.identifier,
-				email: item.user.email,
+				email: item.user.email ?? "-",
 			},
 			room: {
 				name: item.room.room_name,
-				building: item.room.room_building,
-				location: item.room.room_locDetail,
+				building: item.room.room_building ?? "-",
+				location: item.room.room_locDetail ?? "-",
 			},
 		};
 	});
@@ -137,26 +159,18 @@ export default async function AdminDashboardPage() {
 
 	return (
 		<div className="min-h-screen bg-slate-100">
-			<div className="flex min-h-screen">
-				<Sidebar role="admin" />
+			<div className="flex min-h-screen flex-col">
+				<Navbar
+					pageTitle="Dashboard Admin"
+					pageSubtitle="Monitoring pengajuan peminjaman ruangan"
+					role="admin"
+				/>
 
-				<div className="flex min-w-0 flex-1 flex-col">
-					<Navbar
-						pageTitle="Dashboard Admin"
-						pageSubtitle="Monitoring pengajuan peminjaman ruangan"
-						role="admin"
-					/>
-
-					<DashboardContent
-						adminData={tableData}
-						mode="admin"
-						totalRooms={totalRooms}
-						totalBuildings={totalBuildings}
-						totalUsers={totalUsers}
-						lastSync={lastSync}
-						adminRole={adminRole}
-					/>
-				</div>
+				<AdminDashboardContent
+					adminData={tableData}
+					adminRole={adminRole}
+					lastSync={lastSync}
+				/>
 			</div>
 		</div>
 	);

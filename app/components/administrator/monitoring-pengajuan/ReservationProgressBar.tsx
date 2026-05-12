@@ -11,34 +11,34 @@ type ReservationProgressBarProps = {
 	data: AdminReservationRecord;
 };
 
-type Step = { key: string; label: string };
+type Step = { key: string; label: string; shortLabel: string };
 
 function resolveSteps(flow: AdminReservationRecord["flow"]): Step[] {
 	if (flow === "LAB_SKRIPSI") {
 		return [
-			{ key: "SUBMITTED", label: "Diajukan" },
-			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab" },
-			{ key: "DECISION", label: "Disetujui/Ditolak" },
-			{ key: "COMPLETED", label: "Selesai" },
+			{ key: "SUBMITTED", label: "Diajukan", shortLabel: "Diajukan" },
+			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab", shortLabel: "Kepala Lab" },
+			{ key: "DECISION", label: "Disetujui/Ditolak", shortLabel: "Disetujui/Ditolak" },
+			{ key: "COMPLETED", label: "Selesai", shortLabel: "Selesai" },
 		];
 	}
 
 	if (flow === "LAB_LAINNYA") {
 		return [
-			{ key: "SUBMITTED", label: "Diajukan" },
-			{ key: "WAITING_KAJUR", label: "Menunggu Persetujuan Kepala Jurusan" },
-			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab" },
-			{ key: "DECISION", label: "Disetujui/Ditolak" },
-			{ key: "COMPLETED", label: "Selesai" },
+			{ key: "SUBMITTED", label: "Diajukan", shortLabel: "Diajukan" },
+			{ key: "WAITING_KAJUR", label: "Menunggu Persetujuan Kepala Jurusan", shortLabel: "Kepala Jurusan" },
+			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab", shortLabel: "Kepala Lab" },
+			{ key: "DECISION", label: "Disetujui/Ditolak", shortLabel: "Disetujui/Ditolak" },
+			{ key: "COMPLETED", label: "Selesai", shortLabel: "Selesai" },
 		];
 	}
 
 	return [
-		{ key: "SUBMITTED", label: "Diajukan" },
-		{ key: "WAITING_DEKAN", label: "Menunggu Persetujuan Dekan" },
-		{ key: "WAITING_WD2", label: "Menunggu Persetujuan Wakil Dekan 2" },
-		{ key: "DECISION", label: "Disetujui/Ditolak" },
-		{ key: "COMPLETED", label: "Selesai" },
+		{ key: "SUBMITTED", label: "Diajukan", shortLabel: "Diajukan" },
+		{ key: "WAITING_DEKAN", label: "Menunggu Persetujuan Dekan", shortLabel: "Dekan" },
+		{ key: "WAITING_WD2", label: "Menunggu Persetujuan Wakil Dekan 2", shortLabel: "Wakil Dekan 2" },
+		{ key: "DECISION", label: "Disetujui/Ditolak", shortLabel: "Disetujui/Ditolak" },
+		{ key: "COMPLETED", label: "Selesai", shortLabel: "Selesai" },
 	];
 }
 
@@ -67,6 +67,13 @@ function normalizeReservationStatus(statusRaw: string) {
 }
 
 function resolveDecisionLabel(statusRaw: string) {
+	const status = normalizeReservationStatus(statusRaw);
+	if (status.startsWith("REJECT") || status.includes("DITOLAK")) return "Ditolak";
+	if (status === "APPROVED" || status === "DISETUJUI" || status === "COMPLETED" || status === "SELESAI") return "Disetujui";
+	return "Disetujui/Ditolak";
+}
+
+function resolveDecisionShortLabel(statusRaw: string) {
 	const status = normalizeReservationStatus(statusRaw);
 	if (status.startsWith("REJECT") || status.includes("DITOLAK")) return "Ditolak";
 	if (status === "APPROVED" || status === "DISETUJUI" || status === "COMPLETED" || status === "SELESAI") return "Disetujui";
@@ -220,7 +227,8 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 	return (
 		<div className="w-full">
 			<div className="relative">
-				<div className="relative z-10 grid h-10" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+				{/* Step circles */}
+				<div className="relative z-10 grid h-8 md:h-10" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
 					{steps.map((step, index) => {
 						const state = resolveStepState({
 							stepIndex: index,
@@ -230,17 +238,17 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 						});
 
 						return (
-							<div key={step.key} className="flex h-10 items-center justify-center">
+							<div key={step.key} className="flex h-8 items-center justify-center md:h-10">
 								{state === "current" ? (
 									<div
-										className="relative z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[13px] font-bold text-amber-600"
-										style={{ border: "3px solid #f59e0b", boxShadow: "0 0 0 3px #f59e0b, 0 0 0 6px #fef3c7" }}
+										className="relative z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[11px] font-bold text-amber-600 md:h-10 md:w-10 md:text-[13px]"
+										style={{ border: "3px solid #f59e0b", boxShadow: "0 0 0 2px #f59e0b, 0 0 0 5px #fef3c7" }}
 									>
 										{index + 1}
 									</div>
 								) : (
-									<div className={`relative flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-bold ${circleClass(state)}`}>
-										{state === "done" ? <Check size={14} /> : index + 1}
+									<div className={`relative flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold md:h-10 md:w-10 md:text-[13px] ${circleClass(state)}`}>
+										{state === "done" ? <Check className="h-3 w-3 md:h-3.5 md:w-3.5" /> : index + 1}
 									</div>
 								)}
 							</div>
@@ -248,17 +256,21 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 					})}
 				</div>
 
-				<div className="absolute top-1/2 z-0 h-1 -translate-y-1/2 rounded-full bg-slate-200" style={{ left: "10%", right: "10%" }} aria-hidden="true" />
+				{/* Track background */}
+				<div className="absolute top-1/2 z-0 h-0.5 -translate-y-1/2 rounded-full bg-slate-200 md:h-1" style={{ left: "10%", right: "10%" }} aria-hidden="true" />
+				{/* Track filled */}
 				<div
-					className={`absolute top-1/2 z-0 h-1 -translate-y-1/2 rounded-full ${progressColorClass}`}
+					className={`absolute top-1/2 z-0 h-0.5 -translate-y-1/2 rounded-full md:h-1 ${progressColorClass}`}
 					style={{ left: "10%", width: `calc(${progressWidth} - 10%)` }}
 					aria-hidden="true"
 				/>
 			</div>
 
-			<div className="mt-2 grid" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+			{/* Labels */}
+			<div className="mt-1.5 grid md:mt-2" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
 				{steps.map((step, index) => {
-					const label = step.key === "DECISION" ? resolveDecisionLabel(computedStatus) : step.label;
+					const fullLabel = step.key === "DECISION" ? resolveDecisionLabel(computedStatus) : step.label;
+					const mobileLabel = step.key === "DECISION" ? resolveDecisionShortLabel(computedStatus) : step.shortLabel;
 					const state = resolveStepState({
 						stepIndex: index,
 						currentIndex: current,
@@ -269,11 +281,17 @@ export default function ReservationProgressBar({ data }: ReservationProgressBarP
 					const secondary = resolveSecondaryText({ stepIndex: index, state, data, status: computedStatus, steps });
 
 					return (
-						<div key={step.key} className="px-2 text-center">
-							<div className={`h-8 overflow-hidden text-[11px] font-semibold leading-snug whitespace-normal wrap-break-word ${labelClass(state)}`}>
-								{label}
+						<div key={step.key} className="px-0.5 text-center md:px-2">
+							{/* Mobile label */}
+							<div className={`text-[9px] font-semibold leading-tight md:hidden ${labelClass(state)}`}>
+								{mobileLabel}
 							</div>
-							<div className={`mt-1 text-xs font-medium leading-tight ${secondary.className}`}>{secondary.text}</div>
+							{/* Desktop label */}
+							<div className={`hidden h-8 overflow-hidden text-[11px] font-semibold leading-snug whitespace-normal break-words md:block ${labelClass(state)}`}>
+								{fullLabel}
+							</div>
+							{/* Date */}
+							<div className={`mt-0.5 text-[9px] font-medium leading-tight md:mt-1 md:text-xs ${secondary.className}`}>{secondary.text}</div>
 						</div>
 					);
 				})}

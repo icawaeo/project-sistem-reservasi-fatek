@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 import type { UserItem, UserPayload } from "./user-types";
-import { USER_CATEGORY_OPTIONS, USER_ROLE_OPTIONS } from "./user-types";
+import { USER_ROLE_OPTIONS } from "./user-types";
 
 type UserFormModalProps = {
   isOpen: boolean;
@@ -17,14 +17,12 @@ type UserFormModalProps = {
 type FormState = {
   name: string;
   email: string;
-  userCategory: "umum" | "unsrat";
   role: UserPayload["role"];
 };
 
 const initialState: FormState = {
   name: "",
   email: "",
-  userCategory: "umum",
   role: "USER",
 };
 
@@ -44,7 +42,6 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
       setForm({
         name: user.name,
         email: user.email,
-        userCategory: user.userCategory,
         role: user.role,
       });
       return;
@@ -75,7 +72,6 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
       await onSubmit({
         name,
         email,
-        userCategory: form.userCategory,
         role: form.role,
       });
 
@@ -142,44 +138,25 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
             {mode === "edit" ? <p className="text-xs text-slate-500">Email tidak dapat diubah saat edit.</p> : null}
           </label>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-1.5">
-              <span className="text-sm font-semibold text-slate-700">Jenis User</span>
-              <select
-                value={form.userCategory}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, userCategory: event.target.value as "umum" | "unsrat" }))
-                }
-                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
-              >
-                {USER_CATEGORY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1.5">
-              <span className="text-sm font-semibold text-slate-700">Role</span>
-              <select
-                value={form.role}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    role: event.target.value as "USER" | "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2",
-                  }))
-                }
-                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
-              >
-                {USER_ROLE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <label className="space-y-1.5">
+            <span className="text-sm font-semibold text-slate-700">Role</span>
+            <select
+              value={form.role}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  role: event.target.value as "USER" | "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2",
+                }))
+              }
+              className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+            >
+              {USER_ROLE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
           {mode === "create" ? (
             <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-700">

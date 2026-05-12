@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, UserRole, UserType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { isPrismaKnownRequestError } from "@/lib/prisma-errors";
+import { USER_ROLES, USER_TYPES, type UserRoleValue, type UserTypeValue } from "@/lib/user-enums";
 import { generatePasswordSetupToken, PASSWORD_SETUP_TOKEN_TTL_MS } from "@/lib/password-setup";
 import { sendPasswordSetupMail } from "@/lib/mail";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
@@ -12,25 +13,19 @@ import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-l
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESEND_COOLDOWN_SECONDS = 60;
 
-const mapUserCategoryToType = (value: unknown): UserType => {
-  if (value === "unsrat") {
-    return UserType.STAFF;
-  }
 
-  return UserType.PUBLIC;
-};
 
-const parseRole = (value: unknown): UserRole => {
+const parseRole = (value: unknown): UserRoleValue => {
   if (
-    value === UserRole.ADMIN ||
-    value === UserRole.ADMIN_DEKAN ||
-    value === UserRole.ADMIN_WD2 ||
-    value === UserRole.SUPERADMIN
+    value === USER_ROLES.ADMIN ||
+    value === USER_ROLES.ADMIN_DEKAN ||
+    value === USER_ROLES.ADMIN_WD2 ||
+    value === USER_ROLES.SUPERADMIN
   ) {
     return value;
   }
 
-  return UserRole.USER;
+  return USER_ROLES.USER;
 };
 
 const buildBaseUrl = (request: Request) => {
@@ -61,15 +56,15 @@ const mapUser = (user: {
   user_id: string;
   name: string;
   email: string;
-  userType: UserType;
-  role: UserRole;
+  userType: UserTypeValue;
+  role: UserRoleValue;
   createdAt: Date;
   passwordSetupTokens?: Array<{ createdAt: Date; usedAt: Date | null }>;
 }) => ({
   id: user.user_id,
   name: user.name,
   email: user.email,
-  userCategory: user.userType === UserType.PUBLIC ? "umum" : "unsrat",
+
   role: user.role,
   createdAt: user.createdAt.toISOString(),
   isVerified: (user.passwordSetupTokens ?? []).every((token) => token.usedAt !== null),
@@ -136,7 +131,7 @@ export async function POST(request: Request) {
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
-    const userType = mapUserCategoryToType(body?.userCategory);
+    const userType = USER_TYPES.STAFF;
     const role = parseRole(body?.role);
     const { token, tokenHash, expiresAt } = generatePasswordSetupToken();
 
@@ -221,7 +216,7 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (isPrismaKnownRequestError(error) && error.code === "P2002") {
       logServerWarn("[api/admin/users] Duplicate email during create", {
         ...getRequestLogMeta(request),
         code: error.code,

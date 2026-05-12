@@ -50,7 +50,9 @@ export async function POST(request: Request) {
       },
     });
 
-    const blockedIds = new Set(usersWithReservation.map((item) => item.user_id));
+    const reservedUsers: Array<{ user_id: string }> = usersWithReservation;
+
+    const blockedIds = new Set(reservedUsers.map((item) => item.user_id));
     const deletableIds = safeIds.filter((id: string) => !blockedIds.has(id));
 
     if (deletableIds.length === 0) {

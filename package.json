@@ -17,6 +17,7 @@
     "@prisma/client": "^7.4.2",
     "@types/nodemailer": "^8.0.0",
     "bcryptjs": "^3.0.3",
+    "firebase": "^12.13.0",
     "firebase-admin": "^13.7.0",
     "framer-motion": "^12.34.3",
     "lucide-react": "^0.576.0",

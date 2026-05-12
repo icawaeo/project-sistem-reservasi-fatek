@@ -9,6 +9,29 @@ import SuperadminMonitoringContent from "@/app/components/administrator/monitori
 import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import { computeReservationStatus } from "@/app/components/administrator/ui/reservationStatus";
 
+export const dynamic = "force-dynamic";
+
+type SuperadminReservation = {
+	res_purpose: string | null;
+	res_status: string;
+	res_endTime: Date | string;
+	res_id: string;
+	res_date: Date;
+	res_startTime: Date;
+	res_documentUrl: string | null;
+	user: {
+		name: string | null;
+		userType: string | null;
+		identifier: string | null;
+		email: string | null;
+	};
+	room: {
+		room_name: string;
+		room_building: string | null;
+		room_locDetail: string | null;
+	};
+};
+
 const splitReservationPurpose = (value: string | null) => {
 	if (!value) {
 		return { activityName: "-", purpose: "-" };
@@ -31,10 +54,10 @@ export default async function SuperadminMonitoringPengajuanPage() {
 	}
 
 	if (!isSuperadminUser(session.user)) {
-		redirect("/administrator/admin/dashboard");
+		redirect("/administrator/admin");
 	}
 
-	const reservations = await prisma.reservation.findMany({
+	const reservations: SuperadminReservation[] = await prisma.reservation.findMany({
 		include: {
 			user: {
 				select: {
@@ -57,7 +80,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		},
 	});
 
-	const tableData: MonitoringReservation[] = reservations.map((item: { res_purpose: string | null; res_status: string; res_endTime: string | Date; res_id: any; res_date: { toISOString: () => any; }; res_startTime: { toISOString: () => any; }; res_documentUrl: any; user: { name: any; userType: any; identifier: any; email: any; }; room: { room_name: any; room_building: any; room_locDetail: any; }; }) => {
+	const tableData: MonitoringReservation[] = reservations.map((item) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
 		const computedStatus = computeReservationStatus(item.res_status, item.res_endTime);
 
@@ -72,20 +95,20 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		documentUrl: item.res_documentUrl,
 		decisionDocumentUrl: computedStatus === "PENDING" ? null : item.res_documentUrl,
 		user: {
-			name: item.user.name,
-			userType: item.user.userType,
+			name: item.user.name ?? "-",
+			userType: (item.user.userType ?? "USER") as "USER" | "STAFF",
 			identifier: item.user.identifier,
-			email: item.user.email,
+			email: item.user.email ?? "-",
 		},
 		room: {
 			name: item.room.room_name,
-			building: item.room.room_building,
-			location: item.room.room_locDetail,
+			building: item.room.room_building ?? "-",
+			location: item.room.room_locDetail ?? "-",
 		},
 		};
 	});
 
-	const activeBuildings = await prisma.building.findMany({
+	const activeRooms: Array<{ room_building: string | null }> = await prisma.room.findMany({
 		where: {
 			building_isActive: true,
 		},
@@ -97,7 +120,9 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		},
 	});
 
-	const buildingOptions = activeBuildings.map((building: { building_name: any; }) => building.building_name).filter(Boolean);
+	const buildingOptions: string[] = Array.from(
+		new Set(activeRooms.map((room) => room.room_building).filter((value): value is string => Boolean(value))),
+	);
 
 	const lastSync = new Intl.DateTimeFormat("id-ID", {
 		dateStyle: "medium",

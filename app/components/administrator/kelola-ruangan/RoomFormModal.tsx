@@ -39,7 +39,7 @@ const initialState: FormState = {
   facilityInput: "",
 };
 
-const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+import { isLabBuilding } from "@/app/utils/building";
 
 const LAB_PROGRAM_OPTIONS: Array<{ value: LabProgramValue; label: string }> = [
   { value: "ELEKTRO", label: "Teknik Elektro" },
@@ -128,10 +128,10 @@ export default function RoomFormModal({
       return;
     }
 
-    const isLabBuilding = building === LAB_BUILDING_NAME;
-    const labProgram = isLabBuilding && form.labProgram ? form.labProgram : null;
+    const isLabBuildingFlag = isLabBuilding(building);
+    const labProgram = isLabBuildingFlag && form.labProgram ? form.labProgram : null;
 
-    if (isLabBuilding && !labProgram) {
+    if (isLabBuildingFlag && !labProgram) {
       pushToast({ type: "warning", message: "Program studi wajib dipilih untuk ruangan lab." });
       return;
     }
@@ -175,7 +175,7 @@ export default function RoomFormModal({
   const buildingOptions =
     form.building && !buildings.includes(form.building) ? [...buildings, form.building] : buildings;
 
-  const isLabBuilding = form.building === LAB_BUILDING_NAME;
+  const isLabBuildingFlag = isLabBuilding(form.building);
 
   return (
     <div
@@ -241,7 +241,7 @@ export default function RoomFormModal({
                   setForm((prev) => ({
                     ...prev,
                     building: value,
-                    labProgram: value === LAB_BUILDING_NAME ? prev.labProgram : "",
+                    labProgram: isLabBuilding(value) ? prev.labProgram : "",
                   }));
                 }}
                 className={`h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-slate-400 ${
@@ -259,7 +259,7 @@ export default function RoomFormModal({
               </select>
             </label>
 
-            {isLabBuilding ? (
+            {isLabBuildingFlag ? (
               <label className="space-y-1.5">
                 <span className="text-sm font-semibold text-slate-700">Program Studi</span>
                 <select

@@ -10,7 +10,7 @@ export type MonitoringReservation = {
   decisionDocumentUrl?: string | null;
   user: {
     name: string;
-    userType: "STUDENT" | "STAFF" | "PUBLIC";
+    userType: "USER" | "STAFF";
     identifier: string | null;
     email: string;
   };

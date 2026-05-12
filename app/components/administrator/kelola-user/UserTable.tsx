@@ -2,7 +2,7 @@
 
 import { Pencil, Trash2 } from "lucide-react";
 import type { UserItem } from "./user-types";
-import { categoryLabel, roleLabel } from "./user-types";
+import { roleLabel } from "./user-types";
 import {
   SuperAdminTableCard,
   SuperAdminTableScroll,
@@ -86,7 +86,7 @@ export default function UserTable({
               </th>
               <th className="px-4 py-3 font-semibold">Nama User</th>
               <th className="px-4 py-3 font-semibold">Email</th>
-              <th className="px-4 py-3 font-semibold">Jenis User</th>
+
               <th className="px-4 py-3 font-semibold">Role</th>
               <th className="px-4 py-3 font-semibold">Tanggal Dibuat</th>
               <th className="px-4 py-3 font-semibold">Verifikasi</th>
@@ -111,7 +111,7 @@ export default function UserTable({
                   </td>
                   <td className="px-4 py-3 font-semibold text-slate-900">{user.name}</td>
                   <td className="px-4 py-3">{user.email}</td>
-                  <td className="px-4 py-3">{categoryLabel(user.userCategory)}</td>
+
                   <td className="px-4 py-3">
                     <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
                       {roleLabel(user.role)}
@@ -229,7 +229,7 @@ export default function UserTable({
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600">
-                <p>Jenis: {categoryLabel(user.userCategory)}</p>
+
                 <p>Role: {roleLabel(user.role)}</p>
                 <p className="col-span-2">
                   Verifikasi: {user.isVerified ? "Terverifikasi" : "Belum Terverifikasi"}

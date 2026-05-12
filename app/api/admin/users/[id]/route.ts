@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, UserRole, UserType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { isPrismaKnownRequestError } from "@/lib/prisma-errors";
+import { USER_ROLES, type UserRoleValue, type UserTypeValue } from "@/lib/user-enums";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -14,25 +15,19 @@ type RouteParams = {
   }>;
 };
 
-const mapUserCategoryToType = (value: unknown): UserType => {
-  if (value === "unsrat") {
-    return UserType.STAFF;
-  }
 
-  return UserType.PUBLIC;
-};
 
-const parseRole = (value: unknown): UserRole => {
+const parseRole = (value: unknown): UserRoleValue => {
   if (
-    value === UserRole.ADMIN ||
-    value === UserRole.ADMIN_DEKAN ||
-    value === UserRole.ADMIN_WD2 ||
-    value === UserRole.SUPERADMIN
+    value === USER_ROLES.ADMIN ||
+    value === USER_ROLES.ADMIN_DEKAN ||
+    value === USER_ROLES.ADMIN_WD2 ||
+    value === USER_ROLES.SUPERADMIN
   ) {
     return value;
   }
 
-  return UserRole.USER;
+  return USER_ROLES.USER;
 };
 
 const getResendCooldownSeconds = (tokens: Array<{ createdAt: Date; usedAt: Date | null }>) => {
@@ -52,15 +47,15 @@ const mapUser = (user: {
   user_id: string;
   name: string;
   email: string;
-  userType: UserType;
-  role: UserRole;
+  userType: UserTypeValue;
+  role: UserRoleValue;
   createdAt: Date;
   passwordSetupTokens?: Array<{ createdAt: Date; usedAt: Date | null }>;
 }) => ({
   id: user.user_id,
   name: user.name,
   email: user.email,
-  userCategory: user.userType === UserType.PUBLIC ? "umum" : "unsrat",
+
   role: user.role,
   createdAt: user.createdAt.toISOString(),
   isVerified: (user.passwordSetupTokens ?? []).every((token) => token.usedAt !== null),
@@ -94,14 +89,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const body = await request.json();
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
-    const userType = mapUserCategoryToType(body?.userCategory);
     const role = parseRole(body?.role);
 
     if (!name) {
       return NextResponse.json({ error: "Data user belum valid" }, { status: 400 });
     }
 
-    if (session.user.id === id && role !== UserRole.SUPERADMIN) {
+    if (session.user.id === id && role !== USER_ROLES.SUPERADMIN) {
       return NextResponse.json(
         { error: "Anda tidak dapat menurunkan role akun sendiri dari superadmin" },
         { status: 400 }
@@ -114,7 +108,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
       },
       data: {
         name,
-        userType,
         role,
       },
       select: {
@@ -135,7 +128,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(mapUser(user));
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+    if (isPrismaKnownRequestError(error) && error.code === "P2025") {
       logServerWarn("[api/admin/users/:id] User not found during update", {
         ...getRequestLogMeta(request),
         code: error.code,
@@ -187,7 +180,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+    if (isPrismaKnownRequestError(error) && error.code === "P2025") {
       logServerWarn("[api/admin/users/:id] User not found during delete", {
         ...getRequestLogMeta(request),
         code: error.code,

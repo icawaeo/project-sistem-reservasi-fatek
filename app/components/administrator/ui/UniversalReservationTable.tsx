@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, Trash2, CheckCircle } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 import StatusBadge from "@/app/components/administrator/ui/StatusBadge";
 import DeleteConfirmationModal from "@/app/components/administrator/ui/DeleteConfirmationModal";
@@ -15,6 +15,7 @@ import {
   SuperAdminTableMessageRow,
 } from "@/app/components/administrator/ui/SuperAdminTable";
 import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/ui/reservationStatus";
+import ActionConfirmationModal from "@/app/components/administrator/ui/ActionConfirmationModal";
 
 const PAGE_SIZE = 10;
 
@@ -64,6 +65,28 @@ function resolveFilterStatusGroup(status: string, endTimeInput: string) {
   return "PENDING";
 }
 
+function canAdminAct(role: string, status: string) {
+  const normStatus = (status || "").toUpperCase();
+  const normRole = (role || "").toUpperCase();
+
+  if (normRole === "ADMIN") {
+    return normStatus === "PENDING" || normStatus === "PENDING_KABAG";
+  }
+  if (normRole === "ADMIN_DEKAN") {
+    return normStatus === "PENDING_DEKAN";
+  }
+  if (normRole === "ADMIN_WD2") {
+    return normStatus === "PENDING_WD2" || normStatus === "PENDING_WAKIL_DEKAN_2";
+  }
+  if (normRole === "KAJUR") {
+    return normStatus === "PENDING_KAJUR";
+  }
+  if (normRole === "KEPALA_LAB") {
+    return normStatus === "PENDING_KEPALA_LAB";
+  }
+  return false;
+}
+
 export default function UniversalReservationTable({
   data,
   mode = "superadmin",
@@ -77,10 +100,11 @@ export default function UniversalReservationTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED">("ALL");
-  const [processing, setProcessing] = useState<{ id: string; action: "APPROVE" | "REJECT" } | null>(null);
+  const [processing, setProcessing] = useState<{ id: string; action: "APPROVE" | "REJECT" | "COMPLETE" } | null>(null);
   const [selectedRow, setSelectedRow] = useState<GenericReservation | null>(null);
   const [tableData, setTableData] = useState<GenericReservation[]>(data);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; item: GenericReservation | null }>({ isOpen: false, item: null });
+  const [decisionConfirm, setDecisionConfirm] = useState<{ isOpen: boolean; item: GenericReservation | null; action: "APPROVE" | "REJECT" | "COMPLETE" | null }>({ isOpen: false, item: null, action: null });
   const isAdminMode = mode === "admin";
 
   useEffect(() => setTableData(data), [data]);
@@ -156,6 +180,31 @@ export default function UniversalReservationTable({
     }
   };
 
+  const handleComplete = async (id: string) => {
+    if (isAdminMode || processing) return;
+    setProcessing({ id, action: "COMPLETE" });
+
+    try {
+      const response = await fetch(`/api/reservasi/complete?id=${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload.status) throw new Error(payload.error || "Gagal menyelesaikan pengajuan");
+
+      const updates: Partial<GenericReservation> = { status: payload.status, processedAt: payload.processedAt ?? null };
+      onStatusUpdated?.(id, updates);
+      setSelectedRow((prev) => (prev && prev.id === id ? { ...prev, ...updates } : prev));
+      setTableData((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)));
+      pushToast({ type: "success", message: "Pengajuan berhasil diselesaikan." });
+    } catch (error) {
+      pushToast({ type: "error", message: error instanceof Error ? error.message : "Terjadi kesalahan saat memproses." });
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const handleDeleteClick = (item: GenericReservation) => setDeleteModal({ isOpen: true, item });
 
   const handleDeleteConfirm = async () => {
@@ -215,10 +264,8 @@ export default function UniversalReservationTable({
                   <tr className="text-xs uppercase tracking-wide text-slate-500">
                     <th className="px-4 py-3">No</th>
                     <th className="px-4 py-3">Nama Lengkap</th>
-                    <th className="px-4 py-3">Nama Kegiatan</th>
-                    <th className="px-4 py-3">Tujuan Peminjaman</th>
-                    <th className="px-4 py-3">Tanggal Peminjaman</th>
-                    <th className="px-4 py-3">Waktu</th>
+                    <th className="px-4 py-3">Tanggal & Waktu Peminjaman</th>
+                    <th className="px-4 py-3">Tanggal & Waktu Pengajuan</th>
                     <th className="px-4 py-3">Ruangan</th>
                     <th className="px-4 py-3 text-center">Status</th>
                     {isAdminMode ? <th className="px-4 py-3 text-center">Aksi</th> : <th className="px-4 py-3 text-center">Detail</th>}
@@ -230,21 +277,26 @@ export default function UniversalReservationTable({
                       <tr key={item.id} className="border-t border-slate-100 text-slate-700">
                         <td className="px-4 py-3 text-xs text-slate-500">{(currentPage - 1) * PAGE_SIZE + index + 1}</td>
                         <td className="px-4 py-3 font-semibold text-slate-900">{item.user.name}</td>
-                        <td className="px-4 py-3">{item.activityName}</td>
-                        <td className="px-4 py-3">{item.purpose}</td>
-                        <td className="px-4 py-3">{formatDate(item.startTime)}</td>
-                        <td className="px-4 py-3">{formatTime(item.startTime)} - {formatTime(item.endTime)}</td>
+                        <td className="px-4 py-3"><p className="text-slate-900">{formatDate(item.startTime)}</p><p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p></td>
+                        <td className="px-4 py-3"><p className="text-slate-900">{formatDate(item.createdAt)}</p><p className="text-xs text-slate-500">{formatTime(item.createdAt)}</p></td>
                         <td className="px-4 py-3"><p className="font-semibold text-slate-900">{item.room.name}</p><p className="text-xs text-slate-500">{item.room.building}</p></td>
                         <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><StatusBadge status={computeReservationStatus(item.status, item.endTime)} /></div></td>
-                        {isAdminMode ? (
+                        {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
                           <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700">Tinjau &amp; Proses</button></div></td>
                         ) : (
-                          <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button></div></td>
+                          <td className="px-2 py-3 text-center align-middle">
+                            {/* Superadmin actions container */}
+                            <div className="flex w-full justify-center gap-1.5">
+                              <button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button>
+                              <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) === 'APPROVED' || computeReservationStatus(item.status, item.endTime) === 'COMPLETED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={16} /></button>
+                              {!isAdminMode && <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"><Trash2 size={16} /></button>}
+                            </div>
+                          </td>
                         )}
                       </tr>
                     ))
                   ) : (
-                    <SuperAdminTableMessageRow colSpan={isAdminMode ? 9 : 9}>Belum ada data pengajuan terbaru.</SuperAdminTableMessageRow>
+                    <SuperAdminTableMessageRow colSpan={8}>Belum ada data pengajuan terbaru.</SuperAdminTableMessageRow>
                   )}
                 </SuperAdminTableBody>
               </SuperAdminTable>
@@ -256,22 +308,66 @@ export default function UniversalReservationTable({
           {paginatedData.length > 0 ? (
             paginatedData.map((item) => (
               <div key={item.id} className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <div className="flex-1 space-y-2 p-4">
-                  <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Nama Pengaju</p><p className="text-sm font-semibold text-slate-900">{item.user.name}</p></div>
-                  <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Kegiatan</p><p className="text-sm text-slate-700">{item.activityName}</p></div>
-                  <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tujuan</p><p className="text-sm text-slate-700">{item.purpose}</p></div>
-                  <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ruangan</p><p className="text-sm font-semibold text-slate-900">{item.room.name}</p><p className="text-xs text-slate-500">{item.room.building}</p></div>
-                  <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal &amp; Waktu</p><p className="text-sm text-slate-700">{formatDate(item.startTime)}</p><p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p></div>
+                {/* Header: Name + Status */}
+                <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Nama Lengkap</p>
+                    <p className="mt-0.5 text-sm font-bold text-slate-900 leading-snug">{item.user.name}</p>
+                  </div>
+                  <div className="shrink-0 pt-3">
+                    <StatusBadge status={computeReservationStatus(item.status, item.endTime)} />
+                  </div>
                 </div>
-                <div className="border-t border-slate-200 p-4 flex gap-2">
-                  {isAdminMode ? (
-                    <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700">Tinjau &amp; Proses</button>
+
+                {/* Content */}
+                <div className="space-y-3 px-4 py-3">
+                  {/* Room */}
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Ruangan</p>
+                    <p className="mt-0.5 text-sm font-semibold text-slate-900">{item.room.name}</p>
+                    <p className="text-xs text-slate-500">{item.room.building}</p>
+                  </div>
+
+                  {/* Date Grid: Peminjaman + Pengajuan side by side */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tanggal &amp; Waktu Peminjaman</p>
+                      <p className="mt-0.5 text-sm font-medium text-slate-800">{formatDate(item.startTime)}</p>
+                      <p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tanggal &amp; Waktu Pengajuan</p>
+                      <p className="mt-0.5 text-sm font-medium text-slate-800">{formatDate(item.createdAt)}</p>
+                      <p className="text-xs text-slate-500">{formatTime(item.createdAt)}</p>
+                    </div>
+                  </div>
+
+                  {/* Activity + Purpose */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Nama Kegiatan</p>
+                      <p className="mt-0.5 text-sm text-slate-700 leading-snug">{item.activityName}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tujuan Peminjaman</p>
+                      <p className="mt-0.5 text-sm text-slate-700 leading-snug">{item.purpose}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action */}
+                <div className="border-t border-slate-100 px-4 py-3 flex gap-2">
+                  {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
+                    <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-slate-800 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700 active:bg-slate-900">Tinjau &amp; Proses</button>
                   ) : (
-                    <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button>
+                    <>
+                      <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 active:bg-blue-200">Lihat Detail</button>
+                      <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) === 'APPROVED' || computeReservationStatus(item.status, item.endTime) === 'COMPLETED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-emerald-600 transition-colors hover:bg-emerald-100 active:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={18} /></button>
+                    </>
                   )}
 
-                  {showDelete && !isAdminMode ? (
-                    <button type="button" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"><Trash2 size={16} /></button>
+                  {!isAdminMode ? (
+                    <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-rose-600 transition-colors hover:bg-rose-100 active:bg-rose-200"><Trash2 size={18} /></button>
                   ) : null}
                 </div>
               </div>
@@ -301,11 +397,11 @@ export default function UniversalReservationTable({
         <ReservationDetailModal
           data={selectedRow as any}
           adminRole={adminRole as any}
-          isActionable={Boolean(selectedRow)}
+          isActionable={Boolean(selectedRow && canAdminAct(adminRole || "", selectedRow.status))}
           isBusy={Boolean(selectedRow && processing?.id === selectedRow.id)}
           onClose={() => setSelectedRow(null)}
-          onApprove={() => selectedRow && handleDecision(selectedRow.id, "APPROVE")}
-          onReject={() => selectedRow && handleDecision(selectedRow.id, "REJECT")}
+          onApprove={() => selectedRow && setDecisionConfirm({ isOpen: true, item: selectedRow, action: "APPROVE" })}
+          onReject={() => selectedRow && setDecisionConfirm({ isOpen: true, item: selectedRow, action: "REJECT" })}
         />
       ) : (
         <MonitoringDetailModal data={selectedRow as any} onClose={() => setSelectedRow(null)} />
@@ -318,6 +414,29 @@ export default function UniversalReservationTable({
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         isLoading={false}
+      />
+
+      <ActionConfirmationModal
+        isOpen={decisionConfirm.isOpen}
+        action={decisionConfirm.action}
+        title={decisionConfirm.action === "COMPLETE" ? "Selesaikan Pengajuan" : decisionConfirm.action === "APPROVE" ? "Setujui Pengajuan" : "Tolak Pengajuan"}
+        description={
+          decisionConfirm.action === "COMPLETE"
+            ? `Anda yakin ingin menyelesaikan pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}" secara langsung?`
+            : `Anda yakin ingin ${decisionConfirm.action === "APPROVE" ? "menyetujui" : "menolak"} pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}"?`
+        }
+        onConfirm={async () => {
+          if (decisionConfirm.item && decisionConfirm.action) {
+            if (decisionConfirm.action === "COMPLETE") {
+              await handleComplete(decisionConfirm.item.id);
+            } else {
+              await handleDecision(decisionConfirm.item.id, decisionConfirm.action);
+            }
+            setDecisionConfirm({ isOpen: false, item: null, action: null });
+          }
+        }}
+        onCancel={() => setDecisionConfirm({ isOpen: false, item: null, action: null })}
+        isLoading={Boolean(processing)}
       />
     </>
   );

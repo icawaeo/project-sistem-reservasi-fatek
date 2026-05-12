@@ -109,3 +109,44 @@ export const sendEmailChangeVerificationMail = async ({
 
   return { delivered: true as const };
 };
+
+type SendRegistrationOtpMailInput = {
+  to: string;
+  userName: string;
+  otpCode: string;
+  expiresInMinutes: number;
+};
+
+export const sendRegistrationOtpMail = async ({
+  to,
+  userName,
+  otpCode,
+  expiresInMinutes,
+}: SendRegistrationOtpMailInput) => {
+  const transporter = createTransporter();
+  const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@localhost";
+
+  if (!transporter) {
+    console.warn("MAIL_DEBUG: SMTP belum dikonfigurasi. Kode OTP registrasi:", otpCode);
+    return { delivered: false as const };
+  }
+
+  await transporter.sendMail({
+    from: fromAddress,
+    to,
+    subject: "Kode Verifikasi Registrasi - Reservasi Fakultas Teknik",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.6; max-width: 480px; margin: 0 auto;">
+        <h2 style="margin-bottom: 8px;">Halo ${userName},</h2>
+        <p style="margin-top: 0;">Gunakan kode berikut untuk menyelesaikan registrasi akun Anda pada sistem Reservasi Ruangan Fakultas Teknik UNSRAT:</p>
+        <div style="text-align: center; margin: 24px 0;">
+          <span style="display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: 8px; background: #f1f5f9; padding: 16px 32px; border-radius: 12px; border: 2px solid #e2e8f0; color: #0f172a;">${otpCode}</span>
+        </div>
+        <p>Kode ini berlaku selama <strong>${expiresInMinutes} menit</strong>. Jangan bagikan kode ini kepada siapapun.</p>
+        <p style="color: #64748b; font-size: 13px;">Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
+      </div>
+    `,
+  });
+
+  return { delivered: true as const };
+};

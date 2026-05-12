@@ -8,6 +8,8 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import UserManagementContent from "@/app/components/administrator/kelola-user/UserManagementContent";
 import type { UserItem } from "@/app/components/administrator/kelola-user/user-types";
 
+export const dynamic = "force-dynamic";
+
 const RESEND_COOLDOWN_SECONDS = 60;
 
 const getResendCooldownSeconds = (tokens: Array<{ createdAt: Date; usedAt: Date | null }>) => {
@@ -31,7 +33,7 @@ export default async function SuperadminKelolaUserPage() {
   }
 
   if (!isSuperadminUser(session.user)) {
-    redirect("/administrator/admin/dashboard");
+    redirect("/administrator/admin");
   }
 
   const users = await prisma.user.findMany({
@@ -58,7 +60,6 @@ export default async function SuperadminKelolaUserPage() {
     id: user.user_id,
     name: user.name,
     email: user.email,
-    userCategory: user.userType === "PUBLIC" ? "umum" : "unsrat",
     role: user.role,
     createdAt: user.createdAt.toISOString(),
     isVerified: user.passwordSetupTokens.every((token: { usedAt: null; }) => token.usedAt !== null),

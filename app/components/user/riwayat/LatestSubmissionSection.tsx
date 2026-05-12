@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { Calendar, Clock, Eye, FileCheck2, FileText, Hourglass } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, Eye, FileCheck2, FileText, Hourglass } from "lucide-react";
 
 import type { ReservationDraftSnapshot, ReservationRecord } from "./_types";
 import { formatDateRange, formatTimeRange } from "../utils/formatters";
@@ -69,10 +69,17 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot }: 
                 <Clock size={15} className="text-slate-500" />
                 {formatTimeRange(reservation.res_startTime, reservation.res_endTime)}
               </div>
-              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
-                <Hourglass size={15} className="text-amber-600" />
-                Menunggu Persetujuan
-              </div>
+              {reservation.res_status === "APPROVED" ? (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
+                  <CheckCircle2 size={15} className="text-emerald-600" />
+                  Disetujui (Berjalan)
+                </div>
+              ) : (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
+                  <Hourglass size={15} className="text-amber-600" />
+                  Menunggu Persetujuan
+                </div>
+              )}
             </div>
 
             <div className="rounded-xl border border-slate-200 p-4 space-y-3">
@@ -134,42 +141,19 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot }: 
 
                 <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
                   <p className="text-[11px] lg:text-xs text-slate-500 mb-2">Surat Keputusan</p>
-                  <div className="flex items-center gap-3 py-2">
-                    <FileCheck2 className={decisionLetterUrl ? "text-emerald-500" : "text-slate-300"} size={24} />
-                    <div className="flex-1 min-w-0">
-                      <div
-                        className={`font-semibold text-sm lg:text-base truncate ${
-                          decisionLetterUrl ? "text-slate-900" : "text-slate-700"
-                        }`}
-                      >
-                        {decisionLetterUrl ? "Surat keputusan tersedia" : "Surat keputusan belum tersedia"}
-                      </div>
-                      <div className="text-xs lg:text-sm text-slate-500">
-                        {decisionLetterUrl ? "Dokumen • Tersedia" : "Dokumen • Menunggu persetujuan"}
-                      </div>
-                    </div>
-
-                    {decisionLetterUrl ? (
-                      <a
-                        href={decisionLetterUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-slate-700 hover:text-slate-900 transition-colors"
-                        title="Preview surat keputusan"
-                      >
-                        <Eye size={18} />
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled
-                        className="text-slate-400 cursor-not-allowed"
-                        title="Surat keputusan tersedia setelah pengajuan disetujui"
-                      >
-                        <Eye size={18} />
-                      </button>
-                    )}
-                  </div>
+                  {decisionLetterUrl ? (
+                    <a
+                      href={decisionLetterUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs lg:text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      <FileCheck2 size={13} />
+                      Lihat Surat Keputusan
+                    </a>
+                  ) : (
+                    <p className="text-slate-600 text-xs lg:text-sm">Surat keputusan belum tersedia</p>
+                  )}
                 </div>
               </div>
             </div>
