@@ -2,8 +2,8 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-import { USER_ROLES, type UserRoleValue } from "@/lib/user-enums";
-import { type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
+import { USER_ROLES, type UserRoleValue } from "../lib/user-enums";
+import { type LabDepartmentValue, type LabProgramValue } from "../lib/lab-enums";
 
 const { PrismaClient } = require("@prisma/client");
 
