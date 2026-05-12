@@ -1,0 +1,91 @@
+' Kumpulan Activity Diagram untuk fitur Auth.
+' Tambahkan diagram lain dengan menambah blok @startuml ... @enduml baru di bawah.
+
+@startuml auth-login
+title Activity Diagram - Login
+
+|User|
+start
+: Buka halaman login;
+: Isi email dan kata sandi;
+: Tekan tombol "Masuk";
+
+|System|
+: Memproses permintaan masuk;
+if (Terjadi kesalahan sistem?) then (Ya)
+  : Tampilkan pesan "Terjadi kesalahan sistem";
+  stop
+else (Tidak)
+  if (Email atau password salah?) then (Ya)
+    : Tampilkan pesan "Email atau password salah";
+    stop
+  else (Tidak)
+    : Tentukan halaman tujuan sesuai akses;
+    : Arahkan pengguna ke halaman tersebut;
+    stop
+  endif
+endif
+
+@enduml
+
+@startuml auth-register
+title Activity Diagram - Register
+
+|User|
+start
+: Buka halaman pendaftaran;
+: Isi nama, NIM/NIP, email, password, dan konfirmasi password;
+: Tekan tombol "Daftar";
+
+|System|
+: Memeriksa data pendaftaran;
+if (Pendaftaran valid?) then (Ya)
+  : Simpan data pendaftaran sementara;
+  : Kirim kode verifikasi ke email pengguna;
+  : Tampilkan pesan "Kode verifikasi telah dikirim ke email Anda";
+else (Tidak)
+  : Tampilkan pesan kesalahan (contoh: "Semua field wajib diisi", "Email sudah terdaftar");
+  stop
+endif
+
+|User|
+: Masukkan 6 digit kode verifikasi;
+: Tekan tombol "Verifikasi";
+
+|System|
+if (Kode belum 6 digit?) then (Ya)
+  : Tampilkan pesan "Masukkan 6 digit kode verifikasi";
+  stop
+else (Tidak)
+  : Memeriksa kode verifikasi;
+  if (Kode benar?) then (Ya)
+    : Buat akun;
+    : Tampilkan pesan "Akun berhasil dibuat! Sedang masuk...";
+    : Coba masuk otomatis;
+    if (Masuk otomatis berhasil?) then (Ya)
+      : Arahkan ke halaman landing page;
+      stop
+    else (Tidak)
+      : Tampilkan pesan "Akun berhasil dibuat. Silakan login secara manual.";
+      : Arahkan ke halaman login;
+      stop
+    endif
+  else (Tidak)
+    : Tampilkan pesan kesalahan (contoh: "Kode verifikasi salah. Sisa percobaan: ...", "Kode verifikasi sudah kadaluarsa. Silakan kirim ulang kode.");
+
+    |User|
+    : (Opsional) Tekan tombol "Kirim ulang kode";
+
+    |System|
+    if (Masih harus menunggu?) then (Ya)
+      : Tampilkan pesan "Tunggu ... detik sebelum mengirim ulang kode.";
+      stop
+    else (Tidak)
+      : Kirim kode verifikasi baru;
+      : Tampilkan pesan "Kode verifikasi baru telah dikirim";
+      stop
+    endif
+  endif
+endif
+
+@enduml

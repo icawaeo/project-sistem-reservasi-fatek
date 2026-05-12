@@ -1,0 +1,153 @@
+@startuml reservasi-ruangan
+' Activity Diagram - Proses Reservasi Ruangan dari awal sampai pengajuan
+
+|User|
+start
+: Buka halaman gedung;
+
+|System|
+: Memuat daftar ruangan;
+if (Gagal memuat daftar ruangan?) then (Ya)
+  : Tampilkan pesan "Gagal memuat data ruangan.";
+  stop
+else (Tidak)
+  : Tampilkan daftar ruangan;
+endif
+
+|User|
+: Isi tanggal dan waktu reservasi;
+: Tekan tombol "Cek Ketersediaan";
+
+|System|
+if (Data tanggal/waktu belum lengkap?) then (Ya)
+  : Tampilkan pesan "Lengkapi tanggal dan waktu reservasi terlebih dahulu.";
+  stop
+else (Tidak)
+  if (Tanggal terlalu dekat?) then (Ya)
+    : Tampilkan pesan "Reservasi hanya dapat dilakukan minimal H-3...";
+    stop
+  else (Tidak)
+    if (Di luar jam operasional 08:00 - 18:00?) then (Ya)
+      : Tampilkan pesan "Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).";
+      stop
+    else (Tidak)
+      if (Rentang tanggal tidak valid?) then (Ya)
+        : Tampilkan pesan "End Date harus lebih besar atau sama dengan Start Date.";
+        stop
+      else (Tidak)
+        if (Jam selesai <= jam mulai?) then (Ya)
+          : Tampilkan pesan "Jam selesai tidak boleh lebih awal dari jam mulai.";
+          stop
+        else (Tidak)
+          : Mencari ruangan yang tersedia sesuai jadwal;
+          if (Gagal mengambil data?) then (Ya)
+            : Tampilkan pesan "Terjadi kesalahan saat mencari ruangan.";
+            stop
+          else (Tidak)
+            : Tampilkan daftar ruangan yang tersedia;
+          endif
+        endif
+      endif
+    endif
+  endif
+endif
+
+|User|
+: Pilih salah satu ruangan;
+: Tekan tombol "Reservasi";
+
+|System|
+if (Pengguna belum login / bukan peminjam yang valid?) then (Ya)
+  : Arahkan ke halaman login;
+  stop
+else (Tidak)
+  if (Belum cek ketersediaan?) then (Ya)
+    : Tampilkan pesan "Silakan lengkapi form dan cek ketersediaan terlebih dahulu sebelum melakukan reservasi.";
+    stop
+  else (Tidak)
+    : Cek apakah masih ada pengajuan reservasi aktif;
+    if (Masih ada yang aktif?) then (Ya)
+      : Tampilkan pesan "Anda masih memiliki pengajuan reservasi aktif yang belum selesai.";
+      stop
+    else (Tidak)
+      : Arahkan ke formulir reservasi;
+    endif
+  endif
+endif
+
+|User|
+: Isi data peminjam dan keperluan;
+
+|System|
+if (Data jadwal tidak lengkap?) then (Ya)
+  : Tampilkan pesan "Data jadwal tidak lengkap. Silakan pilih ulang ruangan dari halaman gedung.";
+  stop
+else (Tidak)
+  if (Data wajib belum lengkap?) then (Ya)
+    : Tampilkan pesan "Mohon lengkapi seluruh data wajib pada formulir reservasi.";
+    stop
+  else (Tidak)
+    if (Peminjaman lab?) then (Ya)
+      if (Kategori lab belum dipilih?) then (Ya)
+        : Tampilkan pesan "Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya).";
+        stop
+      else (Tidak)
+        if (Dokumen pendukung belum diunggah?) then (Ya)
+          : Tampilkan pesan "Dokumen pendukung wajib diunggah untuk peminjaman lab.";
+          stop
+        else (Tidak)
+          if (Ukuran dokumen > 5 MB?) then (Ya)
+            : Tampilkan pesan "Ukuran file terlalu besar (maks 5 MB). Silakan pilih file lain.";
+            stop
+          endif
+        endif
+      endif
+    endif
+    : Simpan data sementara dan tampilkan halaman konfirmasi;
+  endif
+endif
+
+|User|
+: Periksa ringkasan data;
+: (Opsional) Pratinjau dokumen;
+: Tekan tombol "Konfirmasi";
+
+|System|
+: Memproses konfirmasi reservasi;
+if (Terjadi kesalahan saat submit?) then (Ya)
+  : Tampilkan pesan "Terjadi kesalahan saat submit reservasi.";
+  stop
+else (Tidak)
+  if (Sesi login tidak ditemukan?) then (Ya)
+    : Tampilkan pesan "Sesi login tidak ditemukan. Silakan login ulang.";
+    stop
+  else (Tidak)
+    if (Peminjaman lab?) then (Ya)
+      if (Kategori lab belum dipilih?) then (Ya)
+        : Tampilkan pesan "Kategori peminjaman lab wajib dipilih (Skripsi/Lainnya). Silakan kembali dan lengkapi data.";
+        stop
+      else (Tidak)
+        if (Dokumen pendukung belum diunggah?) then (Ya)
+          : Tampilkan pesan "Dokumen pendukung wajib diunggah untuk peminjaman lab.";
+          stop
+        else (Tidak)
+          : Unggah dokumen pendukung;
+          if (Upload gagal?) then (Ya)
+            : Tampilkan pesan "Gagal mengupload dokumen.";
+            stop
+          endif
+        endif
+      endif
+    endif
+    : Simpan pengajuan reservasi;
+    if (Gagal menyimpan?) then (Ya)
+      : Tampilkan pesan "Gagal menyimpan reservasi.";
+      stop
+    else (Tidak)
+      : Arahkan ke halaman riwayat;
+      stop
+    endif
+  endif
+endif
+
+@enduml
