@@ -44,7 +44,7 @@ Repo ini sudah disiapkan untuk dibuild lewat Dockerfile: `Dockerfile`, `.dockeri
 6. **Mount volume untuk file upload** (wajib jika ingin data tidak hilang saat redeploy):
 	- `/app/uploads` (template surat + metadata `uploads/templates/templates.json`)
 	- `/app/public/uploads` (ttd admin tersimpan di `public/uploads/signatures`)
-7. Deploy. Saat container start, `docker-entrypoint.sh` menjalankan `prisma migrate deploy` (bisa dimatikan dengan `RUN_MIGRATIONS=0`).
+7. Deploy. Saat container start, `docker-entrypoint.sh` menjalankan `prisma migrate deploy`. Kalau migrasi gagal, container tetap lanjut start untuk mencegah restart loop. Jika ingin skip migrasi sama sekali, set `RUN_MIGRATIONS=0`.
 
 ### Environment variables minimal
 
