@@ -13,5 +13,23 @@ if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
   fi
 fi
 
+# Optional: run seed during startup. Set RUN_SEED=1 in env to enable.
+if [ "${RUN_SEED:-0}" = "1" ]; then
+  echo "[entrypoint] Running prisma db seed"
+  SEED_RETRIES=${SEED_RETRIES:-5}
+  SEED_RETRY_DELAY=${SEED_RETRY_DELAY:-5}
+  attempt=0
+  until /app/node_modules/.bin/tsx prisma/seed.ts; do
+    attempt=$((attempt + 1))
+    echo "[entrypoint] prisma db seed attempt ${attempt} failed"
+    if [ "$attempt" -ge "$SEED_RETRIES" ]; then
+      echo "[entrypoint] prisma db seed failed after ${attempt} attempts, continuing startup"
+      break
+    fi
+    echo "[entrypoint] retrying seed in ${SEED_RETRY_DELAY}s..."
+    sleep ${SEED_RETRY_DELAY}
+  done
+fi
+
 echo "[entrypoint] Starting Next.js"
 exec /app/node_modules/.bin/next start -p "${PORT:-3000}"
