@@ -32,16 +32,60 @@ export type LetterTemplateMeta = {
   updatedAt: string;
 };
 
-const TEMPLATE_DIR = path.join(process.cwd(), "uploads", "templates");
+const TEMPLATE_RELATIVE_DIR = path.join("public", "uploads", "templates");
+const LEGACY_TEMPLATE_RELATIVE_DIR = path.join("uploads", "templates");
+const TEMPLATE_DIR = path.join(process.cwd(), TEMPLATE_RELATIVE_DIR);
+const LEGACY_TEMPLATE_DIR = path.join(process.cwd(), LEGACY_TEMPLATE_RELATIVE_DIR);
 const META_PATH = path.join(TEMPLATE_DIR, "templates.json");
+const LEGACY_META_PATH = path.join(LEGACY_TEMPLATE_DIR, "templates.json");
+
+const toCurrentTemplatePath = (storedPath: string) => {
+  const normalized = storedPath.replace(/\\/g, "/");
+  const legacyPrefix = "uploads/templates/";
+
+  if (normalized.startsWith(legacyPrefix)) {
+    return `public/${normalized}`;
+  }
+
+  return normalized;
+};
+
+const migrateLegacyTemplateStoreIfNeeded = async () => {
+  try {
+    await fs.access(LEGACY_TEMPLATE_DIR);
+  } catch {
+    return;
+  }
+
+  await fs.mkdir(TEMPLATE_DIR, { recursive: true });
+
+  const legacyEntries = await fs.readdir(LEGACY_TEMPLATE_DIR);
+  for (const entry of legacyEntries) {
+    const legacyPath = path.join(LEGACY_TEMPLATE_DIR, entry);
+    const currentPath = path.join(TEMPLATE_DIR, entry);
+
+    try {
+      await fs.access(currentPath);
+      continue;
+    } catch {
+      await fs.rename(legacyPath, currentPath);
+    }
+  }
+};
 
 const ensureStoreReady = async () => {
   await fs.mkdir(TEMPLATE_DIR, { recursive: true });
+  await migrateLegacyTemplateStoreIfNeeded();
 
   try {
     await fs.access(META_PATH);
   } catch {
-    await fs.writeFile(META_PATH, JSON.stringify([]), "utf8");
+    try {
+      await fs.access(LEGACY_META_PATH);
+      await fs.rename(LEGACY_META_PATH, META_PATH);
+    } catch {
+      await fs.writeFile(META_PATH, JSON.stringify([]), "utf8");
+    }
   }
 };
 
@@ -66,13 +110,23 @@ const readAll = async (): Promise<LetterTemplateMeta[]> => {
       return "GENERAL";
     };
 
+    let hasLegacyPath = false;
     const normalized = parsed
       .filter(isRecord)
       .map((item) => {
         const templateType = coerceType(item.templateType);
         const base = item as unknown as LetterTemplateMeta;
+        const storedPath = toCurrentTemplatePath(base.storedPath);
+        const pdfStoredPath = base.pdfStoredPath ? toCurrentTemplatePath(base.pdfStoredPath) : undefined;
+
+        if (storedPath !== base.storedPath || pdfStoredPath !== base.pdfStoredPath) {
+          hasLegacyPath = true;
+        }
+
         return {
           ...base,
+          storedPath,
+          pdfStoredPath,
           templateType,
           isActive: Boolean(item.isActive),
         } satisfies LetterTemplateMeta;
@@ -104,6 +158,10 @@ const readAll = async (): Promise<LetterTemplateMeta[]> => {
         isActive: item.id === chosen.id,
       };
     });
+
+    if (hasLegacyPath) {
+      await writeAll(cleaned as LetterTemplateMeta[]);
+    }
 
     return cleaned as LetterTemplateMeta[];
   } catch {
@@ -286,11 +344,11 @@ export const createTemplateFromDocx = async (params: {
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
   const storedFilename = `${id}.docx`;
-  const storedPath = path.join("uploads", "templates", storedFilename);
+  const storedPath = path.join(TEMPLATE_RELATIVE_DIR, storedFilename);
   const absolutePath = path.join(process.cwd(), storedPath);
 
   const pdfStoredFilename = `${id}.pdf`;
-  const pdfStoredPath = path.join("uploads", "templates", pdfStoredFilename);
+  const pdfStoredPath = path.join(TEMPLATE_RELATIVE_DIR, pdfStoredFilename);
   const pdfAbsolutePath = path.join(process.cwd(), pdfStoredPath);
 
   await ensureStoreReady();
@@ -388,7 +446,7 @@ export const ensurePdfPreview = async (id: string) => {
   const template = templates[index];
   const docxAbsolutePath = path.join(process.cwd(), template.storedPath);
   const pdfStoredFilename = template.pdfStoredFilename ?? `${template.id}.pdf`;
-  const pdfStoredPath = template.pdfStoredPath ?? path.join("uploads", "templates", pdfStoredFilename);
+  const pdfStoredPath = template.pdfStoredPath ?? path.join(TEMPLATE_RELATIVE_DIR, pdfStoredFilename);
   const pdfAbsolutePath = path.join(process.cwd(), pdfStoredPath);
 
   try {

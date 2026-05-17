@@ -42,8 +42,7 @@ Repo ini sudah disiapkan untuk dibuild lewat Dockerfile: `Dockerfile`, `.dockeri
 4. **Set environment variables** (lihat daftar di bawah).
 5. **Tambah database** (Postgres) di Dokploy, lalu set `DATABASE_URL`.
 6. **Mount volume untuk file upload** (wajib jika ingin data tidak hilang saat redeploy):
-	- `/app/uploads` (template surat + metadata `uploads/templates/templates.json`)
-	- `/app/public/uploads` (ttd admin tersimpan di `public/uploads/signatures`)
+	- `/app/public/uploads` (template surat di `public/uploads/templates`, TTD admin di `public/uploads/signatures`, dokumen reservasi di `public/uploads/reservations`)
 7. Deploy. Saat container start, `docker-entrypoint.sh` menjalankan `prisma migrate deploy` (bisa dimatikan dengan `RUN_MIGRATIONS=0`).
 
 ### Environment variables minimal
@@ -54,7 +53,7 @@ Repo ini sudah disiapkan untuk dibuild lewat Dockerfile: `Dockerfile`, `.dockeri
 
 ### Environment variables opsional (fitur tertentu)
 
-- Email (reset/verification): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`
+- Email via MailerSend SMTP relay (reset/verification): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SENDER_EMAIL`, `SMTP_SENDER_NAME`
 - Firebase Storage (jika dipakai di fitur upload tertentu): `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_STORAGE_BUCKET`
 - LibreOffice path (umumnya tidak perlu di Linux container karena `soffice` sudah ada di PATH): `LIBREOFFICE_PATH` / `SOFFICE_PATH`
 

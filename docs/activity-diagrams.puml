@@ -1,0 +1,769 @@
+' Activity diagrams for Sistem Reservasi FATEK
+' Setiap blok @startuml ... @enduml dapat dirender terpisah di PlantUML.
+' Diagram dibuat dengan swimlane dan memakai istilah yang mudah dipahami.
+
+@startuml activity_register
+title Registrasi Akun Pengguna
+|Pengguna|
+start
+:Membuka halaman registrasi;
+:Mengisi nama, email kampus, NIM/NIP, dan kata sandi;
+:Mengirim formulir;
+|Sistem|
+:Memeriksa kelengkapan data;
+if (Data lengkap?) then (Ya)
+  :Memeriksa email kampus dan kata sandi;
+  if (Data sesuai?) then (Ya)
+    :Memastikan email belum terdaftar;
+    if (Email belum dipakai?) then (Ya)
+      :Menyimpan pendaftaran sementara;
+      |Email|
+      :Mengirim kode verifikasi;
+      |Pengguna|
+      :Memasukkan kode verifikasi;
+      |Sistem|
+      :Memeriksa kode verifikasi;
+      if (Kode benar dan masih berlaku?) then (Ya)
+        :Membuat akun pengguna;
+        :Menghapus pendaftaran sementara;
+        :Membuka sesi masuk;
+        |Pengguna|
+        :Masuk ke halaman utama;
+      else (Tidak)
+        |Pengguna|
+        :Melihat pesan kode salah atau kedaluwarsa;
+      endif
+    else (Tidak)
+      |Pengguna|
+      :Melihat pesan email sudah terdaftar;
+    endif
+  else (Tidak)
+    |Pengguna|
+    :Memperbaiki email atau kata sandi;
+  endif
+else (Tidak)
+  |Pengguna|
+  :Melengkapi data yang kurang;
+endif
+stop
+@enduml
+
+@startuml activity_login
+title Login dan Arah Halaman
+|Pengguna|
+start
+:Membuka halaman login;
+:Mengisi email dan kata sandi;
+:Menekan tombol masuk;
+|Sistem|
+:Memeriksa akun dan kata sandi;
+if (Akun valid?) then (Ya)
+  :Membaca peran pengguna;
+  if (Superadmin?) then (Ya)
+    |Superadmin|
+    :Masuk ke dashboard superadmin;
+  elseif (Petugas?) then (Ya)
+    |Petugas|
+    :Masuk ke halaman administrator;
+  else (Pengguna biasa)
+    |Pengguna|
+    :Masuk ke halaman utama;
+  endif
+else (Tidak)
+  |Pengguna|
+  :Melihat pesan email atau kata sandi salah;
+endif
+stop
+@enduml
+
+@startuml activity_set_password
+title Membuat Kata Sandi untuk Akun Petugas
+|Petugas|
+start
+:Membuka tautan dari email;
+|Sistem|
+:Memeriksa tautan undangan;
+if (Tautan masih berlaku?) then (Ya)
+  |Petugas|
+  :Mengisi kata sandi baru;
+  :Mengirim kata sandi;
+  |Sistem|
+  :Memeriksa kekuatan dan kecocokan kata sandi;
+  if (Kata sandi sesuai?) then (Ya)
+    :Menyimpan kata sandi baru;
+    :Menandai undangan sudah dipakai;
+    |Petugas|
+    :Menuju halaman login;
+  else (Tidak)
+    |Petugas|
+    :Memperbaiki kata sandi;
+  endif
+else (Tidak)
+  |Petugas|
+  :Melihat pesan tautan tidak berlaku;
+endif
+stop
+@enduml
+
+@startuml activity_check_availability
+title Cek Ketersediaan Ruangan
+|Pengguna|
+start
+:Membuka halaman utama;
+:Memilih tanggal, jam, kapasitas, atau gedung;
+:Menjalankan pencarian;
+|Sistem|
+:Mencari ruangan aktif;
+:Membandingkan dengan jadwal peminjaman yang masih berlaku;
+if (Ada ruangan kosong?) then (Ya)
+  |Pengguna|
+  :Melihat daftar ruangan tersedia;
+  :Memilih ruangan yang cocok;
+  |Sistem|
+  :Menyiapkan pilihan ruangan;
+  |Pengguna|
+  :Menuju detail ruangan atau formulir reservasi;
+else (Tidak)
+  |Pengguna|
+  :Melihat pesan tidak ada ruangan tersedia;
+  :Mengubah pilihan pencarian;
+endif
+stop
+@enduml
+
+@startuml activity_view_building
+title Melihat Gedung dan Ruangan
+|Pengguna|
+start
+:Membuka daftar gedung;
+:Memilih gedung;
+|Sistem|
+:Mengambil informasi gedung dan daftar ruangan;
+if (Gedung aktif dan ditemukan?) then (Ya)
+  |Pengguna|
+  :Melihat informasi gedung;
+  :Melihat daftar ruangan;
+  if (Ingin meminjam ruangan?) then (Ya)
+    :Memilih ruangan;
+    |Sistem|
+    :Menyimpan pilihan sementara;
+    |Pengguna|
+    :Menuju formulir reservasi;
+  else (Tidak)
+    :Tetap melihat informasi ruangan;
+  endif
+else (Tidak)
+  |Pengguna|
+  :Melihat pesan data tidak ditemukan;
+endif
+stop
+@enduml
+
+@startuml activity_create_reservation
+title Mengajukan Reservasi Ruangan
+|Pengguna|
+start
+:Membuka formulir reservasi;
+:Memilih ruangan, tanggal, jam, dan tujuan;
+if (Ruangan laboratorium?) then (Ya)
+  :Memilih jenis kebutuhan lab;
+  if (Butuh dokumen pendukung?) then (Ya)
+    :Mengunggah dokumen pendukung;
+  endif
+else (Tidak)
+  :Melanjutkan sebagai peminjaman umum;
+endif
+:Membuka halaman konfirmasi;
+|Sistem|
+:Memeriksa jadwal sekali lagi;
+if (Jadwal masih kosong?) then (Ya)
+  :Memeriksa apakah pengguna masih punya pengajuan aktif;
+  if (Tidak ada pengajuan aktif?) then (Ya)
+    :Memeriksa kelengkapan dan batas waktu pengajuan;
+    if (Pengajuan memenuhi aturan?) then (Ya)
+      :Menyimpan pengajuan;
+      :Memberi status menunggu konfirmasi;
+      |Notifikasi|
+      :Memberi tahu petugas dan superadmin;
+      |Pengguna|
+      :Menuju halaman riwayat;
+    else (Tidak)
+      |Pengguna|
+      :Melihat pesan aturan belum terpenuhi;
+    endif
+  else (Tidak)
+    |Pengguna|
+    :Melihat pesan masih ada pengajuan aktif;
+  endif
+else (Tidak)
+  |Pengguna|
+  :Memilih jadwal atau ruangan lain;
+endif
+stop
+@enduml
+
+@startuml activity_reservation_history
+title Melihat Riwayat Reservasi
+|Pengguna|
+start
+:Membuka halaman riwayat;
+|Sistem|
+:Memeriksa sesi masuk;
+if (Sudah masuk?) then (Ya)
+  :Mengambil daftar pengajuan milik pengguna;
+  :Mengurutkan pengajuan;
+  |Pengguna|
+  :Melihat pengajuan terbaru dan riwayat;
+  if (Membuka dokumen?) then (Ya)
+    |Sistem|
+    :Menyiapkan dokumen yang tersedia;
+    |Pengguna|
+    :Melihat dokumen pendukung atau surat keputusan;
+  else (Tidak)
+    :Melihat status pengajuan;
+  endif
+else (Tidak)
+  |Pengguna|
+  :Menuju halaman login;
+endif
+stop
+@enduml
+
+@startuml activity_admin_dashboard
+title Dashboard Petugas dan Superadmin
+|Petugas / Superadmin|
+start
+:Membuka dashboard;
+|Sistem|
+:Memeriksa hak akses;
+if (Berwenang?) then (Ya)
+  :Mengambil ringkasan pengajuan;
+  :Mengambil daftar pengajuan terbaru;
+  |Petugas / Superadmin|
+  :Melihat jumlah menunggu, disetujui, ditolak, dan selesai;
+  :Menyaring atau membuka detail pengajuan;
+else (Tidak)
+  |Petugas / Superadmin|
+  :Melihat pesan akses ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_general_approval
+title Persetujuan Reservasi Umum
+|Kabag|
+start
+:Membuka pengajuan umum yang menunggu;
+:Memeriksa detail pengajuan;
+if (Pengajuan layak?) then (Ya)
+  |Sistem|
+  :Meneruskan pengajuan ke Dekan;
+  |Notifikasi|
+  :Memberi tahu Dekan;
+  |Dekan|
+  :Memeriksa pengajuan;
+  if (Dekan menyetujui?) then (Ya)
+    |Sistem|
+    :Meneruskan pengajuan ke Wakil Dekan 2;
+    |Notifikasi|
+    :Memberi tahu Wakil Dekan 2;
+    |Wakil Dekan 2|
+    :Memeriksa pengajuan;
+    if (Wakil Dekan 2 menyetujui?) then (Ya)
+      |Sistem|
+      :Menetapkan pengajuan disetujui;
+      |Notifikasi|
+      :Memberi tahu pengguna bahwa pengajuan disetujui;
+    else (Tidak)
+      |Sistem|
+      :Menetapkan pengajuan ditolak Wakil Dekan 2;
+      |Notifikasi|
+      :Memberi tahu pengguna bahwa pengajuan ditolak;
+    endif
+  else (Tidak)
+    |Sistem|
+    :Menetapkan pengajuan ditolak Dekan;
+    |Notifikasi|
+    :Memberi tahu pengguna bahwa pengajuan ditolak;
+  endif
+else (Tidak)
+  |Sistem|
+  :Menetapkan pengajuan ditolak Kabag;
+  |Notifikasi|
+  :Memberi tahu pengguna bahwa pengajuan ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_lab_thesis_approval
+title Persetujuan Reservasi Lab untuk Skripsi
+|Kabag|
+start
+:Membuka pengajuan lab untuk skripsi;
+:Memeriksa data dan dokumen;
+if (Pengajuan layak?) then (Ya)
+  |Sistem|
+  :Meneruskan pengajuan ke Kepala Lab sesuai program studi;
+  |Notifikasi|
+  :Memberi tahu Kepala Lab;
+  |Kepala Lab|
+  :Memeriksa pengajuan;
+  if (Kepala Lab menyetujui?) then (Ya)
+    |Sistem|
+    :Menetapkan pengajuan disetujui;
+    |Notifikasi|
+    :Memberi tahu pengguna bahwa pengajuan disetujui;
+  else (Tidak)
+    |Sistem|
+    :Menetapkan pengajuan ditolak Kepala Lab;
+    |Notifikasi|
+    :Memberi tahu pengguna bahwa pengajuan ditolak;
+  endif
+else (Tidak)
+  |Sistem|
+  :Menetapkan pengajuan ditolak Kabag;
+  |Notifikasi|
+  :Memberi tahu pengguna bahwa pengajuan ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_lab_other_approval
+title Persetujuan Reservasi Lab untuk Kegiatan Lain
+|Kabag|
+start
+:Membuka pengajuan lab untuk kegiatan lain;
+:Memeriksa data dan dokumen;
+if (Pengajuan layak?) then (Ya)
+  |Sistem|
+  :Meneruskan pengajuan ke Kepala Jurusan;
+  |Notifikasi|
+  :Memberi tahu Kepala Jurusan;
+  |Kepala Jurusan|
+  :Memeriksa pengajuan;
+  if (Kepala Jurusan menyetujui?) then (Ya)
+    |Sistem|
+    :Meneruskan pengajuan ke Kepala Lab;
+    |Notifikasi|
+    :Memberi tahu Kepala Lab;
+    |Kepala Lab|
+    :Memeriksa pengajuan;
+    if (Kepala Lab menyetujui?) then (Ya)
+      |Sistem|
+      :Menetapkan pengajuan disetujui;
+      |Notifikasi|
+      :Memberi tahu pengguna bahwa pengajuan disetujui;
+    else (Tidak)
+      |Sistem|
+      :Menetapkan pengajuan ditolak Kepala Lab;
+      |Notifikasi|
+      :Memberi tahu pengguna bahwa pengajuan ditolak;
+    endif
+  else (Tidak)
+    |Sistem|
+    :Menetapkan pengajuan ditolak Kepala Jurusan;
+    |Notifikasi|
+    :Memberi tahu pengguna bahwa pengajuan ditolak;
+  endif
+else (Tidak)
+  |Sistem|
+  :Menetapkan pengajuan ditolak Kabag;
+  |Notifikasi|
+  :Memberi tahu pengguna bahwa pengajuan ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_admin_add_reservation
+title Menambahkan Reservasi oleh Petugas
+|Petugas|
+start
+:Membuka form tambah reservasi;
+:Mengisi peminjam, ruangan, waktu, dan tujuan;
+:Menyimpan pengajuan;
+|Sistem|
+:Memeriksa kelengkapan dan ketersediaan ruangan;
+if (Data sesuai dan jadwal kosong?) then (Ya)
+  :Menyimpan reservasi;
+  :Memberi status menunggu konfirmasi;
+  |Petugas|
+  :Melihat reservasi baru di daftar monitoring;
+else (Tidak)
+  |Petugas|
+  :Melihat pesan data belum sesuai atau jadwal bentrok;
+endif
+stop
+@enduml
+
+@startuml activity_finish_or_delete_reservation
+title Menyelesaikan atau Menghapus Reservasi
+|Petugas / Superadmin|
+start
+:Membuka daftar reservasi;
+if (Memilih selesaikan?) then (Ya)
+  :Mengonfirmasi penyelesaian;
+  |Sistem|
+  :Memeriksa reservasi;
+  if (Reservasi dapat diselesaikan?) then (Ya)
+    :Menandai reservasi selesai;
+    |Petugas / Superadmin|
+    :Melihat daftar diperbarui;
+  else (Tidak)
+    |Petugas / Superadmin|
+    :Melihat pesan reservasi tidak dapat diselesaikan;
+  endif
+else (Hapus)
+  :Mengonfirmasi penghapusan;
+  |Sistem|
+  :Memeriksa reservasi;
+  if (Reservasi ditemukan?) then (Ya)
+    :Menghapus reservasi;
+    |Petugas / Superadmin|
+    :Melihat daftar diperbarui;
+  else (Tidak)
+    |Petugas / Superadmin|
+    :Melihat pesan data tidak ditemukan;
+  endif
+endif
+stop
+@enduml
+
+@startuml activity_manage_buildings
+title Kelola Gedung
+|Superadmin|
+start
+:Membuka menu kelola gedung;
+|Sistem|
+:Memeriksa hak akses;
+if (Superadmin?) then (Ya)
+  :Mengambil daftar gedung;
+  |Superadmin|
+  :Melihat tabel gedung;
+  if (Tambah gedung?) then (Tambah)
+    :Mengisi nama, hari operasional, jam buka, jam tutup, status, dan gambar;
+    |Sistem|
+    :Memeriksa data dan nama gedung;
+    if (Data sesuai?) then (Ya)
+      :Menyimpan gedung baru;
+    else (Tidak)
+      |Superadmin|
+      :Memperbaiki data gedung;
+    endif
+  elseif (Ubah gedung?) then (Ubah)
+    :Mengubah data gedung;
+    |Sistem|
+    :Menyimpan perubahan;
+  else (Hapus)
+    :Mengonfirmasi penghapusan;
+    |Sistem|
+    :Menghapus gedung jika memungkinkan;
+  endif
+  |Superadmin|
+  :Melihat daftar gedung terbaru;
+else (Tidak)
+  |Superadmin|
+  :Melihat pesan akses ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_manage_rooms
+title Kelola Ruangan
+|Superadmin|
+start
+:Membuka menu kelola ruangan;
+|Sistem|
+:Memeriksa hak akses;
+if (Superadmin?) then (Ya)
+  :Mengambil daftar ruangan dan gedung;
+  |Superadmin|
+  :Melihat tabel ruangan;
+  if (Tambah ruangan?) then (Tambah)
+    :Mengisi nama, gedung, lokasi, kapasitas, status, dan gambar;
+    if (Ruangan lab?) then (Ya)
+      :Memilih program studi lab;
+    endif
+    |Sistem|
+    :Memeriksa data ruangan;
+    if (Data sesuai?) then (Ya)
+      :Menyimpan ruangan baru;
+    else (Tidak)
+      |Superadmin|
+      :Memperbaiki data ruangan;
+    endif
+  elseif (Ubah ruangan?) then (Ubah)
+    :Mengubah data ruangan;
+    |Sistem|
+    :Menyimpan perubahan;
+  else (Hapus)
+    :Mengonfirmasi penghapusan;
+    |Sistem|
+    :Menghapus ruangan jika memungkinkan;
+  endif
+  |Superadmin|
+  :Melihat daftar ruangan terbaru;
+else (Tidak)
+  |Superadmin|
+  :Melihat pesan akses ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_manage_users
+title Kelola Akun Pengguna dan Petugas
+|Superadmin|
+start
+:Membuka menu kelola user;
+|Sistem|
+:Memeriksa hak akses;
+if (Superadmin?) then (Ya)
+  :Mengambil daftar akun;
+  |Superadmin|
+  :Melihat tabel dan filter akun;
+  if (Tambah akun petugas?) then (Tambah)
+    :Mengisi nama, email, dan peran;
+    |Sistem|
+    :Memeriksa data dan email;
+    if (Data sesuai?) then (Ya)
+      :Membuat akun petugas;
+      |Email|
+      :Mengirim tautan membuat kata sandi;
+      |Superadmin|
+      :Melihat status undangan;
+    else (Tidak)
+      |Superadmin|
+      :Memperbaiki data akun;
+    endif
+  elseif (Ubah akun?) then (Ubah)
+    :Mengubah nama, email, atau peran;
+    |Sistem|
+    :Memastikan perubahan aman;
+    :Menyimpan perubahan;
+  elseif (Kirim ulang undangan?) then (Kirim ulang)
+    |Sistem|
+    :Memeriksa jeda pengiriman;
+    |Email|
+    :Mengirim undangan baru jika sudah boleh;
+  else (Hapus)
+    :Memilih satu atau beberapa akun;
+    :Mengonfirmasi penghapusan;
+    |Sistem|
+    :Menghapus akun yang dipilih;
+  endif
+  |Superadmin|
+  :Melihat daftar akun terbaru;
+else (Tidak)
+  |Superadmin|
+  :Melihat pesan akses ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_manage_templates
+title Kelola Template Surat
+|Superadmin|
+start
+:Membuka menu template surat;
+|Sistem|
+:Memeriksa hak akses;
+if (Superadmin?) then (Ya)
+  :Mengambil daftar template;
+  |Superadmin|
+  :Melihat template yang tersedia;
+  if (Unggah template?) then (Unggah)
+    :Memilih file DOCX, nama, dan jenis surat;
+    |Sistem|
+    :Memeriksa format file;
+    if (File sesuai?) then (Ya)
+      :Menyimpan template;
+      :Menyiapkan pratinjau surat;
+      |Superadmin|
+      :Melihat template baru;
+    else (Tidak)
+      |Superadmin|
+      :Melihat pesan file harus DOCX;
+    endif
+  elseif (Ubah template?) then (Ubah)
+    :Mengubah nama, jenis, atau status template;
+    |Sistem|
+    :Menyimpan perubahan template;
+  elseif (Lihat pratinjau?) then (Pratinjau)
+    |Sistem|
+    :Menyiapkan tampilan PDF;
+    |Superadmin|
+    :Melihat pratinjau surat;
+  else (Hapus)
+    :Mengonfirmasi penghapusan;
+    |Sistem|
+    :Menghapus template dan pratinjau;
+  endif
+else (Tidak)
+  |Superadmin|
+  :Melihat pesan akses ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_decision_letter
+title Melihat atau Mengunduh Surat Keputusan
+|Pengguna / Petugas|
+start
+:Memilih surat keputusan reservasi;
+|Sistem|
+:Memeriksa hak lihat;
+if (Boleh melihat?) then (Ya)
+  :Mengambil data reservasi;
+  if (Keputusan sudah final?) then (Ya)
+    :Memilih template sesuai jenis reservasi;
+    :Mengisi data ke surat;
+    :Menyiapkan file PDF;
+    |Pengguna / Petugas|
+    :Melihat atau mengunduh surat keputusan;
+  else (Tidak)
+    |Pengguna / Petugas|
+    :Melihat pesan surat belum tersedia;
+  endif
+else (Tidak)
+  |Pengguna / Petugas|
+  :Melihat pesan akses ditolak;
+endif
+stop
+@enduml
+
+@startuml activity_profile
+title Kelola Profil Administrator
+|Petugas / Superadmin|
+start
+:Membuka halaman profil;
+|Sistem|
+:Memeriksa sesi masuk;
+if (Sudah masuk?) then (Ya)
+  |Petugas / Superadmin|
+  if (Ubah nama?) then (Nama)
+    :Mengisi nama baru;
+    |Sistem|
+    :Menyimpan nama baru;
+    |Petugas / Superadmin|
+    :Melihat profil terbaru;
+  elseif (Ubah email?) then (Email)
+    :Mengisi email baru;
+    |Email|
+    :Mengirim tautan verifikasi email;
+    |Petugas / Superadmin|
+    :Membuka tautan verifikasi;
+    |Sistem|
+    :Memeriksa tautan;
+    if (Tautan valid?) then (Ya)
+      :Mengganti email akun;
+      |Petugas / Superadmin|
+      :Melihat email terbaru;
+    else (Tidak)
+      |Petugas / Superadmin|
+      :Melihat pesan verifikasi gagal;
+    endif
+  else (Unggah tanda tangan)
+    :Mengunggah gambar tanda tangan;
+    |Sistem|
+    :Memeriksa peran yang boleh punya tanda tangan;
+    if (Boleh menyimpan tanda tangan?) then (Ya)
+      :Menyimpan tanda tangan;
+      |Petugas / Superadmin|
+      :Melihat tanda tangan terbaru;
+    else (Tidak)
+      |Petugas / Superadmin|
+      :Melihat pesan akses ditolak;
+    endif
+  endif
+else (Tidak)
+  |Petugas / Superadmin|
+  :Menuju halaman login;
+endif
+stop
+@enduml
+
+@startuml activity_notifications
+title Membaca Notifikasi
+|Pengguna / Petugas|
+start
+:Membuka menu notifikasi;
+|Sistem|
+:Memeriksa sesi masuk;
+if (Sudah masuk?) then (Ya)
+  :Mengambil daftar notifikasi;
+  |Pengguna / Petugas|
+  :Melihat jumlah dan isi notifikasi;
+  if (Memilih notifikasi?) then (Ya)
+    |Sistem|
+    :Menandai notifikasi sudah dibaca;
+    |Pengguna / Petugas|
+    :Menuju halaman terkait;
+  elseif (Menandai belum dibaca?) then (Ya)
+    |Sistem|
+    :Menandai notifikasi belum dibaca;
+    |Pengguna / Petugas|
+    :Melihat status notifikasi berubah;
+  else (Tidak)
+    :Menutup menu notifikasi;
+  endif
+else (Tidak)
+  |Pengguna / Petugas|
+  :Melihat pesan harus login;
+endif
+stop
+@enduml
+
+@startuml activity_push_notification
+title Mengaktifkan Notifikasi Browser
+|Pengguna / Petugas|
+start
+:Membuka aplikasi;
+|Browser|
+:Meminta izin notifikasi;
+if (Izin diberikan?) then (Ya)
+  :Membuat pengenal perangkat;
+  |Sistem|
+  :Memeriksa sesi masuk;
+  if (Sudah masuk?) then (Ya)
+    :Menyimpan perangkat untuk menerima notifikasi;
+    |Pengguna / Petugas|
+    :Dapat menerima notifikasi browser;
+  else (Tidak)
+    |Pengguna / Petugas|
+    :Notifikasi browser belum diaktifkan;
+  endif
+else (Tidak)
+  |Pengguna / Petugas|
+  :Notifikasi browser tidak diaktifkan;
+endif
+stop
+@enduml
+
+@startuml activity_auto_complete
+title Menandai Reservasi Selesai Otomatis
+|Penjadwal Sistem|
+start
+:Menjalankan pemeriksaan berkala;
+|Sistem|
+:Mencari reservasi disetujui yang waktunya sudah lewat;
+if (Ada reservasi yang sudah selesai?) then (Ya)
+  :Menandai reservasi selesai;
+  |Notifikasi|
+  :Memberi tahu pengguna bahwa reservasi selesai;
+else (Tidak)
+  |Sistem|
+  :Tidak ada perubahan;
+endif
+stop
+@enduml
+
+@startuml activity_logout
+title Logout
+|Pengguna / Petugas / Superadmin|
+start
+:Menekan tombol keluar;
+|Sistem|
+:Mengakhiri sesi masuk;
+|Pengguna / Petugas / Superadmin|
+:Kembali ke halaman awal;
+stop
+@enduml

@@ -3,6 +3,25 @@ export function isLabBuilding(buildingName: string): boolean {
   return buildingName.toLowerCase().includes("lab");
 }
 
+const buildingDefaultImageMap: Record<string, string> = {
+  "Gedung Dekanat Fakultas Teknik": "/images/dekanat.jpeg",
+  "Gedung Jurusan Teknik Sipil": "/images/sipil.jpeg",
+  "Gedung Jurusan Teknik Arsitektur": "/images/jte.jpeg",
+  "Gedung Jurusan Teknik Elektro": "/images/jte.jpeg",
+  "Gedung Jurusan Teknik Mesin": "/images/dekanat.jpeg",
+  "Gedung Laboratorium Fakultas Teknik": "/images/lab.jpeg",
+};
+
+export function getBuildingDefaultImage(buildingName: string): string | null {
+  if (!buildingName) return null;
+  return buildingDefaultImageMap[buildingName] ?? null;
+}
+
+export function isLegacyBuildingDefaultImage(imageUrl: string | null | undefined): boolean {
+  if (!imageUrl) return false;
+  return imageUrl.startsWith("/images/building/");
+}
+
 const buildingColorMap: Record<string, string> = {
   "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
   "Gedung Jurusan Teknik Sipil": "from-blue-900 to-blue-700",

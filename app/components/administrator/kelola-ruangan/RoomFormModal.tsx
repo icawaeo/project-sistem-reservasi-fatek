@@ -39,7 +39,7 @@ const initialState: FormState = {
   facilityInput: "",
 };
 
-import { isLabBuilding } from "@/app/utils/building";
+import { getBuildingDefaultImage, isLabBuilding, isLegacyBuildingDefaultImage } from "@/app/utils/building";
 
 const LAB_PROGRAM_OPTIONS: Array<{ value: LabProgramValue; label: string }> = [
   { value: "ELEKTRO", label: "Teknik Elektro" },
@@ -77,7 +77,7 @@ export default function RoomFormModal({
         capacity: String(room.capacity),
         facilities: room.facilities,
         status: room.status,
-        imageUrl: room.imageUrl,
+        imageUrl: isLegacyBuildingDefaultImage(room.imageUrl) ? null : room.imageUrl,
         facilityInput: "",
       });
       return;
@@ -176,6 +176,8 @@ export default function RoomFormModal({
     form.building && !buildings.includes(form.building) ? [...buildings, form.building] : buildings;
 
   const isLabBuildingFlag = isLabBuilding(form.building);
+  const defaultImageUrl = getBuildingDefaultImage(form.building);
+  const previewImageUrl = form.imageUrl ?? defaultImageUrl;
 
   return (
     <div
@@ -375,7 +377,7 @@ export default function RoomFormModal({
           </div>
 
           <ImageUpload
-            value={form.imageUrl}
+            value={previewImageUrl}
             onChange={(value) => setForm((prev) => ({ ...prev, imageUrl: value }))}
           />
 

@@ -19,7 +19,7 @@ const parseFacilities = (value: unknown): string[] => {
 
 const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
 
-import { isLabBuilding } from "@/app/utils/building";
+import { getBuildingDefaultImage, isLabBuilding, isLegacyBuildingDefaultImage } from "@/app/utils/building";
 
 const LAB_PROGRAM_VALUES = [
   "IT",
@@ -165,6 +165,19 @@ export async function PUT(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "ID ruangan tidak valid" }, { status: 400 });
     }
 
+    const existingRoom = await prisma.room.findUnique({
+      where: {
+        room_id: id,
+      },
+      select: {
+        room_imageUrl: true,
+      },
+    });
+
+    if (!existingRoom) {
+      return NextResponse.json({ error: "Ruangan tidak ditemukan" }, { status: 404 });
+    }
+
     const body = await request.json();
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
@@ -173,7 +186,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const capacity = Number(body?.capacity);
     const facilities = parseFacilities(body?.facilities);
     const rawImageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
-    const imageUrl = await saveBase64Image(rawImageUrl, "room");
+    const uploadedImageUrl = await saveBase64Image(rawImageUrl, "room");
     const status = parseStatus(body?.status);
 
     const isLabBuildingFlag = isLabBuilding(building);
@@ -200,6 +213,14 @@ export async function PUT(request: Request, { params }: RouteParams) {
     if (!buildingExists) {
       return NextResponse.json({ error: "Gedung belum terdaftar di master gedung" }, { status: 400 });
     }
+
+    const defaultImageUrl = getBuildingDefaultImage(building);
+    const isExistingCurrentDefault = defaultImageUrl !== null && existingRoom.room_imageUrl === defaultImageUrl;
+    const isExistingManagedDefault =
+      existingRoom.room_imageUrl === null ||
+      isExistingCurrentDefault ||
+      isLegacyBuildingDefaultImage(existingRoom.room_imageUrl);
+    const imageUrl = uploadedImageUrl ?? (isExistingManagedDefault ? defaultImageUrl : existingRoom.room_imageUrl);
 
     const room = await prisma.room.update({
       where: {
