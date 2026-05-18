@@ -11,15 +11,15 @@ import {
   XCircle,
 } from "lucide-react";
 
-import type { ReservationRecord, ReservationStatus, SortOrder } from "./_types";
+import type { ReservationDisplayStatus, ReservationRecord, SortOrder } from "./_types";
 import { formatDate, formatTimeRange } from "../utils/formatters";
 import {
   buildDecisionLetterUrl,
   extractActivityName,
+  getReservationDisplayStatus,
   isDecisionLetterReady,
 } from "../utils/reservation";
-
-type FilterStatus = "ALL" | ReservationStatus;
+type FilterStatus = "ALL" | ReservationDisplayStatus;
 
 type StatusMeta = {
   label: string;
@@ -38,6 +38,11 @@ const statusMeta: Record<string, StatusMeta> = {
     badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
     icon: CheckCircle2,
   },
+  ONGOING: {
+    label: "Sedang berlangsung",
+    badge: "bg-sky-100 text-sky-700 border-sky-200",
+    icon: Hourglass,
+  },
   REJECTED: {
     label: "Ditolak",
     badge: "bg-rose-100 text-rose-700 border-rose-200",
@@ -54,6 +59,7 @@ type Props = {
   items: ReservationRecord[];
   sortOrder: SortOrder;
   filterStatus: FilterStatus;
+  serverNow: Date;
   onSortOrderChange: (value: SortOrder) => void;
   onFilterStatusChange: (value: FilterStatus) => void;
 };
@@ -62,6 +68,7 @@ export default function HistorySection({
   items,
   sortOrder,
   filterStatus,
+  serverNow,
   onSortOrderChange,
   onFilterStatusChange,
 }: Props) {
@@ -97,6 +104,8 @@ export default function HistorySection({
               <option value="ALL">Semua Status</option>
               <option value="PENDING">Menunggu</option>
               <option value="APPROVED">Disetujui</option>
+              <option value="ONGOING">Sedang berlangsung</option>
+              <option value="COMPLETED">Selesai</option>
               <option value="REJECTED">Ditolak</option>
             </select>
           </label>
@@ -119,8 +128,7 @@ export default function HistorySection({
 
             <div className="divide-y divide-slate-200">
               {items.map((item) => {
-                const isCompleted = item.res_status === "APPROVED" && new Date(item.res_endTime).getTime() <= Date.now();
-                const effectiveStatus = isCompleted ? "COMPLETED" : item.res_status;
+                const effectiveStatus = getReservationDisplayStatus(item, serverNow);
 
                 const status = statusMeta[effectiveStatus] || {
                   label: effectiveStatus,
@@ -129,7 +137,7 @@ export default function HistorySection({
                 };
                 const StatusIcon = status.icon;
 
-                const decisionDocUrl = isDecisionLetterReady(item.res_status)
+                const decisionDocUrl = item.res_decisionDocumentUrl && isDecisionLetterReady(item.res_status)
                   ? buildDecisionLetterUrl(item.res_id)
                   : null;
 

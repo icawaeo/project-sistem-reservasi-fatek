@@ -22,6 +22,17 @@ export function isLegacyBuildingDefaultImage(imageUrl: string | null | undefined
   return imageUrl.startsWith("/images/building/");
 }
 
+export function resolveRoomDisplayImage(
+  imageUrl: string | null | undefined,
+  buildingName: string,
+): string | null {
+  if (!imageUrl || isLegacyBuildingDefaultImage(imageUrl)) {
+    return getBuildingDefaultImage(buildingName);
+  }
+
+  return imageUrl;
+}
+
 const buildingColorMap: Record<string, string> = {
   "Gedung Dekanat Fakultas Teknik": "from-sky-900 to-sky-700",
   "Gedung Jurusan Teknik Sipil": "from-blue-900 to-blue-700",

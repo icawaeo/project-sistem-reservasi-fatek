@@ -33,6 +33,7 @@ const mapReservation = (item: {
   res_purpose: string;
   res_status: string;
   res_documentUrl: string | null;
+  res_decisionDocumentUrl: string | null;
   user: {
     name: string;
     userType: "USER" | "STAFF";
@@ -52,7 +53,7 @@ const mapReservation = (item: {
   endTime: item.res_endTime.toISOString(),
   status: item.res_status,
   documentUrl: item.res_documentUrl,
-  decisionDocumentUrl: item.res_status === "PENDING" ? null : item.res_documentUrl,
+  decisionDocumentUrl: item.res_decisionDocumentUrl,
   user: {
     name: item.user.name,
     userType: item.user.userType,
@@ -147,6 +148,7 @@ export async function POST(request: Request) {
         res_purpose: reservationPurpose,
         res_status: "PENDING",
         res_documentUrl: null,
+        res_decisionDocumentUrl: null,
       },
       include: {
         user: {

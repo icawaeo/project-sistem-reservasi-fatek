@@ -4,7 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
-import { sendNotification, NotificationType } from "@/lib/notificationService";
+import { sendNotification } from "@/lib/notificationService";
+import { generateDecisionLetterForReservation } from "@/lib/decision-letter";
 
 type DecisionAction = "APPROVE" | "REJECT";
 
@@ -64,7 +65,6 @@ const resolveNextStatus = (params: {
 
   if (params.action === "REJECT") {
     if (role === "ADMIN") {
-      if (current === "PENDING" || current === "PENDING_KABAG") return "REJECTED_KABAG";
       return null;
     }
 
@@ -74,7 +74,6 @@ const resolveNextStatus = (params: {
     }
 
     if (role === "ADMIN_WD2") {
-      if (current === "PENDING_WD2" || current === "PENDING_WAKIL_DEKAN_2") return "REJECTED_WD2";
       return null;
     }
 
@@ -176,6 +175,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         res_flow: true,
         res_labProgram: true,
         res_labDepartment: true,
+        res_processedBy: true,
+        res_processedAt: true,
+        res_decisionAt: true,
       },
     });
 
@@ -283,6 +285,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         res_waitingKajurAt: true,
         res_waitingKepalaLabAt: true,
         res_decisionAt: true,
+        res_decisionDocumentUrl: true,
         res_labDepartment: true,
         res_labProgram: true,
         user: {
@@ -301,6 +304,34 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
     if (!updated) {
       return NextResponse.json({ error: "Pengajuan tidak ditemukan" }, { status: 404 });
+    }
+
+    let decisionDocumentUrl = updated.res_decisionDocumentUrl;
+    if (
+      (auth.user.role === "ADMIN_WD2" || auth.user.role === "KEPALA_LAB") &&
+      updated.res_status.toUpperCase() === "APPROVED"
+    ) {
+      try {
+        const generated = await generateDecisionLetterForReservation(updated.res_id);
+        decisionDocumentUrl = generated.decisionDocumentUrl;
+      } catch (error) {
+        await prisma.reservation.update({
+          where: { res_id: updated.res_id },
+          data: {
+            res_status: existing.res_status,
+            res_processedBy: existing.res_processedBy,
+            res_processedAt: existing.res_processedAt,
+            res_decisionAt: existing.res_decisionAt,
+          },
+        });
+
+        return NextResponse.json(
+          {
+            error: error instanceof Error ? error.message : "Gagal membuat surat keputusan.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     // --- Notifications ---
@@ -330,7 +361,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
       // 2. Cascade: notify next-stage admin(s) when approval progresses
       let nextAdminRole: string | null = null;
-      let nextAdminWhere: Record<string, any> = {};
+      let nextAdminWhere: Record<string, string> = {};
 
       if (normalizedStatus === 'PENDING_DEKAN') {
         nextAdminRole = 'ADMIN_DEKAN';
@@ -381,6 +412,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       waitingKajurAt: updated.res_waitingKajurAt ? updated.res_waitingKajurAt.toISOString() : null,
       waitingKepalaLabAt: updated.res_waitingKepalaLabAt ? updated.res_waitingKepalaLabAt.toISOString() : null,
       decisionAt: updated.res_decisionAt ? updated.res_decisionAt.toISOString() : null,
+      decisionDocumentUrl,
     });
   } catch (error) {
     logServerError("[api/admin/reservations/:id/decision] Failed to process decision", error, getRequestLogMeta(request));

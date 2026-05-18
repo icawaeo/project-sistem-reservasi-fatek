@@ -92,6 +92,7 @@ export default function DashboardContent({
         lastSync={lastSync}
         adminMode={mode === "admin"}
         adminRole={adminRole}
+        onDeleted={(deletedId) => setTableData((prev) => prev.filter((item) => item.id !== deletedId))}
       />
     </main>
   );

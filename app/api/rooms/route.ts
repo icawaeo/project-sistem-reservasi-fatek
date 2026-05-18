@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
+import {
+  validateBuildingOperationalWindow,
+  type BuildingOperationalSchedule,
+} from "@/lib/building-operational-policy";
+import { resolveRoomDisplayImage } from "@/app/utils/building";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const parseDateTime = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}:00`);
@@ -11,6 +19,21 @@ type RoomWithReservations = {
 	reservations: Array<{ res_id: string }>;
 	[key: string]: unknown;
 };
+
+type CandidateBuilding = BuildingOperationalSchedule & {
+  building_name: string;
+};
+
+type PublicRoom = {
+  room_building: string;
+  room_imageUrl: string | null;
+  [key: string]: unknown;
+};
+
+const withResolvedRoomImage = <T extends PublicRoom>(room: T) => ({
+  ...room,
+  room_imageUrl: resolveRoomDisplayImage(room.room_imageUrl, room.room_building),
+});
 
 // Status reservasi yang sudah tidak aktif (tidak memblokir slot ruangan)
 const INACTIVE_RESERVATION_STATUSES = [
@@ -68,6 +91,54 @@ export async function GET(request: Request) {
         );
       }
 
+      const candidateBuildings = await prisma.building.findMany({
+        where: {
+          building_isActive: true,
+          ...(building ? { building_name: building } : {}),
+        },
+        select: {
+          building_name: true,
+          operational_days: true,
+          open_time: true,
+          close_time: true,
+        },
+      });
+
+      if (building && candidateBuildings.length === 0) {
+        return NextResponse.json({ error: "Gedung tidak ditemukan atau tidak aktif" }, { status: 404 });
+      }
+
+      const eligibleBuildings = (candidateBuildings as CandidateBuilding[]).filter((candidate) =>
+        validateBuildingOperationalWindow({
+          startDate: startDate as string,
+          endDate: endDate as string,
+          startTime: startTime as string,
+          endTime: endTime as string,
+          schedule: candidate as BuildingOperationalSchedule,
+        }).ok
+      );
+
+      if (building && eligibleBuildings.length === 0) {
+        const validation = validateBuildingOperationalWindow({
+          startDate: startDate as string,
+          endDate: endDate as string,
+          startTime: startTime as string,
+          endTime: endTime as string,
+          schedule: candidateBuildings[0] as BuildingOperationalSchedule,
+        });
+
+        return NextResponse.json(
+          { error: validation.ok ? "Jadwal tidak sesuai jam operasional gedung." : validation.error },
+          { status: 400 },
+        );
+      }
+
+      const eligibleBuildingNames = eligibleBuildings.map((candidate: CandidateBuilding) => candidate.building_name);
+
+      if (eligibleBuildingNames.length === 0) {
+        return NextResponse.json([]);
+      }
+
       // Generate daftar tanggal (untuk multi-day, cek per hari)
       const dates = getDateRange(startDate as string, endDate as string);
 
@@ -88,7 +159,7 @@ export async function GET(request: Request) {
       const rooms = await prisma.room.findMany({
         where: {
           room_isActive: true,
-          ...(building ? { room_building: building } : {}),
+          room_building: { in: eligibleBuildingNames },
           reservations: {
             none: {
               res_status: { notIn: INACTIVE_RESERVATION_STATUSES },
@@ -102,7 +173,11 @@ export async function GET(request: Request) {
         ],
       });
 
-      return NextResponse.json(rooms);
+      return NextResponse.json(rooms.map(withResolvedRoomImage), {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      });
     }
 
     const now = new Date();
@@ -128,12 +203,18 @@ export async function GET(request: Request) {
       ],
     });
 
-    const result = rooms.map(({ reservations, ...room }: RoomWithReservations) => ({
-      ...room,
-      isCurrentlyOccupied: reservations.length > 0,
-    }));
+    const result = rooms.map(({ reservations, ...room }: RoomWithReservations) =>
+      withResolvedRoomImage({
+        ...(room as PublicRoom),
+        isCurrentlyOccupied: reservations.length > 0,
+      }),
+    );
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    });
   } catch (error) {
     logServerError("[api/rooms] Failed to fetch rooms", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal mengambil data ruangan" }, { status: 500 });

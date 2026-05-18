@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { isSuperadminUser } from "@/lib/admin-access";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 export async function DELETE(request: Request) {
@@ -9,6 +10,10 @@ export async function DELETE(request: Request) {
 
     if (!session?.user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isSuperadminUser(session.user)) {
+      return Response.json({ error: "Akses ditolak" }, { status: 403 });
     }
 
     // Get reservation ID from URL

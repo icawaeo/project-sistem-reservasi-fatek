@@ -3,27 +3,32 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 
 import type {
+  ReservationDisplayStatus,
   ReservationDraftSnapshot,
   ReservationRecord,
-  ReservationStatus,
   SortOrder,
 } from "./_types";
-import { getActiveReservation } from "../utils/reservation";
+import {
+  getCurrentReservation,
+  getReservationDisplayStatus,
+} from "../utils/reservation";
 
 import LatestSubmissionSection from "./LatestSubmissionSection";
 import HistorySection from "./HistorySection";
 
-type FilterStatus = "ALL" | ReservationStatus;
+type FilterStatus = "ALL" | ReservationDisplayStatus;
 
 type Props = {
   initialReservations: ReservationRecord[];
   initialSort: SortOrder;
+  serverNow: string;
 };
 
-export default function RiwayatClient({ initialReservations, initialSort }: Props) {
+export default function RiwayatClient({ initialReservations, initialSort, serverNow }: Props) {
   const [sortOrder, setSortOrder] = useState<SortOrder>(initialSort);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("ALL");
   const [latestDraftSnapshot, setLatestDraftSnapshot] = useState<ReservationDraftSnapshot | null>(null);
+  const [serverClock, setServerClock] = useState(() => new Date(serverNow));
 
   useEffect(() => {
     const rawDraft = sessionStorage.getItem("reservationDraft");
@@ -37,6 +42,20 @@ export default function RiwayatClient({ initialReservations, initialSort }: Prop
     }
   }, []);
 
+  useEffect(() => {
+    const serverStartedAt = new Date(serverNow).getTime();
+    const clientStartedAt = Date.now();
+
+    const updateServerClock = () => {
+      setServerClock(new Date(serverStartedAt + (Date.now() - clientStartedAt)));
+    };
+
+    updateServerClock();
+    const intervalId = window.setInterval(updateServerClock, 30_000);
+
+    return () => window.clearInterval(intervalId);
+  }, [serverNow]);
+
   const sortedNewest = useMemo(() => {
     return [...initialReservations].sort(
       (a, b) => new Date(b.res_startTime).getTime() - new Date(a.res_startTime).getTime()
@@ -49,23 +68,23 @@ export default function RiwayatClient({ initialReservations, initialSort }: Prop
 
   const sortedReservations = sortOrder === "newest" ? sortedNewest : sortedOldest;
 
-  const latestActiveSubmission = useMemo(() => {
-    return getActiveReservation(sortedReservations);
-  }, [sortedReservations]);
+  const latestCurrentSubmission = useMemo(() => {
+    return getCurrentReservation(sortedReservations, serverClock);
+  }, [sortedReservations, serverClock]);
 
   const historyItems = useMemo(() => {
     let items = sortedReservations;
 
-    if (latestActiveSubmission) {
-      items = items.filter((item) => item.res_id !== latestActiveSubmission.res_id);
+    if (latestCurrentSubmission) {
+      items = items.filter((item) => item.res_id !== latestCurrentSubmission.res_id);
     }
 
     if (filterStatus !== "ALL") {
-      items = items.filter((item) => item.res_status === filterStatus);
+      items = items.filter((item) => getReservationDisplayStatus(item, serverClock) === filterStatus);
     }
 
     return items;
-  }, [sortedReservations, latestActiveSubmission, filterStatus]);
+  }, [sortedReservations, latestCurrentSubmission, filterStatus, serverClock]);
 
   const handleSortOrderChange = useCallback((value: SortOrder) => {
     setSortOrder(value);
@@ -77,12 +96,17 @@ export default function RiwayatClient({ initialReservations, initialSort }: Prop
 
   return (
     <>
-      <LatestSubmissionSection reservation={latestActiveSubmission} draftSnapshot={latestDraftSnapshot} />
+      <LatestSubmissionSection
+        reservation={latestCurrentSubmission}
+        draftSnapshot={latestDraftSnapshot}
+        serverNow={serverClock}
+      />
 
       <HistorySection
         items={historyItems}
         sortOrder={sortOrder}
         filterStatus={filterStatus}
+        serverNow={serverClock}
         onSortOrderChange={handleSortOrderChange}
         onFilterStatusChange={handleFilterStatusChange}
       />

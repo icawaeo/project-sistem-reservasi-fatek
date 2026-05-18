@@ -89,6 +89,7 @@ export default function LandingAvailabilitySearch() {
         room_building: room.room_building,
         room_capacity: String(room.room_capacity),
         room_locDetail: room.room_locDetail,
+        room_imageUrl: room.room_imageUrl ?? "",
         startDate,
         endDate: effectiveEndDate,
         startTime,
@@ -102,9 +103,6 @@ export default function LandingAvailabilitySearch() {
   );
 
   const handleSearch = useCallback(async () => {
-    const OPENING_TIME = "08:00";
-    const CLOSING_TIME = "18:00";
-
     if (!startDate || !startTime || !endTime || (reservationMode === "date-range" && !endDate)) {
       pushToast({ type: "error", message: "Lengkapi tanggal dan waktu reservasi terlebih dahulu." });
       return;
@@ -115,14 +113,6 @@ export default function LandingAvailabilitySearch() {
       pushToast({
         type: "error",
         message: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
-      });
-      return;
-    }
-
-    if (startTime < OPENING_TIME || endTime > CLOSING_TIME) {
-      pushToast({
-        type: "error",
-        message: "Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).",
       });
       return;
     }

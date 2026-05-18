@@ -1,22 +1,24 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { Calendar, CheckCircle2, Clock, Eye, FileCheck2, FileText, Hourglass } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, Eye, FileCheck2, FileText, Hourglass, XCircle } from "lucide-react";
 
 import type { ReservationDraftSnapshot, ReservationRecord } from "./_types";
 import { formatDateRange, formatTimeRange } from "../utils/formatters";
 import {
   buildDecisionLetterUrl,
   extractActivityName,
+  getReservationDisplayStatus,
   isDecisionLetterReady,
 } from "../utils/reservation";
 
 type Props = {
   reservation: ReservationRecord | null;
   draftSnapshot: ReservationDraftSnapshot | null;
+  serverNow: Date;
 };
 
-export default function LatestSubmissionSection({ reservation, draftSnapshot }: Props) {
+export default function LatestSubmissionSection({ reservation, draftSnapshot, serverNow }: Props) {
   const latestPurpose = useMemo(() => {
     const fromReservation = reservation?.res_purpose ? extractActivityName(reservation.res_purpose) : null;
     return fromReservation ?? draftSnapshot?.purpose ?? "-";
@@ -27,9 +29,14 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot }: 
 
   const decisionLetterUrl = useMemo(() => {
     if (!reservation) return null;
-    if (!isDecisionLetterReady(reservation.res_status)) return null;
+    if (!reservation.res_decisionDocumentUrl || !isDecisionLetterReady(reservation.res_status)) return null;
     return buildDecisionLetterUrl(reservation.res_id);
   }, [reservation]);
+
+  const displayStatus = useMemo(
+    () => (reservation ? getReservationDisplayStatus(reservation, serverNow) : null),
+    [reservation, serverNow],
+  );
 
   const handlePreviewDocument = useCallback(() => {
     if (!draftSnapshot?.documentDataUrl) return;
@@ -69,10 +76,20 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot }: 
                 <Clock size={15} className="text-slate-500" />
                 {formatTimeRange(reservation.res_startTime, reservation.res_endTime)}
               </div>
-              {reservation.res_status === "APPROVED" ? (
+              {displayStatus === "APPROVED" ? (
                 <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
                   <CheckCircle2 size={15} className="text-emerald-600" />
-                  Disetujui (Berjalan)
+                  Disetujui
+                </div>
+              ) : displayStatus === "ONGOING" ? (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
+                  <Clock size={15} className="text-blue-600" />
+                  Sedang berlangsung
+                </div>
+              ) : displayStatus === "REJECTED" ? (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">
+                  <XCircle size={15} className="text-rose-600" />
+                  Ditolak
                 </div>
               ) : (
                 <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm lg:text-base text-slate-700 flex items-center gap-2">

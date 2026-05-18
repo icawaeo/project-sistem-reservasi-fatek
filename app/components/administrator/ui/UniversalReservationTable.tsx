@@ -29,6 +29,7 @@ type GenericReservation = {
   room: { name: string; building?: string };
   status: string;
   createdAt: string;
+  decisionDocumentUrl?: string | null;
   // optional admin-only fields
   processedAt?: string | null;
 };
@@ -85,6 +86,20 @@ function canAdminAct(role: string, status: string) {
     return normStatus === "PENDING_KEPALA_LAB";
   }
   return false;
+}
+
+function resolveApproveActionLabel(role: string) {
+  const normalized = (role || "").toUpperCase();
+  if (normalized === "ADMIN") return "Teruskan";
+  if (normalized === "ADMIN_WD2") return "Tanda tangani dan selesaikan";
+  return "Setujui";
+}
+
+function resolveApproveSuccessMessage(role: string) {
+  const normalized = (role || "").toUpperCase();
+  if (normalized === "ADMIN") return "Pengajuan berhasil diteruskan.";
+  if (normalized === "ADMIN_WD2") return "Surat berhasil ditandatangani dan pengajuan diselesaikan.";
+  return "Pengajuan berhasil disetujui.";
 }
 
 export default function UniversalReservationTable({
@@ -169,10 +184,17 @@ export default function UniversalReservationTable({
       const payload = await response.json();
       if (!response.ok || !payload.status) throw new Error(payload.error || "Gagal memproses pengajuan");
 
-      const updates: Partial<GenericReservation> = { status: payload.status, processedAt: payload.processedAt ?? null };
+      const updates: Partial<GenericReservation> = {
+        status: payload.status,
+        processedAt: payload.processedAt ?? null,
+        decisionDocumentUrl: payload.decisionDocumentUrl ?? null,
+      };
       onStatusUpdated?.(id, updates);
       setSelectedRow((prev) => (prev && prev.id === id ? { ...prev, ...updates } : prev));
-      pushToast({ type: "success", message: action === "APPROVE" ? "Pengajuan berhasil disetujui." : "Pengajuan berhasil ditolak." });
+      pushToast({
+        type: "success",
+        message: action === "APPROVE" ? resolveApproveSuccessMessage(adminRole || "") : "Pengajuan berhasil ditolak.",
+      });
     } catch (error) {
       pushToast({ type: "error", message: error instanceof Error ? error.message : "Terjadi kesalahan saat memproses." });
     } finally {
@@ -268,7 +290,7 @@ export default function UniversalReservationTable({
                     <th className="px-4 py-3">Tanggal & Waktu Pengajuan</th>
                     <th className="px-4 py-3">Ruangan</th>
                     <th className="px-4 py-3 text-center">Status</th>
-                    {isAdminMode ? <th className="px-4 py-3 text-center">Aksi</th> : <th className="px-4 py-3 text-center">Detail</th>}
+                    <th className="px-4 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <SuperAdminTableBody>
@@ -281,15 +303,28 @@ export default function UniversalReservationTable({
                         <td className="px-4 py-3"><p className="text-slate-900">{formatDate(item.createdAt)}</p><p className="text-xs text-slate-500">{formatTime(item.createdAt)}</p></td>
                         <td className="px-4 py-3"><p className="font-semibold text-slate-900">{item.room.name}</p><p className="text-xs text-slate-500">{item.room.building}</p></td>
                         <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><StatusBadge status={computeReservationStatus(item.status, item.endTime)} /></div></td>
-                        {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
-                          <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700">Tinjau &amp; Proses</button></div></td>
+                        {isAdminMode ? (
+                          <td className="px-2 py-3 text-center align-middle">
+                            <div className="flex w-full justify-center">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedRow(item)}
+                                className={`rounded-lg px-3 py-2 text-xs font-semibold ${
+                                  canAdminAct(adminRole || "", item.status)
+                                    ? "border border-slate-800 bg-slate-800 text-white hover:bg-slate-700"
+                                    : "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                }`}
+                              >
+                                {canAdminAct(adminRole || "", item.status) ? "Tinjau & Proses" : "Lihat Detail"}
+                              </button>
+                            </div>
+                          </td>
                         ) : (
                           <td className="px-2 py-3 text-center align-middle">
-                            {/* Superadmin actions container */}
                             <div className="flex w-full justify-center gap-1.5">
                               <button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button>
-                              <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) === 'APPROVED' || computeReservationStatus(item.status, item.endTime) === 'COMPLETED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={16} /></button>
-                              {!isAdminMode && <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"><Trash2 size={16} /></button>}
+                              <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) !== 'APPROVED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={16} /></button>
+                              {showDelete ? <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"><Trash2 size={16} /></button> : null}
                             </div>
                           </td>
                         )}
@@ -357,16 +392,26 @@ export default function UniversalReservationTable({
 
                 {/* Action */}
                 <div className="border-t border-slate-100 px-4 py-3 flex gap-2">
-                  {isAdminMode && canAdminAct(adminRole || "", item.status) ? (
-                    <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-slate-800 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700 active:bg-slate-900">Tinjau &amp; Proses</button>
+                  {isAdminMode ? (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRow(item)}
+                      className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+                        canAdminAct(adminRole || "", item.status)
+                          ? "border border-slate-800 bg-slate-800 text-white hover:bg-slate-700 active:bg-slate-900"
+                          : "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200"
+                      }`}
+                    >
+                      {canAdminAct(adminRole || "", item.status) ? "Tinjau & Proses" : "Lihat Detail"}
+                    </button>
                   ) : (
                     <>
                       <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 active:bg-blue-200">Lihat Detail</button>
-                      <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) === 'APPROVED' || computeReservationStatus(item.status, item.endTime) === 'COMPLETED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-emerald-600 transition-colors hover:bg-emerald-100 active:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={18} /></button>
+                      <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) !== 'APPROVED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-emerald-600 transition-colors hover:bg-emerald-100 active:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={18} /></button>
                     </>
                   )}
 
-                  {!isAdminMode ? (
+                  {!isAdminMode && showDelete ? (
                     <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-rose-600 transition-colors hover:bg-rose-100 active:bg-rose-200"><Trash2 size={18} /></button>
                   ) : null}
                 </div>
@@ -419,11 +464,21 @@ export default function UniversalReservationTable({
       <ActionConfirmationModal
         isOpen={decisionConfirm.isOpen}
         action={decisionConfirm.action}
-        title={decisionConfirm.action === "COMPLETE" ? "Selesaikan Pengajuan" : decisionConfirm.action === "APPROVE" ? "Setujui Pengajuan" : "Tolak Pengajuan"}
+        title={
+          decisionConfirm.action === "COMPLETE"
+            ? "Selesaikan Pengajuan"
+            : decisionConfirm.action === "APPROVE"
+              ? `${resolveApproveActionLabel(adminRole || "")} Pengajuan`
+              : "Tolak Pengajuan"
+        }
         description={
           decisionConfirm.action === "COMPLETE"
             ? `Anda yakin ingin menyelesaikan pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}" secara langsung?`
-            : `Anda yakin ingin ${decisionConfirm.action === "APPROVE" ? "menyetujui" : "menolak"} pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}"?`
+            : `Anda yakin ingin ${
+                decisionConfirm.action === "APPROVE"
+                  ? resolveApproveActionLabel(adminRole || "").toLowerCase()
+                  : "menolak"
+              } pengajuan dari "${decisionConfirm.item?.user.name}" untuk kegiatan "${decisionConfirm.item?.activityName}"?`
         }
         onConfirm={async () => {
           if (decisionConfirm.item && decisionConfirm.action) {

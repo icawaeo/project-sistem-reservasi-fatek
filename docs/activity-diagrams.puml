@@ -255,40 +255,26 @@ title Persetujuan Reservasi Umum
 start
 :Membuka pengajuan umum yang menunggu;
 :Memeriksa detail pengajuan;
-if (Pengajuan layak?) then (Ya)
+:Meneruskan pengajuan ke Dekan;
+|Notifikasi|
+:Memberi tahu Dekan;
+|Dekan|
+:Memeriksa pengajuan;
+if (Dekan menyetujui?) then (Ya)
   |Sistem|
-  :Meneruskan pengajuan ke Dekan;
+  :Meneruskan pengajuan ke Wakil Dekan 2;
   |Notifikasi|
-  :Memberi tahu Dekan;
-  |Dekan|
-  :Memeriksa pengajuan;
-  if (Dekan menyetujui?) then (Ya)
-    |Sistem|
-    :Meneruskan pengajuan ke Wakil Dekan 2;
-    |Notifikasi|
-    :Memberi tahu Wakil Dekan 2;
-    |Wakil Dekan 2|
-    :Memeriksa pengajuan;
-    if (Wakil Dekan 2 menyetujui?) then (Ya)
-      |Sistem|
-      :Menetapkan pengajuan disetujui;
-      |Notifikasi|
-      :Memberi tahu pengguna bahwa pengajuan disetujui;
-    else (Tidak)
-      |Sistem|
-      :Menetapkan pengajuan ditolak Wakil Dekan 2;
-      |Notifikasi|
-      :Memberi tahu pengguna bahwa pengajuan ditolak;
-    endif
-  else (Tidak)
-    |Sistem|
-    :Menetapkan pengajuan ditolak Dekan;
-    |Notifikasi|
-    :Memberi tahu pengguna bahwa pengajuan ditolak;
-  endif
+  :Memberi tahu Wakil Dekan 2;
+  |Wakil Dekan 2|
+  :Menandatangani surat keputusan;
+  |Sistem|
+  :Memasukkan tanda tangan Dekan dan Wakil Dekan 2 ke surat;
+  :Menetapkan pengajuan disetujui;
+  |Notifikasi|
+  :Memberi tahu pengguna bahwa pengajuan disetujui;
 else (Tidak)
   |Sistem|
-  :Menetapkan pengajuan ditolak Kabag;
+  :Menetapkan pengajuan ditolak Dekan;
   |Notifikasi|
   :Memberi tahu pengguna bahwa pengajuan ditolak;
 endif

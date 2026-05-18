@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
+import { validateBuildingOperationalWindow } from "@/lib/building-operational-policy";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 import { sendNotification } from "@/lib/notificationService";
 
@@ -131,6 +132,14 @@ export async function POST(request: Request) {
     const resStart = new Date(body.res_startTime);
     const resEnd = new Date(body.res_endTime);
 
+    if (Number.isNaN(resStart.getTime()) || Number.isNaN(resEnd.getTime())) {
+      return NextResponse.json({ error: "Format tanggal/waktu tidak valid" }, { status: 400 });
+    }
+
+    if (resEnd <= resStart) {
+      return NextResponse.json({ error: "Jam selesai tidak boleh lebih awal dari jam mulai." }, { status: 400 });
+    }
+
     const leadTimeCheck = validateReservationLeadTimeDate(resStart);
     if (!leadTimeCheck.ok) {
       return NextResponse.json(
@@ -155,6 +164,35 @@ export async function POST(request: Request) {
 
     if (!room || !room.room_isActive) {
       return NextResponse.json({ error: "Ruangan tidak ditemukan atau tidak aktif" }, { status: 404 });
+    }
+
+    const building = await prisma.building.findUnique({
+      where: { building_name: room.room_building },
+      select: {
+        operational_days: true,
+        open_time: true,
+        close_time: true,
+        building_isActive: true,
+      },
+    });
+
+    if (!building || !building.building_isActive) {
+      return NextResponse.json({ error: "Gedung tidak ditemukan atau tidak aktif" }, { status: 404 });
+    }
+
+    const reservationDates = getDateRange(resStart, resEnd);
+    const startTime = `${String(resStart.getHours()).padStart(2, "0")}:${String(resStart.getMinutes()).padStart(2, "0")}`;
+    const endTime = `${String(resEnd.getHours()).padStart(2, "0")}:${String(resEnd.getMinutes()).padStart(2, "0")}`;
+    const operationalCheck = validateBuildingOperationalWindow({
+      startDate: reservationDates[0],
+      endDate: reservationDates[reservationDates.length - 1],
+      startTime,
+      endTime,
+      schedule: building,
+    });
+
+    if (!operationalCheck.ok) {
+      return NextResponse.json({ error: operationalCheck.error }, { status: 400 });
     }
 
     const isLabRoom = isLabBuilding(room.room_building);

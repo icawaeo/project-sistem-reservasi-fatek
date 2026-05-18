@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 		}
 
 		const role = (session.user.role || "").toUpperCase();
-		if (role !== "ADMIN_DEKAN" && role !== "ADMIN_WD2") {
+		if (role !== "ADMIN_DEKAN" && role !== "ADMIN_WD2" && role !== "KAJUR" && role !== "KEPALA_LAB") {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 

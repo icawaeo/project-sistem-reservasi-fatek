@@ -16,6 +16,7 @@ export type SuperadminMonitoringContentProps = {
   adminData?: AdminReservationRecord[];
   adminMode?: boolean;
   adminRole?: AdminRole;
+  onDeleted?: (deletedId: string) => void;
 };
 
 export default function SuperadminMonitoringContent({
@@ -25,6 +26,7 @@ export default function SuperadminMonitoringContent({
   lastSync,
   adminMode = false,
   adminRole = "ADMIN",
+  onDeleted,
 }: SuperadminMonitoringContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [superadminData, setSuperadminData] = useState<MonitoringReservation[]>(initialData);
@@ -41,6 +43,7 @@ export default function SuperadminMonitoringContent({
 
   const handleDeleteSuccess = (deletedId: string) => {
     setSuperadminData((prev) => prev.filter((item) => item.id !== deletedId));
+    onDeleted?.(deletedId);
   };
 
   const handleAdminStatusUpdated = (id: string, updates: Partial<AdminReservationRecord>) => {

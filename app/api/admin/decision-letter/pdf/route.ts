@@ -31,6 +31,7 @@ const isReservationOwner = async (reservationId: string, userId: string) => {
     select: {
       res_flow: true,
       res_status: true,
+      res_decisionDocumentUrl: true,
     },
   });
 
@@ -71,31 +72,59 @@ export async function GET(request: Request) {
       return auth.response;
     }
 
-  // Default behavior: show GENERAL preview.
-  // If reservationId is provided, select template type based on reservation flow.
-  let templateType: DecisionLetterTemplateType = "GENERAL";
-
   const { searchParams } = new URL(request.url);
+  const reservationId = searchParams.get("reservationId");
+
+  if (reservationId) {
+    const reservation = await prisma.reservation.findUnique({
+      where: { res_id: reservationId },
+      select: {
+        res_decisionDocumentUrl: true,
+      },
+    });
+
+    if (!reservation) {
+      return NextResponse.json({ error: "Reservasi tidak ditemukan." }, { status: 404 });
+    }
+
+    if (!reservation.res_decisionDocumentUrl) {
+      return NextResponse.json({ error: "Surat keputusan belum tersedia." }, { status: 404 });
+    }
+
+    const normalizedRelativePath = reservation.res_decisionDocumentUrl.replace(/^\/+/, "");
+    const absoluteDecisionPath = path.join(process.cwd(), "public", normalizedRelativePath.replace(/^uploads\//, "uploads/"));
+
+    let body: ArrayBuffer;
+    try {
+      const fileBuffer = await fs.readFile(absoluteDecisionPath);
+      body = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+    } catch (error) {
+      logServerError("[api/admin/decision-letter/pdf] Decision letter file not found", error, {
+        ...getRequestLogMeta(request),
+        reservationId,
+        decisionDocumentUrl: reservation.res_decisionDocumentUrl,
+      });
+      return NextResponse.json({ error: "File surat keputusan tidak ditemukan." }, { status: 404 });
+    }
+
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="surat_keputusan_${reservationId}.pdf"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
+  // Default behavior without reservationId: show template preview.
+  let templateType: DecisionLetterTemplateType = "GENERAL";
 
   const flowParam = searchParams.get("flow");
   if (flowParam === "GENERAL" || flowParam === "LAB_SKRIPSI" || flowParam === "LAB_LAINNYA") {
     templateType = flowParam;
   } else {
-    const reservationId = searchParams.get("reservationId");
-    if (reservationId) {
-      const reservation = await prisma.reservation.findUnique({
-        where: { res_id: reservationId },
-        select: { res_flow: true },
-      });
-
-      if (!reservation) {
-        return NextResponse.json({ error: "Reservasi tidak ditemukan." }, { status: 404 });
-      }
-
-      const flow = reservation.res_flow;
-      templateType =
-        flow === "LAB_SKRIPSI" || flow === "LAB_LAINNYA" || flow === "GENERAL" ? (flow as DecisionLetterTemplateType) : "GENERAL";
-    }
+    templateType = "GENERAL";
   }
 
   const active = await getActiveTemplateByType(templateType);
