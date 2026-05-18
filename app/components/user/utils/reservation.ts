@@ -1,4 +1,5 @@
 import type { ReservationDisplayStatus, ReservationRecord } from "../riwayat/_types";
+import { isDateInsideDailyReservationSlot } from "@/lib/reservation-slots";
 
 export const buildDecisionLetterUrl = (reservationId: string) =>
   `/api/admin/decision-letter/pdf?reservationId=${encodeURIComponent(reservationId)}`;
@@ -67,7 +68,15 @@ export const getReservationDisplayStatus = (
       return "COMPLETED";
     }
 
-    if (nowTime >= startTime) {
+    if (
+      isDateInsideDailyReservationSlot(
+        {
+          startTime: reservation.res_startTime,
+          endTime: reservation.res_endTime,
+        },
+        now,
+      )
+    ) {
       return "ONGOING";
     }
 

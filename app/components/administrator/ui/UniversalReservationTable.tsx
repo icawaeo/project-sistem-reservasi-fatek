@@ -88,6 +88,12 @@ function canAdminAct(role: string, status: string) {
   return false;
 }
 
+function formatDateRange(startDateInput: string, endDateInput: string) {
+  const startLabel = formatDate(startDateInput);
+  const endLabel = formatDate(endDateInput);
+  return startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+}
+
 function resolveApproveActionLabel(role: string) {
   const normalized = (role || "").toUpperCase();
   if (normalized === "ADMIN") return "Teruskan";
@@ -299,7 +305,7 @@ export default function UniversalReservationTable({
                       <tr key={item.id} className="border-t border-slate-100 text-slate-700">
                         <td className="px-4 py-3 text-xs text-slate-500">{(currentPage - 1) * PAGE_SIZE + index + 1}</td>
                         <td className="px-4 py-3 font-semibold text-slate-900">{item.user.name}</td>
-                        <td className="px-4 py-3"><p className="text-slate-900">{formatDate(item.startTime)}</p><p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p></td>
+                        <td className="px-4 py-3"><p className="text-slate-900">{formatDateRange(item.startTime, item.endTime)}</p><p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p></td>
                         <td className="px-4 py-3"><p className="text-slate-900">{formatDate(item.createdAt)}</p><p className="text-xs text-slate-500">{formatTime(item.createdAt)}</p></td>
                         <td className="px-4 py-3"><p className="font-semibold text-slate-900">{item.room.name}</p><p className="text-xs text-slate-500">{item.room.building}</p></td>
                         <td className="px-2 py-3 text-center align-middle"><div className="flex w-full justify-center"><StatusBadge status={computeReservationStatus(item.status, item.endTime)} /></div></td>
@@ -367,7 +373,7 @@ export default function UniversalReservationTable({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tanggal &amp; Waktu Peminjaman</p>
-                      <p className="mt-0.5 text-sm font-medium text-slate-800">{formatDate(item.startTime)}</p>
+                      <p className="mt-0.5 text-sm font-medium text-slate-800">{formatDateRange(item.startTime, item.endTime)}</p>
                       <p className="text-xs text-slate-500">{formatTime(item.startTime)} - {formatTime(item.endTime)}</p>
                     </div>
                     <div>

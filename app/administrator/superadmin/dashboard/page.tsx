@@ -7,6 +7,7 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import DashboardContent from "@/app/components/administrator/dashboard/DashboardContent";
 import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import { computeReservationStatus } from "@/app/components/administrator/ui/reservationStatus";
+import { getReservationMinDaysAheadExclusive } from "@/lib/reservation-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,8 @@ export default async function SuperadminDashboardPage() {
 		redirect("/auth");
 	}
 
-	const reservations = await prisma.reservation.findMany({
+	const [reservations, minDaysAheadExclusive] = await Promise.all([
+		prisma.reservation.findMany({
 		include: {
 			user: {
 				select: {
@@ -52,7 +54,9 @@ export default async function SuperadminDashboardPage() {
 		orderBy: {
 			res_date: "desc",
 		},
-	});
+		}),
+		getReservationMinDaysAheadExclusive(),
+	]);
 
 	// Fetch additional data for cards
 	const allRooms = await prisma.room.findMany({
@@ -118,6 +122,7 @@ export default async function SuperadminDashboardPage() {
 						totalBuildings={totalBuildings}
 						totalUsers={totalUsers}
 						lastSync={lastSync}
+						initialMinDaysAheadExclusive={minDaysAheadExclusive}
 					/>
 				</div>
 			</div>

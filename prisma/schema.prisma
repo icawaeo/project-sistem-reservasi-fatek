@@ -240,3 +240,10 @@ model Notification {
   @@index([userId])
   @@index([userId, isRead])
 }
+
+model AppSetting {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

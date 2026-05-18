@@ -139,6 +139,12 @@ const formatTime = (value: Date) =>
 		timeZone: "Asia/Makassar",
 	}).format(value);
 
+const formatDateRange = (start: Date, end: Date) => {
+	const startLabel = formatDate(start);
+	const endLabel = formatDate(end);
+	return startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+};
+
 const splitReservationPurpose = (value: string) => {
 	const [activityName, ...purposeParts] = value.split(" - ");
 	return {
@@ -181,7 +187,7 @@ const getSignersForReservation = async (params: {
 		return [dekan, wd2];
 	}
 
-	if (params.flow === "LAB_LAINNYA") {
+	if (params.flow === "LAB_LAINNYA" || params.flow === "LAB_SKRIPSI") {
 		const [kajur, kepalaLab] = await Promise.all([
 			prisma.user.findFirst({
 				where: {
@@ -208,20 +214,7 @@ const getSignersForReservation = async (params: {
 		return [kajur, kepalaLab];
 	}
 
-	const kepalaLab = await prisma.user.findFirst({
-		where: {
-			role: "KEPALA_LAB",
-			...(params.labProgram ? { programScope: params.labProgram } : {}),
-		},
-		select: { user_id: true, name: true, identifier: true, rank: true, position: true, signatureUrl: true },
-	});
-
-	if (!kepalaLab) {
-		throw new Error("Akun Kepala Lab yang sesuai belum tersedia.");
-	}
-
-	assertSignerComplete(kepalaLab, "Kepala Lab");
-	return [kepalaLab];
+	throw new Error("Alur peminjaman tidak dikenali.");
 };
 
 export const generateDecisionLetterForReservation = async (reservationId: string) => {
@@ -269,9 +262,7 @@ export const generateDecisionLetterForReservation = async (reservationId: string
 	const officialSequence =
 		reservation.res_flow === "GENERAL"
 			? [signers[0], signers[0], signers[1]]
-			: reservation.res_flow === "LAB_LAINNYA"
-				? [signers[0], signers[0], signers[1]]
-				: [signers[0], signers[0]];
+			: [signers[0], signers[0], signers[1]];
 
 	const docxAbsolutePath = path.join(process.cwd(), template.storedPath);
 	const docxBuffer = await fs.readFile(docxAbsolutePath);
@@ -296,12 +287,13 @@ export const generateDecisionLetterForReservation = async (reservationId: string
 		nama_mahasiswa: reservation.user.name,
 		nim: reservation.user.identifier ?? "-",
 		nama_kegiatan: reservationPurpose.activityName,
-		tanggal_kegiatan: formatDate(reservation.res_startTime),
+		tanggal_kegiatan: formatDateRange(reservation.res_startTime, reservation.res_endTime),
 		waktu: `${formatTime(reservation.res_startTime)} - ${formatTime(reservation.res_endTime)}`,
 		nama_ruangan: reservation.room.room_name,
 		tujuan_peminjaman: reservationPurpose.purpose,
 		tanggal: formatDate(currentDate),
 		prodi: reservation.res_labProgram ?? "-",
+		jurusan: reservation.res_labDepartment ?? "-",
 	};
 
 	for (const [placeholder, value] of Object.entries(staticPlaceholders)) {

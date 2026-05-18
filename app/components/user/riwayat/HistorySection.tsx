@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import type { ReservationDisplayStatus, ReservationRecord, SortOrder } from "./_types";
-import { formatDate, formatTimeRange } from "../utils/formatters";
+import { formatDateRange, formatTimeRange } from "../utils/formatters";
 import {
   buildDecisionLetterUrl,
   extractActivityName,
@@ -155,7 +155,9 @@ export default function HistorySection({
                         </p>
                       </div>
 
-                      <p className="text-sm lg:text-base text-slate-700 text-center">{formatDate(item.res_startTime)}</p>
+                      <p className="text-sm lg:text-base text-slate-700 text-center">
+                        {formatDateRange(item.res_startTime, item.res_endTime)}
+                      </p>
                       <p className="text-sm lg:text-base text-slate-700 text-center">
                         {formatTimeRange(item.res_startTime, item.res_endTime)}
                       </p>
@@ -176,12 +178,12 @@ export default function HistorySection({
                             className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-slate-700 hover:bg-slate-50"
                           >
                             <FileText size={12} />
-                            Surat Pengajuan
+                            Surat Pengantar
                           </a>
                         ) : (
                           <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-slate-400">
                             <FileText size={12} />
-                            Surat Pengajuan
+                            Surat Pengantar
                           </span>
                         )}
 
@@ -226,7 +228,7 @@ export default function HistorySection({
                       <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
                         <div className="rounded-lg bg-slate-50 border border-slate-200 p-2 text-center">
                           <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Tanggal</p>
-                          <p>{formatDate(item.res_startTime)}</p>
+                          <p>{formatDateRange(item.res_startTime, item.res_endTime)}</p>
                         </div>
                         <div className="rounded-lg bg-slate-50 border border-slate-200 p-2 text-center">
                           <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mb-1">Waktu</p>
@@ -243,12 +245,12 @@ export default function HistorySection({
                             className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-slate-700"
                           >
                             <FileText size={12} />
-                            Surat Pengajuan
+                            Surat Pengantar
                           </a>
                         ) : (
                           <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-slate-400">
                             <FileText size={12} />
-                            Surat Pengajuan
+                            Surat Pengantar
                           </span>
                         )}
                         {decisionDocUrl ? (

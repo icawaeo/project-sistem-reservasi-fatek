@@ -1,4 +1,8 @@
-export default function PanduanPeminjamanContent() {
+export default function PanduanPeminjamanContent({
+  minDaysAheadExclusive,
+}: {
+  minDaysAheadExclusive: number;
+}) {
   return (
     <div className="space-y-6 text-slate-700">
       {/* <section className="space-y-2">
@@ -68,7 +72,8 @@ export default function PanduanPeminjamanContent() {
 
         <ul className="list-disc space-y-2 pl-5 text-sm md:text-base leading-relaxed text-slate-700">
           <li>
-            Reservasi minimal <span className="font-semibold text-slate-800">H-3</span> dari tanggal peminjaman.
+            Reservasi minimal{" "}
+            <span className="font-semibold text-slate-800">H-{minDaysAheadExclusive}</span> dari tanggal peminjaman.
           </li>
           <li>
             Pilih jam peminjaman sesuai <span className="font-semibold text-slate-800">jam operasional gedung</span>.

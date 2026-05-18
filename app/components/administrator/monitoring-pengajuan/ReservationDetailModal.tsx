@@ -40,6 +40,12 @@ function formatDate(dateInput: string) {
 	}).format(new Date(dateInput));
 }
 
+function formatDateRange(startDateInput: string, endDateInput: string) {
+	const startLabel = formatDate(startDateInput);
+	const endLabel = formatDate(endDateInput);
+	return startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+}
+
 function formatTime(dateInput: string) {
 	return new Intl.DateTimeFormat("id-ID", {
 		hour: "2-digit",
@@ -148,7 +154,7 @@ export default function ReservationDetailModal({
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Tanggal Peminjaman</span>
-									<div className="text-sm font-semibold text-slate-900">{formatDate(data.startTime)}</div>
+									<div className="text-sm font-semibold text-slate-900">{formatDateRange(data.startTime, data.endTime)}</div>
 									<div className="text-xs text-slate-500">{formatTime(data.startTime)} - {formatTime(data.endTime)}</div>
 								</div>
 								<div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -16,7 +16,10 @@ const AvailabilityModal = dynamic(
   () => import("@/app/components/user/landingpage/AvailabilityModal"),
   { ssr: false }
 );
-import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
+import {
+  DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE,
+  validateReservationLeadTimeYMD,
+} from "@/lib/reservation-policy";
 
 export default function LandingAvailabilitySearch() {
   const { data: session } = useSession();
@@ -32,8 +35,26 @@ export default function LandingAvailabilitySearch() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [availableBuildings, setAvailableBuildings] = useState<BuildingGroup[]>([]);
+  const [minDaysAheadExclusive, setMinDaysAheadExclusive] = useState(DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE);
 
   const selectedRoom: RoomAvailability | null = null;
+
+  useEffect(() => {
+    const loadPolicy = async () => {
+      try {
+        const response = await fetch("/api/reservation-policy", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (Number.isInteger(payload?.minDaysAheadExclusive)) {
+          setMinDaysAheadExclusive(payload.minDaysAheadExclusive);
+        }
+      } catch {
+        // Gunakan default lokal jika aturan gagal dimuat.
+      }
+    };
+
+    void loadPolicy();
+  }, []);
 
   const scheduleLabel = useMemo(() => {
     if (reservationMode === "date-range") {
@@ -108,11 +129,11 @@ export default function LandingAvailabilitySearch() {
       return;
     }
 
-    const leadTimeCheck = validateReservationLeadTimeYMD(startDate);
+    const leadTimeCheck = validateReservationLeadTimeYMD(startDate, { minDaysAheadExclusive });
     if (!leadTimeCheck.ok) {
       pushToast({
         type: "error",
-        message: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
+        message: `Reservasi hanya dapat dilakukan minimal H-${minDaysAheadExclusive}. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
       });
       return;
     }
@@ -167,7 +188,7 @@ export default function LandingAvailabilitySearch() {
     } finally {
       setIsSearching(false);
     }
-  }, [endDate, endTime, pushToast, reservationMode, startDate, startTime]);
+  }, [endDate, endTime, minDaysAheadExclusive, pushToast, reservationMode, startDate, startTime]);
 
   return (
     <>

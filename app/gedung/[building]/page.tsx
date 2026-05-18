@@ -17,7 +17,10 @@ import Navbar from "@/app/components/layout/NavbarClient";
 import ReservationSearchWidget, { type ReservationMode } from "@/app/components/user/ReservationSearchWidget";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
-import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
+import {
+    DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE,
+    validateReservationLeadTimeYMD,
+} from "@/lib/reservation-policy";
 import { validateBuildingOperationalWindow } from "@/lib/building-operational-policy";
 import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/kelola-ruangan/room-types";
 
@@ -113,6 +116,7 @@ export default function BuildingPage() {
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [minDaysAheadExclusive, setMinDaysAheadExclusive] = useState(DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -166,6 +170,23 @@ export default function BuildingPage() {
         };
         loadBuilding();
     }, [buildingName]);
+
+    useEffect(() => {
+        const loadPolicy = async () => {
+            try {
+                const response = await fetch("/api/reservation-policy", { cache: "no-store" });
+                if (!response.ok) return;
+                const payload = await response.json();
+                if (Number.isInteger(payload?.minDaysAheadExclusive)) {
+                    setMinDaysAheadExclusive(payload.minDaysAheadExclusive);
+                }
+            } catch {
+                // Gunakan default lokal jika aturan gagal dimuat.
+            }
+        };
+
+        void loadPolicy();
+    }, []);
 
     // Load all rooms for this building on mount
     useEffect(() => {
@@ -241,11 +262,11 @@ export default function BuildingPage() {
             return;
         }
 
-        const leadTimeCheck = validateReservationLeadTimeYMD(startDate);
+        const leadTimeCheck = validateReservationLeadTimeYMD(startDate, { minDaysAheadExclusive });
         if (!leadTimeCheck.ok) {
             pushToast({
                 type: "error",
-                message: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
+                message: `Reservasi hanya dapat dilakukan minimal H-${minDaysAheadExclusive}. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
             });
             return;
         }
