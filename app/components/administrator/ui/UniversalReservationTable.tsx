@@ -88,6 +88,12 @@ function canAdminAct(role: string, status: string) {
   return false;
 }
 
+function canSuperadminComplete(status: string, endTime: string) {
+  const computedStatus = computeReservationStatus(status, endTime);
+  const group = resolveReservationStatusGroup(computedStatus);
+  return group === "PENDING" || group === "APPROVED";
+}
+
 function formatDateRange(startDateInput: string, endDateInput: string) {
   const startLabel = formatDate(startDateInput);
   const endLabel = formatDate(endDateInput);
@@ -329,7 +335,7 @@ export default function UniversalReservationTable({
                           <td className="px-2 py-3 text-center align-middle">
                             <div className="flex w-full justify-center gap-1.5">
                               <button type="button" onClick={() => setSelectedRow(item)} className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Lihat Detail</button>
-                              <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) !== 'APPROVED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={16} /></button>
+                              <button type="button" title="Selesaikan" disabled={!canSuperadminComplete(item.status, item.endTime)} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={16} /></button>
                               {showDelete ? <button type="button" title="Hapus" onClick={() => handleDeleteClick(item)} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-600 transition-colors hover:bg-rose-100"><Trash2 size={16} /></button> : null}
                             </div>
                           </td>
@@ -413,7 +419,7 @@ export default function UniversalReservationTable({
                   ) : (
                     <>
                       <button type="button" onClick={() => setSelectedRow(item)} className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 active:bg-blue-200">Lihat Detail</button>
-                      <button type="button" title="Selesaikan" disabled={computeReservationStatus(item.status, item.endTime) !== 'APPROVED'} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-emerald-600 transition-colors hover:bg-emerald-100 active:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={18} /></button>
+                      <button type="button" title="Selesaikan" disabled={!canSuperadminComplete(item.status, item.endTime)} onClick={() => setDecisionConfirm({ isOpen: true, item, action: "COMPLETE" })} className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-emerald-600 transition-colors hover:bg-emerald-100 active:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle size={18} /></button>
                     </>
                   )}
 

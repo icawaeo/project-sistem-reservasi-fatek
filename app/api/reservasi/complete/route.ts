@@ -35,8 +35,15 @@ export async function PATCH(request: Request) {
       return Response.json({ error: "Pengajuan sudah berstatus Selesai" }, { status: 400 });
     }
 
-    if (reservation.res_status !== "APPROVED") {
-      return Response.json({ error: "Hanya pengajuan yang sudah disetujui yang dapat diselesaikan" }, { status: 400 });
+    const normalizedStatus = reservation.res_status.toUpperCase();
+    const isPendingStatus = normalizedStatus.startsWith("PENDING");
+    const isApprovedStatus = normalizedStatus === "APPROVED" || normalizedStatus === "DISETUJUI";
+
+    if (!isPendingStatus && !isApprovedStatus) {
+      return Response.json(
+        { error: "Hanya pengajuan yang masih diproses atau sudah disetujui yang dapat diselesaikan" },
+        { status: 400 },
+      );
     }
 
     const now = new Date();
