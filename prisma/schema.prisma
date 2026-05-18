@@ -5,13 +5,13 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "binary"
   // output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql" 
+  provider = "postgresql"
 }
 
 enum UserType {
@@ -53,33 +53,33 @@ enum ReservationFlow {
 }
 
 model User {
-  user_id      String    @id @default(uuid())
-  email        String    @unique
-  name         String
-  passwordHash String
-  identifier   String?   // NIM/NIP - nullable for STAFF (admin) users
-  userType     UserType
-  role         UserRole  @default(USER)
+  user_id         String         @id @default(uuid())
+  email           String         @unique
+  name            String
+  passwordHash    String
+  identifier      String? // NIM/NIP - nullable for STAFF (admin) users
+  userType        UserType
+  role            UserRole       @default(USER)
   departmentScope LabDepartment?
   programScope    LabProgram?
-  signatureUrl String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-   
-  reservations Reservation[]
+  signatureUrl    String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  reservations        Reservation[]
   passwordSetupTokens PasswordSetupToken[]
-  emailChangeTokens EmailChangeToken[]
-  fcmTokens FcmToken[]
-  notifications Notification[]
+  emailChangeTokens   EmailChangeToken[]
+  fcmTokens           FcmToken[]
+  notifications       Notification[]
 }
 
 model PasswordSetupToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   userId    String
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
 
@@ -87,13 +87,13 @@ model PasswordSetupToken {
 }
 
 model EmailChangeToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   userId    String
   newEmail  String
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
 
@@ -120,28 +120,37 @@ model Room {
   room_id        String  @id @default(cuid())
   room_name      String
   room_building  String
+  building_id    String
   room_locDetail String
   room_capacity  Int
   room_imageUrl  String?
   room_isActive  Boolean @default(true)
 
-  labProgram     LabProgram?
-  labDepartment  LabDepartment?
+  labProgram    LabProgram?
+  labDepartment LabDepartment?
+
+  // Relasi: Satu ruangan hanya berada di satu gedung
+  building Building @relation(fields: [building_id], references: [building_id])
 
   // Relasi: Satu ruangan bisa ada di banyak reservasi
   reservations Reservation[]
+
+  @@index([building_id])
 }
 
 model Building {
-  building_id      String   @id @default(cuid())
-  building_name    String   @unique
-  operational_days String[]
-  open_time        String
-  close_time       String
+  building_id       String   @id @default(cuid())
+  building_name     String   @unique
+  operational_days  String[]
+  open_time         String
+  close_time        String
   building_imageUrl String?
-  building_isActive Boolean @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  building_isActive Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relasi: Satu gedung bisa memiliki banyak ruangan
+  rooms Room[]
 }
 
 model Facility {
@@ -154,13 +163,13 @@ model Facility {
 }
 
 model Reservation {
-  res_id          String   @id @default(cuid())
-  res_date        DateTime @default(now())
+  res_id          String          @id @default(cuid())
+  res_date        DateTime        @default(now())
   res_startTime   DateTime
   res_endTime     DateTime
   res_purpose     String
   res_flow        ReservationFlow @default(GENERAL)
-  res_status      String   @default("PENDING") // e.g., "PENDING", "APPROVED", "REJECTED"
+  res_status      String          @default("PENDING") // e.g., "PENDING", "APPROVED", "REJECTED"
   res_documentUrl String?
 
   res_labProgram    LabProgram?
@@ -171,11 +180,11 @@ model Reservation {
   res_processedAt DateTime?
 
   // Per-step progress timestamps
-  res_waitingDekanAt DateTime?
-  res_waitingWd2At   DateTime?
-  res_waitingKajurAt DateTime?
+  res_waitingDekanAt     DateTime?
+  res_waitingWd2At       DateTime?
+  res_waitingKajurAt     DateTime?
   res_waitingKepalaLabAt DateTime?
-  res_decisionAt     DateTime?
+  res_decisionAt         DateTime?
 
   // Foreign Keys
   user_id String
@@ -191,13 +200,13 @@ model Reservation {
 model ReservationItem {
   // Primary key gabungan atau ID unik
   id String @id @default(cuid())
-  
+
   res_id      String
   reservation Reservation @relation(fields: [res_id], references: [res_id])
-  
+
   fac_id   String
   facility Facility @relation(fields: [fac_id], references: [fac_id])
-  
+
   resItem_qty Int
 }
 
@@ -211,20 +220,20 @@ model FcmToken {
   user      User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
 }
 
 model Notification {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
-  title         String
-  body          String
-  data          Json     // For custom data like reservationId, type, etc.
-  isRead        Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  title     String
+  body      String
+  data      Json // For custom data like reservationId, type, etc.
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@index([userId, isRead])
 }

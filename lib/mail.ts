@@ -45,9 +45,20 @@ const createTransporter = () => {
   });
 };
 
+const getFromAddress = () => {
+  const address =
+    process.env.SMTP_SENDER_EMAIL ||
+    process.env.MAIL_FROM ||
+    process.env.SMTP_USER ||
+    "noreply@localhost";
+  const name = process.env.SMTP_SENDER_NAME;
+
+  return name ? { name, address } : address;
+};
+
 export const sendPasswordSetupMail = async ({ to, userName, setupUrl, expiresInHours }: SendPasswordSetupMailInput) => {
   const transporter = createTransporter();
-  const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@localhost";
+  const fromAddress = getFromAddress();
 
   if (!transporter) {
     console.warn("MAIL_DEBUG: SMTP belum dikonfigurasi. Gunakan setup URL manual:", setupUrl);
@@ -82,7 +93,7 @@ export const sendEmailChangeVerificationMail = async ({
   expiresInHours,
 }: SendEmailChangeVerificationMailInput) => {
   const transporter = createTransporter();
-  const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@localhost";
+  const fromAddress = getFromAddress();
 
   if (!transporter) {
     console.warn("MAIL_DEBUG: SMTP belum dikonfigurasi. Gunakan URL verifikasi email manual:", verificationUrl);
@@ -124,7 +135,7 @@ export const sendRegistrationOtpMail = async ({
   expiresInMinutes,
 }: SendRegistrationOtpMailInput) => {
   const transporter = createTransporter();
-  const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER || "noreply@localhost";
+  const fromAddress = getFromAddress();
 
   if (!transporter) {
     console.warn("MAIL_DEBUG: SMTP belum dikonfigurasi. Kode OTP registrasi:", otpCode);

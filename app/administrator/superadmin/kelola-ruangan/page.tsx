@@ -7,6 +7,7 @@ import Sidebar from "@/app/components/administrator/ui/Sidebar";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import RoomManagementContent from "@/app/components/administrator/kelola-ruangan/RoomManagementContent";
 import type { RoomItem } from "@/app/components/administrator/kelola-ruangan/room-types";
+import { getBuildingDefaultImage, isLegacyBuildingDefaultImage } from "@/app/utils/building";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +20,6 @@ const normalizeFloor = (value: string) => {
 	}
 
 	return trimmed.replace(/^(lantai|lt\.?)/i, "").trim();
-};
-
-const formatFloorLabel = (value: string) => {
-	const floor = normalizeFloor(value);
-	return floor ? `Lantai ${floor}` : "";
 };
 
 const parseRoomDetails = (value: string): { floor: string; facilities: string[] } => {
@@ -72,7 +68,9 @@ const mapRoom = (room: {
 		floor: details.floor,
 		capacity: room.room_capacity,
 		facilities: details.facilities,
-		imageUrl: room.room_imageUrl,
+		imageUrl: isLegacyBuildingDefaultImage(room.room_imageUrl)
+			? getBuildingDefaultImage(room.room_building)
+			: room.room_imageUrl,
 		status: room.room_isActive ? "aktif" : "maintenance",
 		labProgram: room.labProgram ?? null,
 		labDepartment: room.labDepartment ?? null,
@@ -98,7 +96,7 @@ export default async function SuperadminKelolaRuanganPage() {
 	});
 
 	const initialRooms = rooms.map(mapRoom);
-	const initialBuildings = buildings.map((building: { building_name: any; }) => building.building_name);
+	const initialBuildings = buildings.map((building: { building_name: string }) => building.building_name);
 
 	return (
 		<div className="min-h-screen bg-slate-100">

@@ -27,3 +27,7 @@ tsconfig.tsbuildinfo
 
 # Tests / local scripts (optional)
 *.sqlite
+
+# Runtime uploads / generated files
+uploads
+public/uploads

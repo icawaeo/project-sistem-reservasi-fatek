@@ -32,7 +32,7 @@ type RoomWithStatus = {
     labDepartment: LabDepartmentValue | null;
 };
 
-import { isLabBuilding, getBuildingGradient } from "@/app/utils/building";
+import { getBuildingDefaultImage, isLabBuilding, getBuildingGradient } from "@/app/utils/building";
 
 const LAB_PROGRAM_LABELS: Record<LabProgramValue, string> = {
     IT: "Informatika",
@@ -53,17 +53,6 @@ const LAB_DEPARTMENT_LABELS: Record<LabDepartmentValue, string> = {
 
 const LAB_DEPARTMENT_OPTIONS: LabDepartmentValue[] = ["ELEKTRO", "ARSITEKTUR", "SIPIL", "MESIN"];
 const LAB_PROGRAM_OPTIONS: LabProgramValue[] = ["IT", "ELEKTRO", "ARSITEKTUR", "PWK", "SIPIL", "LINGKUNGAN", "MESIN"];
-
-
-
-const buildingImageMap: Record<string, string> = {
-    "Gedung Dekanat Fakultas Teknik": "/images/building/dekanat.jpeg",
-    "Gedung Jurusan Teknik Sipil": "/images/building/sipil.jpeg",
-    "Gedung Jurusan Teknik Arsitektur": "/images/building/jte.jpeg",
-    "Gedung Jurusan Teknik Elektro": "/images/building/jte.jpeg",
-    "Gedung Jurusan Teknik Mesin": "/images/building/dekanat.jpeg",
-    "Gedung Laboratorium Fakultas Teknik": "/images/building/lab.jpeg",
-};
 
 const mapPoints: Record<string, { shortUrl: string; embedUrl: string }> = {
     "Gedung Jurusan Teknik Arsitektur": {
@@ -128,7 +117,7 @@ export default function BuildingPage() {
     const [currentPage, setCurrentPage] = useState(1);
 
     const buildingGradient = getBuildingGradient(buildingName);
-    const buildingHeroImage = buildingInfo?.building_imageUrl || buildingImageMap[buildingName] || "/hero.jpeg";
+    const buildingHeroImage = buildingInfo?.building_imageUrl || getBuildingDefaultImage(buildingName) || "/hero.jpeg";
     const buildingMap = mapPoints[buildingName] ?? null;
     const isLabBuildingFlag = isLabBuilding(buildingName);
 

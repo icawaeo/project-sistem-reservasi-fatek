@@ -18,7 +18,7 @@ const parseFacilities = (value: unknown): string[] => {
 
 const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
 
-import { isLabBuilding } from "@/app/utils/building";
+import { getBuildingDefaultImage, isLabBuilding } from "@/app/utils/building";
 
 const LAB_PROGRAM_VALUES = [
   "IT",
@@ -187,7 +187,7 @@ export async function POST(request: Request) {
     const capacity = Number(body?.capacity);
     const facilities = parseFacilities(body?.facilities);
     const rawImageUrl = typeof body?.imageUrl === "string" ? body.imageUrl : null;
-    const imageUrl = await saveBase64Image(rawImageUrl, "room");
+    const uploadedImageUrl = await saveBase64Image(rawImageUrl, "room");
     const status = parseStatus(body?.status);
 
     const isLabBuildingFlag = isLabBuilding(building);
@@ -214,6 +214,8 @@ export async function POST(request: Request) {
     if (!buildingExists) {
       return NextResponse.json({ error: "Gedung belum terdaftar di master gedung" }, { status: 400 });
     }
+
+    const imageUrl = uploadedImageUrl ?? getBuildingDefaultImage(building);
 
     const room = await prisma.room.create({
       data: {

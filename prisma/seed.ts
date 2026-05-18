@@ -2,8 +2,9 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-import { USER_ROLES, type UserRoleValue } from "../lib/user-enums";
-import { type LabDepartmentValue, type LabProgramValue } from "../lib/lab-enums";
+import { USER_ROLES, type UserRoleValue } from "@/lib/user-enums";
+import { type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
+import { getBuildingDefaultImage } from "@/app/utils/building";
 
 const { PrismaClient } = require("@prisma/client");
 
@@ -190,15 +191,6 @@ type SeedBuilding = {
   close_time: string;
 };
 
-const buildingImageMap: Record<string, string> = {
-  "Gedung Dekanat Fakultas Teknik": "/images/building/dekanat.jpeg",
-  "Gedung Jurusan Teknik Sipil": "/images/building/sipil.jpeg",
-  "Gedung Jurusan Teknik Arsitektur": "/images/building/jte.jpeg",
-  "Gedung Jurusan Teknik Elektro": "/images/building/jte.jpeg",
-  "Gedung Jurusan Teknik Mesin": "/images/building/dekanat.jpeg",
-  "Gedung Laboratorium Fakultas Teknik": "/images/building/lab.jpeg",
-};
-
 const buildingSeeds: SeedBuilding[] = [
   {
     building_name: "Gedung Dekanat Fakultas Teknik",
@@ -244,126 +236,126 @@ const roomSeeds: SeedRoom[] = [
     room_building: "Gedung Dekanat Fakultas Teknik",
     room_locDetail: "Lantai 1",
     room_capacity: 180,
-    room_imageUrl: buildingImageMap["Gedung Dekanat Fakultas Teknik"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Dekanat Fakultas Teknik")!,
   },
   {
     room_name: "Studio Perancangan Sipil",
     room_building: "Gedung Jurusan Teknik Sipil",
     room_locDetail: "Lantai 1",
     room_capacity: 35,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Sipil"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Sipil")!,
   },
   {
     room_name: "Ruang Kuliah Sipil A",
     room_building: "Gedung Jurusan Teknik Sipil",
     room_locDetail: "Lantai 2",
     room_capacity: 45,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Sipil"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Sipil")!,
   },
   {
     room_name: "Ruang Kuliah Sipil B",
     room_building: "Gedung Jurusan Teknik Sipil",
     room_locDetail: "Lantai 3",
     room_capacity: 25,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Sipil"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Sipil")!,
   },
   {
     room_name: "Studio Arsitektur 1",
     room_building: "Gedung Jurusan Teknik Arsitektur",
     room_locDetail: "Lantai 1",
     room_capacity: 50,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Arsitektur"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Arsitektur")!,
   },
   {
     room_name: "Studio Arsitektur 2",
     room_building: "Gedung Jurusan Teknik Arsitektur",
     room_locDetail: "Lantai 2",
     room_capacity: 40,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Arsitektur"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Arsitektur")!,
   },
   {
     room_name: "Ruang Presentasi Arsitektur",
     room_building: "Gedung Jurusan Teknik Arsitektur",
     room_locDetail: "Lantai 2",
     room_capacity: 30,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Arsitektur"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Arsitektur")!,
   },
   {
     room_name: "JTE - 01",
     room_building: "Gedung Jurusan Teknik Elektro",
     room_locDetail: "Lantai 1",
     room_capacity: 40,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Elektro"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Elektro")!,
   },
   {
     room_name: "JTE - 02",
     room_building: "Gedung Jurusan Teknik Elektro",
     room_locDetail: "Lantai 1",
     room_capacity: 40,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Elektro"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Elektro")!,
   },
   {
     room_name: "Creative Room",
     room_building: "Gedung Jurusan Teknik Elektro",
     room_locDetail: "Lantai 2",
     room_capacity: 20,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Elektro"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Elektro")!,
   },
   {
     room_name: "Ruang Seminar 01",
     room_building: "Gedung Jurusan Teknik Elektro",
     room_locDetail: "Lantai 1",
     room_capacity: 32,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Elektro"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Elektro")!,
   },
   {
     room_name: "Ruang Seminar 02",
     room_building: "Gedung Jurusan Teknik Elektro",
     room_locDetail: "Lantai 1",
     room_capacity: 32,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Elektro"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Elektro")!,
   },
   {
     room_name: "Ruang Kuliah Mesin A",
     room_building: "Gedung Jurusan Teknik Mesin",
     room_locDetail: "Lantai 2",
     room_capacity: 45,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Mesin"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Mesin")!,
   },
   {
     room_name: "Bengkel Mesin Produksi",
     room_building: "Gedung Jurusan Teknik Mesin",
     room_locDetail: "Lantai 1",
     room_capacity: 28,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Mesin"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Mesin")!,
   },
   {
     room_name: "Ruang Seminar Mesin",
     room_building: "Gedung Jurusan Teknik Mesin",
     room_locDetail: "Lantai 2",
     room_capacity: 35,
-    room_imageUrl: buildingImageMap["Gedung Jurusan Teknik Mesin"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Jurusan Teknik Mesin")!,
   },
   {
     room_name: "Lab Multimedia",
     room_building: "Gedung Laboratorium Fakultas Teknik",
     room_locDetail: "Lantai 3",
     room_capacity: 24,
-    room_imageUrl: buildingImageMap["Gedung Laboratorium Fakultas Teknik"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Laboratorium Fakultas Teknik")!,
   },
   {
     room_name: "Lab Rekayasa Perangkat Lunak",
     room_building: "Gedung Laboratorium Fakultas Teknik",
     room_locDetail: "Lantai 3",
     room_capacity: 30,
-    room_imageUrl: buildingImageMap["Gedung Laboratorium Fakultas Teknik"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Laboratorium Fakultas Teknik")!,
   },
   {
     room_name: "Lab Keamanan Siber",
     room_building: "Gedung Laboratorium Fakultas Teknik",
     room_locDetail: "Lantai 3",
     room_capacity: 18,
-    room_imageUrl: buildingImageMap["Gedung Laboratorium Fakultas Teknik"],
+    room_imageUrl: getBuildingDefaultImage("Gedung Laboratorium Fakultas Teknik")!,
   },
 ];
 
@@ -410,9 +402,11 @@ async function seedRooms() {
         room_isActive: room.room_isActive ?? true,
         labProgram,
         labDepartment,
+        building: {
+          connect: { building_name: room.room_building },
+        },
       },
     });
-    createdCount += 1;
   }
 
   console.log(`Room seed complete. Created: ${createdCount}, Updated: ${updatedCount}`);
