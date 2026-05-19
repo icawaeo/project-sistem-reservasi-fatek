@@ -41,7 +41,11 @@ export default async function RiwayatPeminjamanPage({ searchParams }: PageProps)
 
       <main className="w-full max-w-6xl mx-auto px-4 pt-8 pb-14 flex-1 sm:px-6 lg:px-8 xl:px-10">
         <RiwayatBreadcrumb />
-        <RiwayatClient initialReservations={reservations} initialSort={sortOrder} />
+        <RiwayatClient
+          initialReservations={reservations}
+          initialSort={sortOrder}
+          serverNow={new Date().toISOString()}
+        />
       </main>
 
       <RiwayatFooter />

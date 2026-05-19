@@ -86,7 +86,7 @@ export default function MonitoringSection({
         data={data}
         mode="superadmin"
         showControls={false}
-        showDelete={false}
+        showDelete
         onDeleteSuccess={onDeleteSuccess}
       />
     </SectionCard>

@@ -5,11 +5,13 @@ import type { ReservationRecord, SortOrder } from "../riwayat/_types";
 
 type UserReservationWithRoom = {
   res_id: string;
+  res_date: Date;
   res_startTime: Date;
   res_endTime: Date;
   res_status: string;
   res_purpose: string | null;
   res_documentUrl: string | null;
+  res_decisionDocumentUrl: string | null;
   room: {
     room_name: string;
     room_building: string | null;
@@ -46,11 +48,13 @@ export async function getUserReservations(userId: string, sort: SortOrder): Prom
 
   return reservations.map((reservation: UserReservationWithRoom) => ({
     res_id: reservation.res_id,
+    res_date: reservation.res_date.toISOString(),
     res_startTime: reservation.res_startTime.toISOString(),
     res_endTime: reservation.res_endTime.toISOString(),
     res_status: String(reservation.res_status),
     res_purpose: reservation.res_purpose,
     res_documentUrl: reservation.res_documentUrl,
+    res_decisionDocumentUrl: reservation.res_decisionDocumentUrl,
     room: {
       room_name: reservation.room.room_name,
       room_building: reservation.room.room_building,

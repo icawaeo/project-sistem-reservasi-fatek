@@ -36,7 +36,7 @@ function resolveSteps(flow: AdminReservationRecord["flow"]): Step[] {
 	return [
 		{ key: "SUBMITTED", label: "Diajukan", shortLabel: "Diajukan" },
 		{ key: "WAITING_DEKAN", label: "Menunggu Persetujuan Dekan", shortLabel: "Dekan" },
-		{ key: "WAITING_WD2", label: "Menunggu Persetujuan Wakil Dekan 2", shortLabel: "Wakil Dekan 2" },
+		{ key: "WAITING_WD2", label: "Menunggu TTD Wakil Dekan 2", shortLabel: "TTD WD2" },
 		{ key: "DECISION", label: "Disetujui/Ditolak", shortLabel: "Disetujui/Ditolak" },
 		{ key: "COMPLETED", label: "Selesai", shortLabel: "Selesai" },
 	];

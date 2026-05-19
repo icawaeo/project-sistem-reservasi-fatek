@@ -19,6 +19,7 @@ type SuperadminReservation = {
 	res_date: Date;
 	res_startTime: Date;
 	res_documentUrl: string | null;
+	res_decisionDocumentUrl: string | null;
 	user: {
 		name: string | null;
 		userType: string | null;
@@ -93,7 +94,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		purpose: parsedPurpose.purpose,
 		status: computedStatus,
 		documentUrl: item.res_documentUrl,
-		decisionDocumentUrl: computedStatus === "PENDING" ? null : item.res_documentUrl,
+		decisionDocumentUrl: item.res_decisionDocumentUrl,
 		user: {
 			name: item.user.name ?? "-",
 			userType: (item.user.userType ?? "USER") as "USER" | "STAFF",

@@ -25,6 +25,7 @@ type AdminDashboardReservation = {
 	res_purpose: string | null;
 	res_status: string;
 	res_documentUrl: string | null;
+	res_decisionDocumentUrl: string | null;
 	res_labDepartment: LabDepartmentValue | null;
 	res_labProgram: LabProgramValue | null;
 	user: {
@@ -137,6 +138,7 @@ export default async function AdminDashboardPage() {
 			rawPurpose: item.res_purpose || "-",
 			status: item.res_status,
 			documentUrl: item.res_documentUrl,
+			decisionDocumentUrl: item.res_decisionDocumentUrl,
 			user: {
 				name: item.user.name ?? "-",
 				userType: (item.user.userType ?? "USER") as "USER" | "STAFF",

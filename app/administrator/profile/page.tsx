@@ -35,6 +35,9 @@ export default async function AdministratorProfilePage({ searchParams }: Profile
 			name: true,
 			email: true,
 			role: true,
+			identifier: true,
+			rank: true,
+			position: true,
 			signatureUrl: true,
 		},
 	});
@@ -75,6 +78,9 @@ export default async function AdministratorProfilePage({ searchParams }: Profile
 								initialName={user.name}
 								initialEmail={user.email}
 								role={String(user.role)}
+								initialIdentifier={user.identifier}
+								initialRank={user.rank}
+								initialPosition={user.position}
 								initialSignatureUrl={user.signatureUrl}
 								emailChanged={emailChanged}
 							/>

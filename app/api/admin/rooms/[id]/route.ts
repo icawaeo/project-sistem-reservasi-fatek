@@ -19,7 +19,12 @@ const parseFacilities = (value: unknown): string[] => {
 
 const parseStatus = (value: unknown) => (value === "maintenance" ? "maintenance" : "aktif");
 
-import { getBuildingDefaultImage, isLabBuilding, isLegacyBuildingDefaultImage } from "@/app/utils/building";
+import {
+  getBuildingDefaultImage,
+  isLabBuilding,
+  isLegacyBuildingDefaultImage,
+  resolveRoomDisplayImage,
+} from "@/app/utils/building";
 
 const LAB_PROGRAM_VALUES = [
   "IT",
@@ -128,7 +133,7 @@ const mapRoom = (room: {
     floor: details.floor,
     capacity: room.room_capacity,
     facilities: details.facilities,
-    imageUrl: room.room_imageUrl,
+    imageUrl: resolveRoomDisplayImage(room.room_imageUrl, room.room_building),
     status: room.room_isActive ? "aktif" : "maintenance",
     labProgram: room.labProgram ?? null,
     labDepartment: room.labDepartment ?? null,

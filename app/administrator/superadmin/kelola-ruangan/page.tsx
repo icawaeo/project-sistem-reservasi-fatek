@@ -7,7 +7,7 @@ import Sidebar from "@/app/components/administrator/ui/Sidebar";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import RoomManagementContent from "@/app/components/administrator/kelola-ruangan/RoomManagementContent";
 import type { RoomItem } from "@/app/components/administrator/kelola-ruangan/room-types";
-import { getBuildingDefaultImage, isLegacyBuildingDefaultImage } from "@/app/utils/building";
+import { resolveRoomDisplayImage } from "@/app/utils/building";
 
 export const dynamic = "force-dynamic";
 
@@ -68,9 +68,7 @@ const mapRoom = (room: {
 		floor: details.floor,
 		capacity: room.room_capacity,
 		facilities: details.facilities,
-		imageUrl: isLegacyBuildingDefaultImage(room.room_imageUrl)
-			? getBuildingDefaultImage(room.room_building)
-			: room.room_imageUrl,
+		imageUrl: resolveRoomDisplayImage(room.room_imageUrl, room.room_building),
 		status: room.room_isActive ? "aktif" : "maintenance",
 		labProgram: room.labProgram ?? null,
 		labDepartment: room.labDepartment ?? null,

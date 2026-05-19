@@ -1,7 +1,10 @@
 import Navbar from "@/app/components/layout/Navbar";
 import PanduanPeminjamanContent from "@/app/components/user/PanduanPeminjamanContent";
+import { getReservationMinDaysAheadExclusive } from "@/lib/reservation-settings";
 
-export default function PanduanPage() {
+export default async function PanduanPage() {
+	const minDaysAheadExclusive = await getReservationMinDaysAheadExclusive();
+
 	return (
 		<div className="min-h-screen bg-white font-sans">
 			<Navbar />
@@ -16,7 +19,7 @@ export default function PanduanPage() {
 					</p>
 
 					<div className="mt-6">
-						<PanduanPeminjamanContent />
+						<PanduanPeminjamanContent minDaysAheadExclusive={minDaysAheadExclusive} />
 					</div>
 				</div>
 			</main>

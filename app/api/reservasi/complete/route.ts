@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
+import { isSuperadminUser } from "@/lib/admin-access";
 
 export async function PATCH(request: Request) {
   try {
@@ -11,8 +12,9 @@ export async function PATCH(request: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Hanya superadmin atau pengguna dengan role SUPERADMIN (jika ada pengecekan lebih lanjut, bisa ditambahkan di sini).
-    // Karena table ini diakses oleh mode "superadmin" pada UniversalReservationTable, kita anggap session valid.
+    if (!isSuperadminUser(session.user)) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const url = new URL(request.url);
     const reservationId = url.searchParams.get("id");
@@ -31,6 +33,17 @@ export async function PATCH(request: Request) {
 
     if (reservation.res_status === "COMPLETED") {
       return Response.json({ error: "Pengajuan sudah berstatus Selesai" }, { status: 400 });
+    }
+
+    const normalizedStatus = reservation.res_status.toUpperCase();
+    const isPendingStatus = normalizedStatus.startsWith("PENDING");
+    const isApprovedStatus = normalizedStatus === "APPROVED" || normalizedStatus === "DISETUJUI";
+
+    if (!isPendingStatus && !isApprovedStatus) {
+      return Response.json(
+        { error: "Hanya pengajuan yang masih diproses atau sudah disetujui yang dapat diselesaikan" },
+        { status: 400 },
+      );
     }
 
     const now = new Date();

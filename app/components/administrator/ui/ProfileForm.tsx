@@ -10,6 +10,9 @@ type ProfileFormProps = {
 	initialName: string;
 	initialEmail: string;
 	role: string;
+	initialIdentifier?: string | null;
+	initialRank?: string | null;
+	initialPosition?: string | null;
 	initialSignatureUrl?: string | null;
 	emailChanged?: boolean;
 };
@@ -20,6 +23,9 @@ export default function ProfileForm({
 	initialName,
 	initialEmail,
 	role,
+	initialIdentifier,
+	initialRank,
+	initialPosition,
 	initialSignatureUrl,
 	emailChanged,
 }: ProfileFormProps) {
@@ -28,8 +34,14 @@ export default function ProfileForm({
 
 	const [name, setName] = useState(initialName);
 	const [email, setEmail] = useState(initialEmail);
+	const [identifier, setIdentifier] = useState(initialIdentifier ?? "");
+	const [rank, setRank] = useState(initialRank ?? "");
+	const [position, setPosition] = useState(initialPosition ?? "");
 	const [baselineName, setBaselineName] = useState(initialName);
 	const [baselineEmail, setBaselineEmail] = useState(initialEmail);
+	const [baselineIdentifier, setBaselineIdentifier] = useState(initialIdentifier ?? "");
+	const [baselineRank, setBaselineRank] = useState(initialRank ?? "");
+	const [baselinePosition, setBaselinePosition] = useState(initialPosition ?? "");
 
 	const [saving, setSaving] = useState(false);
 	const [verifyingEmail, setVerifyingEmail] = useState(false);
@@ -39,8 +51,15 @@ export default function ProfileForm({
 
 	const canUploadSignature = useMemo(() => {
 		const normalized = (role || "").toUpperCase();
-		return normalized === "ADMIN_DEKAN" || normalized === "ADMIN_WD2";
+		return (
+			normalized === "ADMIN_DEKAN" ||
+			normalized === "ADMIN_WD2" ||
+			normalized === "KAJUR" ||
+			normalized === "KEPALA_LAB"
+		);
 	}, [role]);
+
+	const requiresOfficialProfile = canUploadSignature;
 
 	const isEmailChanged = useMemo(() => {
 		return normalizeEmail(email) !== normalizeEmail(baselineEmail);
@@ -51,8 +70,14 @@ export default function ProfileForm({
 		setBaselineName(initialName);
 		setEmail(initialEmail);
 		setBaselineEmail(initialEmail);
+		setIdentifier(initialIdentifier ?? "");
+		setBaselineIdentifier(initialIdentifier ?? "");
+		setRank(initialRank ?? "");
+		setBaselineRank(initialRank ?? "");
+		setPosition(initialPosition ?? "");
+		setBaselinePosition(initialPosition ?? "");
 		setSignatureUrl(initialSignatureUrl ?? null);
-	}, [initialEmail, initialName, initialSignatureUrl]);
+	}, [initialEmail, initialIdentifier, initialName, initialPosition, initialRank, initialSignatureUrl]);
 
 	useEffect(() => {
 		if (!emailChanged) return;
@@ -68,6 +93,9 @@ export default function ProfileForm({
 
 		const trimmedName = name.trim();
 		const trimmedEmail = email.trim();
+		const trimmedIdentifier = identifier.trim();
+		const trimmedRank = rank.trim();
+		const trimmedPosition = position.trim();
 		const emailNeedsVerification = normalizeEmail(trimmedEmail) !== normalizeEmail(baselineEmail);
 
 		if (!trimmedName) {
@@ -85,16 +113,34 @@ export default function ProfileForm({
 			return;
 		}
 
+		if (requiresOfficialProfile && (!trimmedIdentifier || !trimmedRank || !trimmedPosition)) {
+			pushToast({
+				type: "error",
+				message: "NIP, pangkat/golongan, dan jabatan wajib diisi.",
+			});
+			return;
+		}
+
 		setSaving(true);
 
 		try {
-			if (trimmedName !== baselineName) {
+			if (
+				trimmedName !== baselineName ||
+				trimmedIdentifier !== baselineIdentifier ||
+				trimmedRank !== baselineRank ||
+				trimmedPosition !== baselinePosition
+			) {
 				const response = await fetch("/api/admin/profile", {
 					method: "PATCH",
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({ name: trimmedName }),
+					body: JSON.stringify({
+						name: trimmedName,
+						identifier: trimmedIdentifier,
+						rank: trimmedRank,
+						position: trimmedPosition,
+					}),
 				});
 
 				if (!response.ok) {
@@ -103,7 +149,10 @@ export default function ProfileForm({
 				}
 
 				setBaselineName(trimmedName);
-				pushToast({ type: "success", message: "Nama berhasil diperbarui." });
+				setBaselineIdentifier(trimmedIdentifier);
+				setBaselineRank(trimmedRank);
+				setBaselinePosition(trimmedPosition);
+				pushToast({ type: "success", message: "Profil berhasil diperbarui." });
 			}
 
 			router.refresh();
@@ -225,6 +274,46 @@ export default function ProfileForm({
 						</button>
 					</div>
 				</div>
+
+				{requiresOfficialProfile ? (
+					<>
+						<div>
+							<label className="text-xs font-bold tracking-wider text-slate-700">NIP</label>
+							<input
+								type="text"
+								required
+								value={identifier}
+								onChange={(e) => setIdentifier(e.target.value)}
+								className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+								placeholder="Masukkan NIP"
+							/>
+						</div>
+
+						<div>
+							<label className="text-xs font-bold tracking-wider text-slate-700">PANGKAT / GOLONGAN</label>
+							<input
+								type="text"
+								required
+								value={rank}
+								onChange={(e) => setRank(e.target.value)}
+								className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+								placeholder="Contoh: Pembina / IV.a"
+							/>
+						</div>
+
+						<div>
+							<label className="text-xs font-bold tracking-wider text-slate-700">JABATAN</label>
+							<input
+								type="text"
+								required
+								value={position}
+								onChange={(e) => setPosition(e.target.value)}
+								className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+								placeholder="Masukkan jabatan"
+							/>
+						</div>
+					</>
+				) : null}
 
 				{canUploadSignature ? (
 					<div>

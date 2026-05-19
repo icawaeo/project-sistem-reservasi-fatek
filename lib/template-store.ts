@@ -238,7 +238,7 @@ const resolveLibreOfficeExecutable = async () => {
   return process.platform === "win32" ? "soffice.exe" : "soffice";
 };
 
-const convertDocxToPdf = async (params: {
+export const convertDocxToPdf = async (params: {
   inputAbsolutePath: string;
   outputDirAbsolutePath: string;
   expectedPdfAbsolutePath: string;

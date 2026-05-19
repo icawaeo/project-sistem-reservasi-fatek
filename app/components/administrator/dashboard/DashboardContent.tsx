@@ -5,6 +5,7 @@ import { Clock, Building2, DoorOpen, Users } from "lucide-react";
 import StatCard from "@/app/components/administrator/ui/StatCard";
 import DashboardStatGrid from "@/app/components/administrator/dashboard/DashboardStatGrid";
 import SuperadminMonitoringContent from "@/app/components/administrator/monitoring-pengajuan/SuperadminMonitoringContent";
+import ReservationPolicySection from "@/app/components/administrator/dashboard/ReservationPolicySection";
 import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import { computeReservationStatus, resolveReservationStatusGroup } from "@/app/components/administrator/ui/reservationStatus";
@@ -18,6 +19,7 @@ type DashboardContentProps = {
   totalUsers: number;
   lastSync: string;
   adminRole?: AdminRole;
+  initialMinDaysAheadExclusive?: number;
 };
 
 export default function DashboardContent({
@@ -29,6 +31,7 @@ export default function DashboardContent({
   totalUsers,
   lastSync,
   adminRole = "ADMIN",
+  initialMinDaysAheadExclusive = 3,
 }: DashboardContentProps) {
   const [tableData, setTableData] = useState<MonitoringReservation[]>(initialData);
   const [adminTableData, setAdminTableData] = useState<AdminReservationRecord[]>(adminData);
@@ -86,12 +89,17 @@ export default function DashboardContent({
         />
       </DashboardStatGrid>
 
+      {mode === "superadmin" ? (
+        <ReservationPolicySection initialMinDaysAheadExclusive={initialMinDaysAheadExclusive} />
+      ) : null}
+
       <SuperadminMonitoringContent
         initialData={tableData}
         adminData={adminTableData}
         lastSync={lastSync}
         adminMode={mode === "admin"}
         adminRole={adminRole}
+        onDeleted={(deletedId) => setTableData((prev) => prev.filter((item) => item.id !== deletedId))}
       />
     </main>
   );

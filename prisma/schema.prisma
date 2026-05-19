@@ -58,6 +58,8 @@ model User {
   name            String
   passwordHash    String
   identifier      String? // NIM/NIP - nullable for STAFF (admin) users
+  rank            String?
+  position        String?
   userType        UserType
   role            UserRole       @default(USER)
   departmentScope LabDepartment?
@@ -171,6 +173,7 @@ model Reservation {
   res_flow        ReservationFlow @default(GENERAL)
   res_status      String          @default("PENDING") // e.g., "PENDING", "APPROVED", "REJECTED"
   res_documentUrl String?
+  res_decisionDocumentUrl String?
 
   res_labProgram    LabProgram?
   res_labDepartment LabDepartment?
@@ -236,4 +239,11 @@ model Notification {
 
   @@index([userId])
   @@index([userId, isRead])
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

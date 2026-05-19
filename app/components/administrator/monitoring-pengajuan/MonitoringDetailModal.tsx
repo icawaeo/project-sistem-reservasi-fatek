@@ -17,6 +17,12 @@ function formatDate(dateInput: string) {
   }).format(new Date(dateInput));
 }
 
+function formatDateRange(startDateInput: string, endDateInput: string) {
+  const startLabel = formatDate(startDateInput);
+  const endLabel = formatDate(endDateInput);
+  return startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+}
+
 function formatTime(dateInput: string) {
   return new Intl.DateTimeFormat("id-ID", {
     hour: "2-digit",
@@ -70,7 +76,7 @@ export default function MonitoringDetailModal({
             </div>
             <div className="rounded-lg border border-slate-200 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Kegiatan</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{formatDate(data.startTime)}</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{formatDateRange(data.startTime, data.endTime)}</p>
             </div>
             <div className="rounded-lg border border-slate-200 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Waktu</p>

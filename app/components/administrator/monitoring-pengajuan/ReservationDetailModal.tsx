@@ -40,6 +40,12 @@ function formatDate(dateInput: string) {
 	}).format(new Date(dateInput));
 }
 
+function formatDateRange(startDateInput: string, endDateInput: string) {
+	const startLabel = formatDate(startDateInput);
+	const endLabel = formatDate(endDateInput);
+	return startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+}
+
 function formatTime(dateInput: string) {
 	return new Intl.DateTimeFormat("id-ID", {
 		hour: "2-digit",
@@ -85,12 +91,15 @@ export default function ReservationDetailModal({
 	const computedStatus = computeReservationStatus(data.status, data.endTime);
 	const normalizedStatus = (computedStatus ?? "").toUpperCase();
 	const isDecisionLetterReady =
-		normalizedStatus === "APPROVED" ||
-		normalizedStatus === "DISETUJUI" ||
-		normalizedStatus === "COMPLETED" ||
-		normalizedStatus === "SELESAI";
+		Boolean(data.decisionDocumentUrl) &&
+		(normalizedStatus === "APPROVED" ||
+			normalizedStatus === "DISETUJUI" ||
+			normalizedStatus === "COMPLETED" ||
+			normalizedStatus === "SELESAI");
 
-	const decisionLetterPdfUrl = `/api/admin/decision-letter/pdf?flow=${encodeURIComponent(data.flow)}`;
+	const decisionLetterPdfUrl = `/api/admin/decision-letter/pdf?reservationId=${encodeURIComponent(data.id)}`;
+	const isKabagForwardStep = adminRole === "ADMIN";
+	const isWd2SigningStep = adminRole === "ADMIN_WD2";
 
 	return (
 		<div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4" onClick={onClose}>
@@ -145,7 +154,7 @@ export default function ReservationDetailModal({
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Tanggal Peminjaman</span>
-									<div className="text-sm font-semibold text-slate-900">{formatDate(data.startTime)}</div>
+									<div className="text-sm font-semibold text-slate-900">{formatDateRange(data.startTime, data.endTime)}</div>
 									<div className="text-xs text-slate-500">{formatTime(data.startTime)} - {formatTime(data.endTime)}</div>
 								</div>
 								<div>
@@ -201,11 +210,17 @@ export default function ReservationDetailModal({
 				</div>
 
 				<footer className="flex items-center justify-end gap-4 border-t border-slate-200 bg-slate-50/50 px-8 py-6">
-					<button type="button" onClick={onReject} disabled={isBusy || !isActionable} className="rounded-xl border border-rose-200 bg-rose-50 px-8 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40">
-						Tolak Pengajuan
-					</button>
+					{isKabagForwardStep ? (
+						<button type="button" onClick={onClose} disabled={isBusy} className="rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40">
+							Batal
+						</button>
+					) : !isWd2SigningStep ? (
+						<button type="button" onClick={onReject} disabled={isBusy || !isActionable} className="rounded-xl border border-rose-200 bg-rose-50 px-8 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40">
+							Tolak Pengajuan
+						</button>
+					) : null}
 					<button type="button" onClick={onApprove} disabled={isBusy || !isActionable} className="rounded-xl border border-emerald-200 bg-emerald-50 px-10 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40">
-						Setujui Pengajuan
+						{isKabagForwardStep ? "Teruskan" : isWd2SigningStep ? "Tanda tangani dan selesaikan" : "Setujui Pengajuan"}
 					</button>
 				</footer>
 			</div>

@@ -17,7 +17,11 @@ import Navbar from "@/app/components/layout/NavbarClient";
 import ReservationSearchWidget, { type ReservationMode } from "@/app/components/user/ReservationSearchWidget";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
-import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
+import {
+    DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE,
+    validateReservationLeadTimeYMD,
+} from "@/lib/reservation-policy";
+import { validateBuildingOperationalWindow } from "@/lib/building-operational-policy";
 import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/kelola-ruangan/room-types";
 
 type RoomWithStatus = {
@@ -112,6 +116,7 @@ export default function BuildingPage() {
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [minDaysAheadExclusive, setMinDaysAheadExclusive] = useState(DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -152,7 +157,9 @@ export default function BuildingPage() {
     useEffect(() => {
         const loadBuilding = async () => {
             try {
-                const res = await fetch(`/api/buildings?name=${encodeURIComponent(buildingName)}`);
+                const res = await fetch(`/api/buildings?name=${encodeURIComponent(buildingName)}`, {
+                    cache: "no-store",
+                });
                 if (res.ok) {
                     const data = await res.json();
                     setBuildingInfo(data);
@@ -164,12 +171,31 @@ export default function BuildingPage() {
         loadBuilding();
     }, [buildingName]);
 
+    useEffect(() => {
+        const loadPolicy = async () => {
+            try {
+                const response = await fetch("/api/reservation-policy", { cache: "no-store" });
+                if (!response.ok) return;
+                const payload = await response.json();
+                if (Number.isInteger(payload?.minDaysAheadExclusive)) {
+                    setMinDaysAheadExclusive(payload.minDaysAheadExclusive);
+                }
+            } catch {
+                // Gunakan default lokal jika aturan gagal dimuat.
+            }
+        };
+
+        void loadPolicy();
+    }, []);
+
     // Load all rooms for this building on mount
     useEffect(() => {
         const loadRooms = async () => {
             setIsLoading(true);
             try {
-                const res = await fetch(`/api/rooms?building=${encodeURIComponent(buildingName)}`);
+                const res = await fetch(`/api/rooms?building=${encodeURIComponent(buildingName)}`, {
+                    cache: "no-store",
+                });
                 const payload = (await res.json().catch(() => null)) as unknown;
 
                 if (!res.ok) {
@@ -196,28 +222,51 @@ export default function BuildingPage() {
         loadRooms();
     }, [buildingName, pushToast]);
 
-    const handleSearch = async () => {
-        const OPENING_TIME = "08:00";
-        const CLOSING_TIME = "18:00";
+    useEffect(() => {
+        const refreshRooms = async () => {
+            try {
+                const res = await fetch(`/api/rooms?building=${encodeURIComponent(buildingName)}`, {
+                    cache: "no-store",
+                });
+                if (!res.ok) return;
 
+                const payload = (await res.json()) as RoomWithStatus[];
+                setRooms(payload);
+            } catch {
+                // Biarkan data terakhir tetap tampil jika refresh ringan gagal.
+            }
+        };
+
+        const handleFocus = () => {
+            void refreshRooms();
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                void refreshRooms();
+            }
+        };
+
+        window.addEventListener("focus", handleFocus);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, [buildingName]);
+
+    const handleSearch = async () => {
         if (!startDate || !startTime || !endTime || (reservationMode === "date-range" && !endDate)) {
             pushToast({ type: "error", message: "Lengkapi tanggal dan waktu reservasi terlebih dahulu." });
             return;
         }
 
-        const leadTimeCheck = validateReservationLeadTimeYMD(startDate);
+        const leadTimeCheck = validateReservationLeadTimeYMD(startDate, { minDaysAheadExclusive });
         if (!leadTimeCheck.ok) {
             pushToast({
                 type: "error",
-                message: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
-            });
-            return;
-        }
-
-        if (startTime < OPENING_TIME || endTime > CLOSING_TIME) {
-            pushToast({
-                type: "error",
-                message: "Tanggal dan waktu melewati jam operasional gedung (08:00 - 18:00).",
+                message: `Reservasi hanya dapat dilakukan minimal H-${minDaysAheadExclusive}. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
             });
             return;
         }
@@ -233,6 +282,24 @@ export default function BuildingPage() {
         }
 
         const effectiveEndDate = reservationMode === "date-range" ? endDate : startDate;
+
+        if (buildingInfo) {
+            const operationalCheck = validateBuildingOperationalWindow({
+                startDate,
+                endDate: effectiveEndDate,
+                startTime,
+                endTime,
+                schedule: buildingInfo,
+            });
+
+            if (!operationalCheck.ok) {
+                pushToast({
+                    type: "error",
+                    message: operationalCheck.error,
+                });
+                return;
+            }
+        }
 
         setIsSearching(true);
         try {
@@ -333,6 +400,7 @@ export default function BuildingPage() {
             room_building: room.room_building,
             room_capacity: String(room.room_capacity),
             room_locDetail: room.room_locDetail,
+            room_imageUrl: room.room_imageUrl ?? "",
             startDate,
             endDate: effectiveEndDate,
             startTime,

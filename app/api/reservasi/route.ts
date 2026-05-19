@@ -3,12 +3,24 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
+import { getReservationMinDaysAheadExclusive } from "@/lib/reservation-settings";
+import { validateBuildingOperationalWindow } from "@/lib/building-operational-policy";
+import {
+  getDailyReservationSlots,
+  rangesConflictByDailySlots,
+  RESERVATION_BUFFER_MS,
+} from "@/lib/reservation-slots";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 import { sendNotification } from "@/lib/notificationService";
 
 import { isLabBuilding } from "@/app/utils/building";
 
 type IncomingReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
+
+type ReservationConflictCandidate = {
+  res_startTime: Date;
+  res_endTime: Date;
+};
 
 const normalizeFlow = (value: unknown): IncomingReservationFlow | null => {
   if (typeof value !== "string") return null;
@@ -27,9 +39,6 @@ const INACTIVE_STATUSES = [
   "REJECTED_WD2", "REJECTED_KAJUR", "REJECTED_KEPALA_LAB",
   "COMPLETED", "CANCELLED",
 ];
-
-// Buffer 2 jam setelah reservasi selesai
-const BUFFER_MS = 2 * 60 * 60 * 1000;
 
 /**
  * Generate array of date strings (YYYY-MM-DD) from start to end (inclusive).
@@ -128,14 +137,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
     }
 
+    const documentUrl = typeof body.res_documentUrl === "string" ? body.res_documentUrl.trim() : "";
+    if (!documentUrl) {
+      return NextResponse.json({ error: "Dokumen pendukung wajib diunggah." }, { status: 400 });
+    }
+
     const resStart = new Date(body.res_startTime);
     const resEnd = new Date(body.res_endTime);
 
-    const leadTimeCheck = validateReservationLeadTimeDate(resStart);
+    if (Number.isNaN(resStart.getTime()) || Number.isNaN(resEnd.getTime())) {
+      return NextResponse.json({ error: "Format tanggal/waktu tidak valid" }, { status: 400 });
+    }
+
+    if (resEnd <= resStart) {
+      return NextResponse.json({ error: "Jam selesai tidak boleh lebih awal dari jam mulai." }, { status: 400 });
+    }
+
+    const minDaysAheadExclusive = await getReservationMinDaysAheadExclusive();
+    const leadTimeCheck = validateReservationLeadTimeDate(resStart, { minDaysAheadExclusive });
     if (!leadTimeCheck.ok) {
       return NextResponse.json(
         {
-          error: `Reservasi hanya dapat dilakukan minimal H-3. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
+          error: `Reservasi hanya dapat dilakukan minimal H-${minDaysAheadExclusive}. Silakan pilih tanggal mulai ${leadTimeCheck.earliestAllowedDateYMD}.`,
         },
         { status: 400 },
       );
@@ -155,6 +178,35 @@ export async function POST(request: Request) {
 
     if (!room || !room.room_isActive) {
       return NextResponse.json({ error: "Ruangan tidak ditemukan atau tidak aktif" }, { status: 404 });
+    }
+
+    const building = await prisma.building.findUnique({
+      where: { building_name: room.room_building },
+      select: {
+        operational_days: true,
+        open_time: true,
+        close_time: true,
+        building_isActive: true,
+      },
+    });
+
+    if (!building || !building.building_isActive) {
+      return NextResponse.json({ error: "Gedung tidak ditemukan atau tidak aktif" }, { status: 404 });
+    }
+
+    const reservationDates = getDateRange(resStart, resEnd);
+    const startTime = `${String(resStart.getHours()).padStart(2, "0")}:${String(resStart.getMinutes()).padStart(2, "0")}`;
+    const endTime = `${String(resEnd.getHours()).padStart(2, "0")}:${String(resEnd.getMinutes()).padStart(2, "0")}`;
+    const operationalCheck = validateBuildingOperationalWindow({
+      startDate: reservationDates[0],
+      endDate: reservationDates[reservationDates.length - 1],
+      startTime,
+      endTime,
+      schedule: building,
+    });
+
+    if (!operationalCheck.ok) {
+      return NextResponse.json({ error: operationalCheck.error }, { status: 400 });
     }
 
     const isLabRoom = isLabBuilding(room.room_building);
@@ -177,7 +229,6 @@ export async function POST(request: Request) {
         );
       }
 
-		const documentUrl = typeof body.res_documentUrl === "string" ? body.res_documentUrl.trim() : "";
 		if (!documentUrl) {
 			return NextResponse.json(
 				{ error: "Dokumen pendukung wajib diunggah untuk peminjaman lab." },
@@ -193,78 +244,82 @@ export async function POST(request: Request) {
       }
     }
 
-    // --- Pecah reservasi multi-hari menjadi reservasi harian ---
-    // Ambil jam dari start dan end, lalu generate satu reservasi per hari
-    const startHours = resStart.getHours();
-    const startMinutes = resStart.getMinutes();
-    const endHours = resEnd.getHours();
-    const endMinutes = resEnd.getMinutes();
-
-    const dateStrings = getDateRange(resStart, resEnd);
-
-    // Buat daftar slot harian
-    const dailySlots = dateStrings.map((dateStr) => {
-      const dayStart = new Date(`${dateStr}T${String(startHours).padStart(2, "0")}:${String(startMinutes).padStart(2, "0")}:00`);
-      const dayEnd = new Date(`${dateStr}T${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}:00`);
-      return { start: dayStart, end: dayEnd };
+    const dailySlots = getDailyReservationSlots({
+      startTime: resStart,
+      endTime: resEnd,
     });
 
-    // --- Conflict check per hari dengan buffer 2 jam ---
-    // Buffer: jika reservasi lain berakhir jam 12:00, slot baru hanya bisa mulai jam 14:00
-    for (const slot of dailySlots) {
-      const bufferedStart = new Date(slot.start.getTime() - BUFFER_MS);
-
-      const conflicting = await prisma.reservation.findFirst({
-        where: {
-          room_id: room.room_id,
-          res_status: { notIn: INACTIVE_STATUSES },
-          res_startTime: { lt: slot.end },
-          res_endTime: { gt: bufferedStart },
-        },
-      });
-
-      if (conflicting) {
-        const conflictDate = slot.start.toLocaleDateString("id-ID", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        return NextResponse.json(
-          {
-            error: `Ruangan sudah dipesan pada ${conflictDate} (${String(startHours).padStart(2, "0")}:${String(startMinutes).padStart(2, "0")} - ${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}). Silakan pilih jadwal atau ruangan lain.`,
-          },
-          { status: 409 }
-        );
-      }
+    if (dailySlots.length === 0) {
+      return NextResponse.json({ error: "Rentang tanggal/waktu tidak valid" }, { status: 400 });
     }
 
-    // --- Buat semua reservasi harian dalam satu transaksi ---
-    const createdReservations = await prisma.$transaction(
-      dailySlots.map((slot) =>
-        prisma.reservation.create({
-          data: {
-            room_id: room.room_id,
-            user_id: session.user.id,
-            res_startTime: slot.start,
-            res_endTime: slot.end,
-            res_purpose: body.res_purpose,
-            res_flow: resolvedFlow,
-            res_status: "PENDING",
-            res_documentUrl: body.res_documentUrl || null,
-            res_labProgram: isLabRoom ? room.labProgram : null,
-            res_labDepartment: isLabRoom ? room.labDepartment : null,
-          },
-          include: {
-            room: true,
-            user: true,
-          },
-        })
-      )
+    const firstRequestedSlot = dailySlots[0];
+    const lastRequestedSlot = dailySlots[dailySlots.length - 1];
+    const possibleConflicts = await prisma.reservation.findMany({
+      where: {
+        room_id: room.room_id,
+        res_status: { notIn: INACTIVE_STATUSES },
+        res_startTime: { lt: new Date(lastRequestedSlot.end.getTime() + RESERVATION_BUFFER_MS) },
+        res_endTime: { gt: new Date(firstRequestedSlot.start.getTime() - RESERVATION_BUFFER_MS) },
+      },
+      select: {
+        res_startTime: true,
+        res_endTime: true,
+      },
+    });
+
+    const conflictingReservation = (possibleConflicts as ReservationConflictCandidate[]).find((existing) =>
+      rangesConflictByDailySlots(
+        { startTime: resStart, endTime: resEnd },
+        { startTime: existing.res_startTime, endTime: existing.res_endTime },
+      ),
     );
 
-    // Gunakan reservasi pertama untuk response dan notifikasi
-    const firstReservation = createdReservations[0];
+    if (conflictingReservation) {
+      const conflictSlot = dailySlots.find((slot) =>
+        getDailyReservationSlots({
+          startTime: conflictingReservation.res_startTime,
+          endTime: conflictingReservation.res_endTime,
+        }).some((existingSlot) =>
+          slot.date === existingSlot.date &&
+          slot.start.getTime() < existingSlot.end.getTime() + RESERVATION_BUFFER_MS &&
+          slot.end.getTime() > existingSlot.start.getTime() - RESERVATION_BUFFER_MS
+        ),
+      );
+
+      const conflictDate = (conflictSlot?.start ?? firstRequestedSlot.start).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      return NextResponse.json(
+        {
+          error: `Ruangan sudah dipesan atau masih dalam jeda 2 jam pada ${conflictDate}. Silakan pilih jadwal atau ruangan lain.`,
+        },
+        { status: 409 },
+      );
+    }
+
+    const firstReservation = await prisma.reservation.create({
+      data: {
+        room_id: room.room_id,
+        user_id: session.user.id,
+        res_startTime: resStart,
+        res_endTime: resEnd,
+        res_purpose: body.res_purpose,
+        res_flow: resolvedFlow,
+        res_status: "PENDING",
+        res_documentUrl: body.res_documentUrl || null,
+        res_labProgram: isLabRoom ? room.labProgram : null,
+        res_labDepartment: isLabRoom ? room.labDepartment : null,
+      },
+      include: {
+        room: true,
+        user: true,
+      },
+    });
 
     // Send notification to Kabag (ADMIN) and Superadmin only — other roles get notified via cascade
     try {
@@ -278,8 +333,8 @@ export async function POST(request: Request) {
       });
 
       const dateLabel = dailySlots.length > 1
-        ? `${dateStrings[0]} s/d ${dateStrings[dateStrings.length - 1]} (${dailySlots.length} hari)`
-        : dateStrings[0];
+        ? `${dailySlots[0].date} s/d ${dailySlots[dailySlots.length - 1].date} (${dailySlots.length} hari)`
+        : dailySlots[0].date;
 
       for (const admin of admins) {
         await sendNotification(

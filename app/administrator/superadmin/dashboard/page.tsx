@@ -7,6 +7,7 @@ import Navbar from "@/app/components/administrator/ui/Navbar";
 import DashboardContent from "@/app/components/administrator/dashboard/DashboardContent";
 import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import { computeReservationStatus } from "@/app/components/administrator/ui/reservationStatus";
+import { getReservationMinDaysAheadExclusive } from "@/lib/reservation-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,8 @@ export default async function SuperadminDashboardPage() {
 		redirect("/auth");
 	}
 
-	const reservations = await prisma.reservation.findMany({
+	const [reservations, minDaysAheadExclusive] = await Promise.all([
+		prisma.reservation.findMany({
 		include: {
 			user: {
 				select: {
@@ -52,7 +54,9 @@ export default async function SuperadminDashboardPage() {
 		orderBy: {
 			res_date: "desc",
 		},
-	});
+		}),
+		getReservationMinDaysAheadExclusive(),
+	]);
 
 	// Fetch additional data for cards
 	const allRooms = await prisma.room.findMany({
@@ -66,7 +70,7 @@ export default async function SuperadminDashboardPage() {
 
 	const totalUsers = await prisma.user.count();
 
-	const tableData: MonitoringReservation[] = reservations.map((item: { res_purpose: string | null; res_status: string; res_endTime: string | Date; res_id: any; res_date: { toISOString: () => any; }; res_startTime: { toISOString: () => any; }; res_documentUrl: any; user: { name: any; userType: any; identifier: any; email: any; }; room: { room_name: any; room_building: any; room_locDetail: any; }; }) => {
+	const tableData: MonitoringReservation[] = reservations.map((item: { res_purpose: string | null; res_status: string; res_endTime: string | Date; res_id: any; res_date: { toISOString: () => any; }; res_startTime: { toISOString: () => any; }; res_documentUrl: any; res_decisionDocumentUrl: any; user: { name: any; userType: any; identifier: any; email: any; }; room: { room_name: any; room_building: any; room_locDetail: any; }; }) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
 		const computedStatus = computeReservationStatus(item.res_status, item.res_endTime);
 
@@ -79,7 +83,7 @@ export default async function SuperadminDashboardPage() {
 		purpose: parsedPurpose.purpose,
 		status: computedStatus,
 		documentUrl: item.res_documentUrl,
-		decisionDocumentUrl: computedStatus === "PENDING" ? null : item.res_documentUrl,
+		decisionDocumentUrl: item.res_decisionDocumentUrl,
 		user: {
 			name: item.user.name,
 			userType: item.user.userType,
@@ -118,6 +122,7 @@ export default async function SuperadminDashboardPage() {
 						totalBuildings={totalBuildings}
 						totalUsers={totalUsers}
 						lastSync={lastSync}
+						initialMinDaysAheadExclusive={minDaysAheadExclusive}
 					/>
 				</div>
 			</div>

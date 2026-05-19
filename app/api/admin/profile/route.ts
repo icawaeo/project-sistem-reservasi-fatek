@@ -16,6 +16,9 @@ export async function PATCH(request: Request) {
 
 		const body = await request.json().catch(() => null);
 		const name = typeof body?.name === "string" ? body.name.trim() : "";
+		const identifier = typeof body?.identifier === "string" ? body.identifier.trim() : "";
+		const rank = typeof body?.rank === "string" ? body.rank.trim() : "";
+		const position = typeof body?.position === "string" ? body.position.trim() : "";
 
 		if (!name) {
 			return NextResponse.json({ error: "Nama wajib diisi" }, { status: 400 });
@@ -25,12 +28,38 @@ export async function PATCH(request: Request) {
 			return NextResponse.json({ error: "Nama terlalu pendek" }, { status: 400 });
 		}
 
+		const dbUser = await prisma.user.findUnique({
+			where: { user_id: session.user.id },
+			select: { role: true },
+		});
+
+		const role = (dbUser?.role ?? session.user.role ?? "").toUpperCase();
+		const requiresOfficialProfile =
+			role === "ADMIN_DEKAN" ||
+			role === "ADMIN_WD2" ||
+			role === "KAJUR" ||
+			role === "KEPALA_LAB";
+
+		if (requiresOfficialProfile && (!identifier || !rank || !position)) {
+			return NextResponse.json(
+				{ error: "NIP, pangkat/golongan, dan jabatan wajib diisi untuk pejabat penandatangan." },
+				{ status: 400 },
+			);
+		}
+
 		await prisma.user.update({
 			where: {
 				user_id: session.user.id,
 			},
 			data: {
 				name,
+				...(requiresOfficialProfile
+					? {
+							identifier,
+							rank,
+							position,
+						}
+					: {}),
 			},
 		});
 

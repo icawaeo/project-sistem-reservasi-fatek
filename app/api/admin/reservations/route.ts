@@ -5,10 +5,31 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import type { MonitoringReservation } from "@/app/components/administrator/monitoring-pengajuan/monitoring-types";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
+import {
+  getDailyReservationSlots,
+  rangesConflictByDailySlots,
+  RESERVATION_BUFFER_MS,
+} from "@/lib/reservation-slots";
 
 const parseDateTime = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}:00`);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const INACTIVE_STATUSES = [
+  "REJECTED",
+  "REJECTED_KABAG",
+  "REJECTED_DEKAN",
+  "REJECTED_WD2",
+  "REJECTED_KAJUR",
+  "REJECTED_KEPALA_LAB",
+  "COMPLETED",
+  "CANCELLED",
+];
+
+type ReservationConflictCandidate = {
+  res_startTime: Date;
+  res_endTime: Date;
 };
 
 const splitReservationPurpose = (value: string | null) => {
@@ -33,6 +54,7 @@ const mapReservation = (item: {
   res_purpose: string;
   res_status: string;
   res_documentUrl: string | null;
+  res_decisionDocumentUrl: string | null;
   user: {
     name: string;
     userType: "USER" | "STAFF";
@@ -52,7 +74,7 @@ const mapReservation = (item: {
   endTime: item.res_endTime.toISOString(),
   status: item.res_status,
   documentUrl: item.res_documentUrl,
-  decisionDocumentUrl: item.res_status === "PENDING" ? null : item.res_documentUrl,
+  decisionDocumentUrl: item.res_decisionDocumentUrl,
   user: {
     name: item.user.name,
     userType: item.user.userType,
@@ -120,18 +142,41 @@ export async function POST(request: Request) {
       );
     }
 
-    const overlappingReservation = await prisma.reservation.findFirst({
+    const requestedSlots = getDailyReservationSlots({
+      startTime: startDateTime,
+      endTime: endDateTime,
+    });
+
+    if (requestedSlots.length === 0) {
+      return NextResponse.json({ error: "Rentang tanggal/waktu tidak valid" }, { status: 400 });
+    }
+
+    const firstRequestedSlot = requestedSlots[0];
+    const lastRequestedSlot = requestedSlots[requestedSlots.length - 1];
+
+    const possibleConflicts = await prisma.reservation.findMany({
       where: {
         room_id: roomId,
-        res_startTime: { lt: endDateTime },
-        res_endTime: { gt: startDateTime },
+        res_status: { notIn: INACTIVE_STATUSES },
+        res_startTime: { lt: new Date(lastRequestedSlot.end.getTime() + RESERVATION_BUFFER_MS) },
+        res_endTime: { gt: new Date(firstRequestedSlot.start.getTime() - RESERVATION_BUFFER_MS) },
       },
-      select: { res_id: true },
+      select: {
+        res_startTime: true,
+        res_endTime: true,
+      },
     });
+
+    const overlappingReservation = (possibleConflicts as ReservationConflictCandidate[]).find((reservation) =>
+      rangesConflictByDailySlots(
+        { startTime: startDateTime, endTime: endDateTime },
+        { startTime: reservation.res_startTime, endTime: reservation.res_endTime },
+      ),
+    );
 
     if (overlappingReservation) {
       return NextResponse.json(
-        { error: "Jadwal bentrok. Ruangan sudah terpakai pada rentang waktu tersebut." },
+        { error: "Jadwal bentrok atau masih berada dalam jeda 2 jam pemakaian ruangan." },
         { status: 409 }
       );
     }
@@ -147,6 +192,7 @@ export async function POST(request: Request) {
         res_purpose: reservationPurpose,
         res_status: "PENDING",
         res_documentUrl: null,
+        res_decisionDocumentUrl: null,
       },
       include: {
         user: {

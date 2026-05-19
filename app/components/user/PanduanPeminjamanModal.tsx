@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import PanduanPeminjamanContent from "@/app/components/user/PanduanPeminjamanContent";
+import { DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE } from "@/lib/reservation-policy";
 
 type PanduanPeminjamanModalProps = {
   open: boolean;
@@ -11,6 +12,7 @@ type PanduanPeminjamanModalProps = {
 
 export default function PanduanPeminjamanModal({ open, onClose }: PanduanPeminjamanModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [minDaysAheadExclusive, setMinDaysAheadExclusive] = useState(DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE);
 
   useEffect(() => {
     if (!open) return;
@@ -35,6 +37,25 @@ export default function PanduanPeminjamanModal({ open, onClose }: PanduanPeminja
       document.body.style.overflow = prevOverflow;
     };
   }, [onClose, open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const loadPolicy = async () => {
+      try {
+        const response = await fetch("/api/reservation-policy", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (Number.isInteger(payload?.minDaysAheadExclusive)) {
+          setMinDaysAheadExclusive(payload.minDaysAheadExclusive);
+        }
+      } catch {
+        // Tetap gunakan nilai default jika aturan gagal dimuat.
+      }
+    };
+
+    void loadPolicy();
+  }, [open]);
 
   if (!open) return null;
 
@@ -79,7 +100,7 @@ export default function PanduanPeminjamanModal({ open, onClose }: PanduanPeminja
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-5">
-          <PanduanPeminjamanContent />
+          <PanduanPeminjamanContent minDaysAheadExclusive={minDaysAheadExclusive} />
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-4 py-3 md:px-6">

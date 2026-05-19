@@ -17,6 +17,7 @@ export type AdminReservationRecord = {
 	rawPurpose: string;
 	status: string;
 	documentUrl: string | null;
+	decisionDocumentUrl?: string | null;
 	user: {
 		name: string;
 		userType: "USER" | "STAFF";
