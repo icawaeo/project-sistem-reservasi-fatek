@@ -174,7 +174,7 @@ export default function RegisterView() {
 
       if (signInResult?.error) {
         pushToast({ type: "warning", message: "Akun berhasil dibuat. Silakan login secara manual." });
-        router.push("/?tab=login");
+        router.push("/auth?tab=login");
       } else {
         router.push("/landingpage");
         router.refresh();
@@ -330,7 +330,7 @@ export default function RegisterView() {
 
         <p className="pt-3 text-center text-sm text-slate-700">
           Sudah memiliki akun?{" "}
-          <Link className="font-semibold hover:underline" href="/?tab=login">
+          <Link className="font-semibold hover:underline" href="/auth?tab=login">
             Masuk di sini
           </Link>
         </p>
@@ -456,7 +456,7 @@ export default function RegisterView() {
 
       <p className="pt-3 text-center text-sm text-slate-700">
         Sudah memiliki akun?{" "}
-        <Link className="font-semibold hover:underline" href="/?tab=login">
+        <Link className="font-semibold hover:underline" href="/auth?tab=login">
           Masuk di sini
         </Link>
       </p>

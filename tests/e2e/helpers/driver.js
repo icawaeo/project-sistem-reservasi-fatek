@@ -8,11 +8,14 @@ const CHROME_BINARY =
 
 async function buildDriver() {
   const options = new chrome.Options();
+  
   const service = new chrome.ServiceBuilder(chromedriver.path)
     .setStdio("ignore");
 
   options.setChromeBinaryPath(CHROME_BINARY);
-  options.excludeSwitches("enable-logging", "enable-automation");
+  
+  options.excludeSwitches("enable-automation"); 
+
   if (process.env.E2E_HEADLESS !== "0") {
     options.addArguments("--headless=new");
   }
@@ -26,7 +29,6 @@ async function buildDriver() {
   options.addArguments("--disable-accelerated-2d-canvas");
   options.addArguments("--disable-accelerated-video-decode");
   options.addArguments("--disable-dev-shm-usage");
-  options.addArguments("--disable-logging");
   options.addArguments("--disable-gpu-compositing");
   options.addArguments("--disable-software-rasterizer");
   options.addArguments("--disable-features=VizDisplayCompositor,UseSkiaRenderer,CanvasOopRasterization");
@@ -35,6 +37,9 @@ async function buildDriver() {
   options.addArguments("--remote-debugging-pipe");
   options.addArguments("--silent");
   options.addArguments("--no-sandbox");
+  
+  options.addArguments("--log-level=3");
+  options.addArguments("--disable-logging");
 
   return new Builder()
     .forBrowser("chrome")

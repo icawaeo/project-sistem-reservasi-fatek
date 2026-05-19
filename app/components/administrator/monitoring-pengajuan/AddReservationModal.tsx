@@ -141,7 +141,11 @@ export default function AddReservationModal({
   }
 
   const handleChange = (field: keyof typeof initialForm, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "building" ? { roomId: "" } : {}),
+    }));
   };
 
   const getTextToneClass = (value: string) => (value ? "text-slate-900" : "text-slate-500");

@@ -18,6 +18,7 @@ type DashboardContentProps = {
   totalBuildings: number;
   totalUsers: number;
   lastSync: string;
+  buildingOptions?: string[];
   adminRole?: AdminRole;
   initialMinDaysAheadExclusive?: number;
 };
@@ -30,6 +31,7 @@ export default function DashboardContent({
   totalBuildings,
   totalUsers,
   lastSync,
+  buildingOptions = [],
   adminRole = "ADMIN",
   initialMinDaysAheadExclusive = 3,
 }: DashboardContentProps) {
@@ -96,6 +98,7 @@ export default function DashboardContent({
       <SuperadminMonitoringContent
         initialData={tableData}
         adminData={adminTableData}
+        buildingOptions={buildingOptions}
         lastSync={lastSync}
         adminMode={mode === "admin"}
         adminRole={adminRole}

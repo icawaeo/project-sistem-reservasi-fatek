@@ -5,9 +5,9 @@
     "passes": 16,
     "pending": 0,
     "failures": 0,
-    "start": "2026-05-19T00:03:51.881Z",
-    "end": "2026-05-19T00:06:10.216Z",
-    "duration": 138335,
+    "start": "2026-05-19T10:38:37.464Z",
+    "end": "2026-05-19T10:39:19.984Z",
+    "duration": 42520,
     "testsRegistered": 16,
     "passPercent": 100,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "7c82064c-374b-4173-bdcf-162e6065a382",
+      "uuid": "89a55201-54c2-4e21-9f64-b4db39ca327f",
       "title": "",
       "fullFile": "",
       "file": "",
@@ -27,16 +27,16 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "e6a290f6-755b-4db3-9ec7-ad466c3d2140",
-          "title": "REG-01 - registrasi data valid mengarahkan ke verifikasi OTP",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\REG-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\REG-01.spec.js",
+          "uuid": "d0ac65b1-f249-44dc-a3c6-dc8923cc2d7f",
+          "title": "REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\public.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\public.spec.js",
           "beforeHooks": [
             {
-              "title": "\"before all\" hook in \"REG-01 - registrasi data valid mengarahkan ke verifikasi OTP\"",
-              "fullTitle": "REG-01 - registrasi data valid mengarahkan ke verifikasi OTP \"before all\" hook in \"REG-01 - registrasi data valid mengarahkan ke verifikasi OTP\"",
+              "title": "\"before all\" hook in \"REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP\"",
+              "fullTitle": "REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP \"before all\" hook in \"REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP\"",
               "timedOut": false,
-              "duration": 1500,
+              "duration": 1017,
               "state": null,
               "speed": null,
               "pass": false,
@@ -45,18 +45,18 @@
               "context": null,
               "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
               "err": {},
-              "uuid": "40551353-8ecb-4c9f-b68b-a1db640f48ab",
-              "parentUUID": "e6a290f6-755b-4db3-9ec7-ad466c3d2140",
+              "uuid": "2960d074-64d2-445e-b73e-555fde7338ab",
+              "parentUUID": "d0ac65b1-f249-44dc-a3c6-dc8923cc2d7f",
               "isHook": true,
               "skipped": false
             }
           ],
           "afterHooks": [
             {
-              "title": "\"after all\" hook in \"REG-01 - registrasi data valid mengarahkan ke verifikasi OTP\"",
-              "fullTitle": "REG-01 - registrasi data valid mengarahkan ke verifikasi OTP \"after all\" hook in \"REG-01 - registrasi data valid mengarahkan ke verifikasi OTP\"",
+              "title": "\"after all\" hook in \"REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP\"",
+              "fullTitle": "REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP \"after all\" hook in \"REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP\"",
               "timedOut": false,
-              "duration": 56,
+              "duration": 75,
               "state": null,
               "speed": null,
               "pass": false,
@@ -65,8 +65,8 @@
               "context": null,
               "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
               "err": {},
-              "uuid": "6adb2031-2515-4fde-8293-ec25ee83fdc8",
-              "parentUUID": "e6a290f6-755b-4db3-9ec7-ad466c3d2140",
+              "uuid": "e02052ce-92d1-49c8-9132-9f6175e73177",
+              "parentUUID": "d0ac65b1-f249-44dc-a3c6-dc8923cc2d7f",
               "isHook": true,
               "skipped": false
             }
@@ -74,46 +74,46 @@
           "tests": [
             {
               "title": "registrasi data valid mengarahkan ke verifikasi OTP",
-              "fullTitle": "REG-01 - registrasi data valid mengarahkan ke verifikasi OTP registrasi data valid mengarahkan ke verifikasi OTP",
+              "fullTitle": "REG-01 [role: PUBLIC] - registrasi data valid mengarahkan ke verifikasi OTP registrasi data valid mengarahkan ke verifikasi OTP",
               "timedOut": false,
-              "duration": 1977,
+              "duration": 1485,
               "state": "passed",
               "speed": "slow",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
               "err": {},
-              "uuid": "f054b5ab-5c4d-4865-bfb1-f4dfe75096d7",
-              "parentUUID": "e6a290f6-755b-4db3-9ec7-ad466c3d2140",
+              "uuid": "7dfe3612-cd79-444c-bf0a-93b60f9cbb3f",
+              "parentUUID": "d0ac65b1-f249-44dc-a3c6-dc8923cc2d7f",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "f054b5ab-5c4d-4865-bfb1-f4dfe75096d7"
+            "7dfe3612-cd79-444c-bf0a-93b60f9cbb3f"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 1977,
+          "duration": 1485,
           "root": false,
           "rootEmpty": false,
           "_timeout": 90000
         },
         {
-          "uuid": "8ed935c5-81c8-4a19-a5e6-7cf6f9bf8720",
-          "title": "REG-02 - registrasi email luar UNSRAT ditolak",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\REG-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\REG-02.spec.js",
+          "uuid": "eb0b8923-e4af-4703-bd92-fd9d26355441",
+          "title": "REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\public.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\public.spec.js",
           "beforeHooks": [
             {
-              "title": "\"before all\" hook in \"REG-02 - registrasi email luar UNSRAT ditolak\"",
-              "fullTitle": "REG-02 - registrasi email luar UNSRAT ditolak \"before all\" hook in \"REG-02 - registrasi email luar UNSRAT ditolak\"",
+              "title": "\"before all\" hook in \"REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak\"",
+              "fullTitle": "REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak \"before all\" hook in \"REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak\"",
               "timedOut": false,
-              "duration": 1307,
+              "duration": 783,
               "state": null,
               "speed": null,
               "pass": false,
@@ -122,18 +122,18 @@
               "context": null,
               "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
               "err": {},
-              "uuid": "fced3cc5-2e3c-41b4-a1a8-a4c9ff73c295",
-              "parentUUID": "8ed935c5-81c8-4a19-a5e6-7cf6f9bf8720",
+              "uuid": "86b128f9-d5eb-47f7-ad7f-0181c59e216d",
+              "parentUUID": "eb0b8923-e4af-4703-bd92-fd9d26355441",
               "isHook": true,
               "skipped": false
             }
           ],
           "afterHooks": [
             {
-              "title": "\"after all\" hook in \"REG-02 - registrasi email luar UNSRAT ditolak\"",
-              "fullTitle": "REG-02 - registrasi email luar UNSRAT ditolak \"after all\" hook in \"REG-02 - registrasi email luar UNSRAT ditolak\"",
+              "title": "\"after all\" hook in \"REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak\"",
+              "fullTitle": "REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak \"after all\" hook in \"REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak\"",
               "timedOut": false,
-              "duration": 65,
+              "duration": 69,
               "state": null,
               "speed": null,
               "pass": false,
@@ -142,8 +142,8 @@
               "context": null,
               "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
               "err": {},
-              "uuid": "0d0fe0c2-7234-4fda-b24c-fd3e250433fd",
-              "parentUUID": "8ed935c5-81c8-4a19-a5e6-7cf6f9bf8720",
+              "uuid": "28ce1013-4704-4183-9720-e006c03af51a",
+              "parentUUID": "eb0b8923-e4af-4703-bd92-fd9d26355441",
               "isHook": true,
               "skipped": false
             }
@@ -151,46 +151,46 @@
           "tests": [
             {
               "title": "registrasi email luar UNSRAT ditolak",
-              "fullTitle": "REG-02 - registrasi email luar UNSRAT ditolak registrasi email luar UNSRAT ditolak",
+              "fullTitle": "REG-02 [role: PUBLIC] - registrasi email luar UNSRAT ditolak registrasi email luar UNSRAT ditolak",
               "timedOut": false,
-              "duration": 1136,
+              "duration": 1304,
               "state": "passed",
               "speed": "slow",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
               "err": {},
-              "uuid": "cc9184c9-57b5-45a7-bee3-f3a8eaf7ed8d",
-              "parentUUID": "8ed935c5-81c8-4a19-a5e6-7cf6f9bf8720",
+              "uuid": "361558f5-d4f7-41cb-b1fa-dc28c8bf36fb",
+              "parentUUID": "eb0b8923-e4af-4703-bd92-fd9d26355441",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "cc9184c9-57b5-45a7-bee3-f3a8eaf7ed8d"
+            "361558f5-d4f7-41cb-b1fa-dc28c8bf36fb"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 1136,
+          "duration": 1304,
           "root": false,
           "rootEmpty": false,
           "_timeout": 90000
         },
         {
-          "uuid": "579b8ea4-ecb3-4d44-b07a-8cc51a5a3168",
-          "title": "LOG-01 - login valid menampilkan dashboard sesuai role",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\LOG-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\LOG-01.spec.js",
+          "uuid": "139d4a01-147b-4ca1-b406-e74d45f512a4",
+          "title": "PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\public.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\public.spec.js",
           "beforeHooks": [
             {
-              "title": "\"before all\" hook in \"LOG-01 - login valid menampilkan dashboard sesuai role\"",
-              "fullTitle": "LOG-01 - login valid menampilkan dashboard sesuai role \"before all\" hook in \"LOG-01 - login valid menampilkan dashboard sesuai role\"",
+              "title": "\"before all\" hook in \"PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
+              "fullTitle": "PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi \"before all\" hook in \"PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
               "timedOut": false,
-              "duration": 1117,
+              "duration": 816,
               "state": null,
               "speed": null,
               "pass": false,
@@ -199,16 +199,324 @@
               "context": null,
               "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
               "err": {},
-              "uuid": "ad85c49c-fd75-44dc-ba0d-510bd5351047",
-              "parentUUID": "579b8ea4-ecb3-4d44-b07a-8cc51a5a3168",
+              "uuid": "018e919e-5f1b-42da-bac7-980846827c1a",
+              "parentUUID": "139d4a01-147b-4ca1-b406-e74d45f512a4",
               "isHook": true,
               "skipped": false
             }
           ],
           "afterHooks": [
             {
-              "title": "\"after all\" hook in \"LOG-01 - login valid menampilkan dashboard sesuai role\"",
-              "fullTitle": "LOG-01 - login valid menampilkan dashboard sesuai role \"after all\" hook in \"LOG-01 - login valid menampilkan dashboard sesuai role\"",
+              "title": "\"after all\" hook in \"PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
+              "fullTitle": "PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi \"after all\" hook in \"PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
+              "timedOut": false,
+              "duration": 63,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "eef79027-52b3-4fa6-be78-2922c4810b15",
+              "parentUUID": "139d4a01-147b-4ca1-b406-e74d45f512a4",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "aplikasi memiliki manifest dan service worker untuk opsi instalasi",
+              "fullTitle": "PWA-01 [role: PUBLIC] - aplikasi memiliki manifest dan service worker untuk opsi instalasi aplikasi memiliki manifest dan service worker untuk opsi instalasi",
+              "timedOut": false,
+              "duration": 1336,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "1b429dcb-b7d8-4b95-94cd-31b206608b29",
+              "parentUUID": "139d4a01-147b-4ca1-b406-e74d45f512a4",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "1b429dcb-b7d8-4b95-94cd-31b206608b29"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1336,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "ef70d795-07e7-4910-8d9b-f45987ee2702",
+          "title": "PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\public.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\public.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online\"",
+              "fullTitle": "PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online \"before all\" hook in \"PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online\"",
+              "timedOut": false,
+              "duration": 777,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "e92fcb8a-0237-4cff-8532-1dd861d34c8b",
+              "parentUUID": "ef70d795-07e7-4910-8d9b-f45987ee2702",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online\"",
+              "fullTitle": "PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online \"after all\" hook in \"PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online\"",
+              "timedOut": false,
+              "duration": 64,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "cab05da7-fc4a-41d1-b9d0-091db7b4e046",
+              "parentUUID": "ef70d795-07e7-4910-8d9b-f45987ee2702",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "offline fallback tersedia saat halaman tidak bisa diakses online",
+              "fullTitle": "PWA-02 [role: PUBLIC] - offline fallback tersedia saat halaman tidak bisa diakses online offline fallback tersedia saat halaman tidak bisa diakses online",
+              "timedOut": false,
+              "duration": 1044,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "e37b794c-f342-4cef-97db-e2f44a9a763e",
+              "parentUUID": "ef70d795-07e7-4910-8d9b-f45987ee2702",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "e37b794c-f342-4cef-97db-e2f44a9a763e"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1044,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "ffaf0edb-11f4-4233-89db-5d7d2d21cf21",
+          "title": "PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\public.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\public.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan\"",
+              "fullTitle": "PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan \"before all\" hook in \"PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan\"",
+              "timedOut": false,
+              "duration": 793,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "ee1544fa-7b54-4ef3-8918-13ee39487d28",
+              "parentUUID": "ffaf0edb-11f4-4233-89db-5d7d2d21cf21",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan\"",
+              "fullTitle": "PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan \"after all\" hook in \"PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan\"",
+              "timedOut": false,
+              "duration": 81,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "d6f99549-41b8-45ad-92ce-7d57c45f12cd",
+              "parentUUID": "ffaf0edb-11f4-4233-89db-5d7d2d21cf21",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "indikator offline berubah menjadi koneksi dipulihkan",
+              "fullTitle": "PWA-03 [role: PUBLIC] - indikator offline berubah menjadi koneksi dipulihkan indikator offline berubah menjadi koneksi dipulihkan",
+              "timedOut": false,
+              "duration": 1167,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "46ed76df-cf56-4e6c-b372-3456475896c6",
+              "parentUUID": "ffaf0edb-11f4-4233-89db-5d7d2d21cf21",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "46ed76df-cf56-4e6c-b372-3456475896c6"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1167,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "22167388-a986-45a1-92c1-252e721f468b",
+          "title": "LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\superadmin.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\superadmin.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role\"",
+              "fullTitle": "LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role \"before all\" hook in \"LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role\"",
+              "timedOut": false,
+              "duration": 807,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "aeb1f678-be3a-4628-929b-88cd99b0a546",
+              "parentUUID": "22167388-a986-45a1-92c1-252e721f468b",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role\"",
+              "fullTitle": "LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role \"after all\" hook in \"LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role\"",
+              "timedOut": false,
+              "duration": 63,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "6372bac5-6d46-4272-93f4-3a9ac07cf966",
+              "parentUUID": "22167388-a986-45a1-92c1-252e721f468b",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "login valid menampilkan dashboard sesuai role",
+              "fullTitle": "LOG-01 [role: SUPERADMIN] - login valid menampilkan dashboard sesuai role login valid menampilkan dashboard sesuai role",
+              "timedOut": false,
+              "duration": 1357,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "54fcb2a0-c4c1-48f4-b7fc-10f615e4dee6",
+              "parentUUID": "22167388-a986-45a1-92c1-252e721f468b",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "54fcb2a0-c4c1-48f4-b7fc-10f615e4dee6"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1357,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "c2d64491-acc7-4057-9c61-fa5213e1e403",
+          "title": "LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\superadmin.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\superadmin.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal\"",
+              "fullTitle": "LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal \"before all\" hook in \"LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal\"",
+              "timedOut": false,
+              "duration": 773,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "d6e1f92f-acd8-4f78-a5ef-866d9cfd7cfd",
+              "parentUUID": "c2d64491-acc7-4057-9c61-fa5213e1e403",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal\"",
+              "fullTitle": "LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal \"after all\" hook in \"LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal\"",
               "timedOut": false,
               "duration": 58,
               "state": null,
@@ -219,85 +527,8 @@
               "context": null,
               "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
               "err": {},
-              "uuid": "e2671e28-fe3a-4c12-b2a3-9c2795326140",
-              "parentUUID": "579b8ea4-ecb3-4d44-b07a-8cc51a5a3168",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "login valid menampilkan dashboard sesuai role",
-              "fullTitle": "LOG-01 - login valid menampilkan dashboard sesuai role login valid menampilkan dashboard sesuai role",
-              "timedOut": false,
-              "duration": 1945,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "5f270681-c14d-4cdb-93a8-995aa9d3005b",
-              "parentUUID": "579b8ea4-ecb3-4d44-b07a-8cc51a5a3168",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "5f270681-c14d-4cdb-93a8-995aa9d3005b"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 1945,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "81548f6a-089a-4a4e-bda7-a579d3532874",
-          "title": "LOG-02 - password salah menampilkan pesan error login gagal",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\LOG-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\LOG-02.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"LOG-02 - password salah menampilkan pesan error login gagal\"",
-              "fullTitle": "LOG-02 - password salah menampilkan pesan error login gagal \"before all\" hook in \"LOG-02 - password salah menampilkan pesan error login gagal\"",
-              "timedOut": false,
-              "duration": 1115,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "c23f51c4-9a3c-4591-95ab-930b61a01517",
-              "parentUUID": "81548f6a-089a-4a4e-bda7-a579d3532874",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"LOG-02 - password salah menampilkan pesan error login gagal\"",
-              "fullTitle": "LOG-02 - password salah menampilkan pesan error login gagal \"after all\" hook in \"LOG-02 - password salah menampilkan pesan error login gagal\"",
-              "timedOut": false,
-              "duration": 61,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "a4dccf28-ed73-4741-bc5b-e0f2b8a74bc3",
-              "parentUUID": "81548f6a-089a-4a4e-bda7-a579d3532874",
+              "uuid": "36dcd619-7be6-45fd-aaed-7c772e03e4da",
+              "parentUUID": "c2d64491-acc7-4057-9c61-fa5213e1e403",
               "isHook": true,
               "skipped": false
             }
@@ -305,46 +536,46 @@
           "tests": [
             {
               "title": "password salah menampilkan pesan error login gagal",
-              "fullTitle": "LOG-02 - password salah menampilkan pesan error login gagal password salah menampilkan pesan error login gagal",
+              "fullTitle": "LOG-02 [role: SUPERADMIN] - password salah menampilkan pesan error login gagal password salah menampilkan pesan error login gagal",
               "timedOut": false,
-              "duration": 1105,
+              "duration": 949,
               "state": "passed",
               "speed": "slow",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
               "err": {},
-              "uuid": "e36c7556-a5e6-4156-85d5-54d6a88abe46",
-              "parentUUID": "81548f6a-089a-4a4e-bda7-a579d3532874",
+              "uuid": "fd67968d-6014-4164-8677-78b899db9f8a",
+              "parentUUID": "c2d64491-acc7-4057-9c61-fa5213e1e403",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "e36c7556-a5e6-4156-85d5-54d6a88abe46"
+            "fd67968d-6014-4164-8677-78b899db9f8a"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 1105,
+          "duration": 949,
           "root": false,
           "rootEmpty": false,
           "_timeout": 90000
         },
         {
-          "uuid": "10ec55ab-b221-4d0b-bcc5-d1fce4249100",
-          "title": "CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\CEK-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\CEK-01.spec.js",
+          "uuid": "5e705069-fc85-4820-9895-f9d5addc7f59",
+          "title": "RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\superadmin.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\superadmin.spec.js",
           "beforeHooks": [
             {
-              "title": "\"before all\" hook in \"CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia\"",
-              "fullTitle": "CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia \"before all\" hook in \"CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia\"",
+              "title": "\"before all\" hook in \"RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid\"",
+              "fullTitle": "RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid \"before all\" hook in \"RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid\"",
               "timedOut": false,
-              "duration": 1216,
+              "duration": 761,
               "state": null,
               "speed": null,
               "pass": false,
@@ -353,18 +584,18 @@
               "context": null,
               "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
               "err": {},
-              "uuid": "c1c97dd6-5c8b-4afa-83ec-f974c40fa315",
-              "parentUUID": "10ec55ab-b221-4d0b-bcc5-d1fce4249100",
+              "uuid": "5806e4bd-3412-433a-ae5a-3e98d0236366",
+              "parentUUID": "5e705069-fc85-4820-9895-f9d5addc7f59",
               "isHook": true,
               "skipped": false
             }
           ],
           "afterHooks": [
             {
-              "title": "\"after all\" hook in \"CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia\"",
-              "fullTitle": "CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia \"after all\" hook in \"CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia\"",
+              "title": "\"after all\" hook in \"RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid\"",
+              "fullTitle": "RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid \"after all\" hook in \"RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid\"",
               "timedOut": false,
-              "duration": 96,
+              "duration": 71,
               "state": null,
               "speed": null,
               "pass": false,
@@ -373,470 +604,8 @@
               "context": null,
               "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
               "err": {},
-              "uuid": "0db9ba7a-8eb4-4101-9504-62f553e74678",
-              "parentUUID": "10ec55ab-b221-4d0b-bcc5-d1fce4249100",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "pencarian jadwal menampilkan daftar ruangan tersedia",
-              "fullTitle": "CEK-01 - pencarian jadwal menampilkan daftar ruangan tersedia pencarian jadwal menampilkan daftar ruangan tersedia",
-              "timedOut": false,
-              "duration": 17340,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "ee9f0109-2dab-4638-9d1f-7038cd839b21",
-              "parentUUID": "10ec55ab-b221-4d0b-bcc5-d1fce4249100",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "ee9f0109-2dab-4638-9d1f-7038cd839b21"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 17340,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "0827f108-66c1-4900-bb6d-003bba0ac3fb",
-          "title": "CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\CEK-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\CEK-02.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
-              "fullTitle": "CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil \"before all\" hook in \"CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
-              "timedOut": false,
-              "duration": 1261,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "c927b537-b959-428f-8fd8-4c96617ab040",
-              "parentUUID": "0827f108-66c1-4900-bb6d-003bba0ac3fb",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
-              "fullTitle": "CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil \"after all\" hook in \"CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
-              "timedOut": false,
-              "duration": 95,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "348a3e0e-3fd8-4a9f-b87b-291b7ee23994",
-              "parentUUID": "0827f108-66c1-4900-bb6d-003bba0ac3fb",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "ruangan dengan reservasi PENDING pada jadwal sama tidak tampil",
-              "fullTitle": "CEK-02 - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil ruangan dengan reservasi PENDING pada jadwal sama tidak tampil",
-              "timedOut": false,
-              "duration": 17350,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "22f72b3d-2aed-4ed1-bb99-ad21657fe2d3",
-              "parentUUID": "0827f108-66c1-4900-bb6d-003bba0ac3fb",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "22f72b3d-2aed-4ed1-bb99-ad21657fe2d3"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 17350,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "73d76a08-ee5d-4a47-ae84-1d68fe629d0d",
-          "title": "RES-01 - form reservasi lengkap membuat pengajuan PENDING",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\RES-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\RES-01.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"RES-01 - form reservasi lengkap membuat pengajuan PENDING\"",
-              "fullTitle": "RES-01 - form reservasi lengkap membuat pengajuan PENDING \"before all\" hook in \"RES-01 - form reservasi lengkap membuat pengajuan PENDING\"",
-              "timedOut": false,
-              "duration": 1280,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "aeacdcac-53d3-48d4-956e-3fc1afba8d40",
-              "parentUUID": "73d76a08-ee5d-4a47-ae84-1d68fe629d0d",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"RES-01 - form reservasi lengkap membuat pengajuan PENDING\"",
-              "fullTitle": "RES-01 - form reservasi lengkap membuat pengajuan PENDING \"after all\" hook in \"RES-01 - form reservasi lengkap membuat pengajuan PENDING\"",
-              "timedOut": false,
-              "duration": 62,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "0fc0f7ae-f5bf-4abd-bcff-2cd8dbef2450",
-              "parentUUID": "73d76a08-ee5d-4a47-ae84-1d68fe629d0d",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "form reservasi lengkap membuat pengajuan PENDING",
-              "fullTitle": "RES-01 - form reservasi lengkap membuat pengajuan PENDING form reservasi lengkap membuat pengajuan PENDING",
-              "timedOut": false,
-              "duration": 2503,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "2ee52a25-8ab7-42e4-9a42-d537174f9c4d",
-              "parentUUID": "73d76a08-ee5d-4a47-ae84-1d68fe629d0d",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "2ee52a25-8ab7-42e4-9a42-d537174f9c4d"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 2503,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "35cb0cfd-59cc-4d4a-9457-24a4c103943c",
-          "title": "RES-02 - jadwal bentrok menampilkan conflict reservasi",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\RES-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\RES-02.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"RES-02 - jadwal bentrok menampilkan conflict reservasi\"",
-              "fullTitle": "RES-02 - jadwal bentrok menampilkan conflict reservasi \"before all\" hook in \"RES-02 - jadwal bentrok menampilkan conflict reservasi\"",
-              "timedOut": false,
-              "duration": 1105,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "53fff8ae-890d-49b8-abd7-a6b64a11759f",
-              "parentUUID": "35cb0cfd-59cc-4d4a-9457-24a4c103943c",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"RES-02 - jadwal bentrok menampilkan conflict reservasi\"",
-              "fullTitle": "RES-02 - jadwal bentrok menampilkan conflict reservasi \"after all\" hook in \"RES-02 - jadwal bentrok menampilkan conflict reservasi\"",
-              "timedOut": false,
-              "duration": 49,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "75f3cdaa-afe1-4c03-a1cd-901811e719dc",
-              "parentUUID": "35cb0cfd-59cc-4d4a-9457-24a4c103943c",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "jadwal bentrok menampilkan conflict reservasi",
-              "fullTitle": "RES-02 - jadwal bentrok menampilkan conflict reservasi jadwal bentrok menampilkan conflict reservasi",
-              "timedOut": false,
-              "duration": 1352,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "33d83bb8-00a4-483c-8557-b7e483604d97",
-              "parentUUID": "35cb0cfd-59cc-4d4a-9457-24a4c103943c",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "33d83bb8-00a4-483c-8557-b7e483604d97"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 1352,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "b20b11fb-ce4a-4771-b28d-2104a9be0b69",
-          "title": "APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\APR-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\APR-01.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
-              "fullTitle": "APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya \"before all\" hook in \"APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
-              "timedOut": false,
-              "duration": 1053,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "c181e858-b694-4053-afa7-e546a6f9cfbf",
-              "parentUUID": "b20b11fb-ce4a-4771-b28d-2104a9be0b69",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
-              "fullTitle": "APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya \"after all\" hook in \"APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
-              "timedOut": false,
-              "duration": 54,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "a2b4a2b8-f677-4575-b704-6c2d7f86e31d",
-              "parentUUID": "b20b11fb-ce4a-4771-b28d-2104a9be0b69",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "admin menyetujui PENDING menjadi tahap approval berikutnya",
-              "fullTitle": "APR-01 - admin menyetujui PENDING menjadi tahap approval berikutnya admin menyetujui PENDING menjadi tahap approval berikutnya",
-              "timedOut": false,
-              "duration": 2681,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "04973b6d-f8e7-48f1-b8b3-071d80d7d9ff",
-              "parentUUID": "b20b11fb-ce4a-4771-b28d-2104a9be0b69",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "04973b6d-f8e7-48f1-b8b3-071d80d7d9ff"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 2681,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "bd2d3fda-7f32-4b28-a9ff-01ebbd10923e",
-          "title": "APR-02 - admin menolak pengajuan dan slot tersedia kembali",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\APR-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\APR-02.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"APR-02 - admin menolak pengajuan dan slot tersedia kembali\"",
-              "fullTitle": "APR-02 - admin menolak pengajuan dan slot tersedia kembali \"before all\" hook in \"APR-02 - admin menolak pengajuan dan slot tersedia kembali\"",
-              "timedOut": false,
-              "duration": 1095,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "e90a88c6-e117-4305-bcc3-601badf54e99",
-              "parentUUID": "bd2d3fda-7f32-4b28-a9ff-01ebbd10923e",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"APR-02 - admin menolak pengajuan dan slot tersedia kembali\"",
-              "fullTitle": "APR-02 - admin menolak pengajuan dan slot tersedia kembali \"after all\" hook in \"APR-02 - admin menolak pengajuan dan slot tersedia kembali\"",
-              "timedOut": false,
-              "duration": 61,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "4d822638-db1e-4375-b18a-107e0809d5ad",
-              "parentUUID": "bd2d3fda-7f32-4b28-a9ff-01ebbd10923e",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "admin menolak pengajuan dan slot tersedia kembali",
-              "fullTitle": "APR-02 - admin menolak pengajuan dan slot tersedia kembali admin menolak pengajuan dan slot tersedia kembali",
-              "timedOut": false,
-              "duration": 1363,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "f408a7f3-48f3-4188-b515-12135c38e41b",
-              "parentUUID": "bd2d3fda-7f32-4b28-a9ff-01ebbd10923e",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "f408a7f3-48f3-4188-b515-12135c38e41b"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 1363,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "73627359-f018-4c3f-85f0-817a8da23277",
-          "title": "RMG-01 - superadmin menambahkan data ruangan valid",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\RMG-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\RMG-01.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"RMG-01 - superadmin menambahkan data ruangan valid\"",
-              "fullTitle": "RMG-01 - superadmin menambahkan data ruangan valid \"before all\" hook in \"RMG-01 - superadmin menambahkan data ruangan valid\"",
-              "timedOut": false,
-              "duration": 1273,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "c89a66a4-f4fe-4e86-b2aa-fdca0abeead3",
-              "parentUUID": "73627359-f018-4c3f-85f0-817a8da23277",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"RMG-01 - superadmin menambahkan data ruangan valid\"",
-              "fullTitle": "RMG-01 - superadmin menambahkan data ruangan valid \"after all\" hook in \"RMG-01 - superadmin menambahkan data ruangan valid\"",
-              "timedOut": false,
-              "duration": 45,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "0611ea55-c0db-4bdf-85d4-ace6ea0fbbda",
-              "parentUUID": "73627359-f018-4c3f-85f0-817a8da23277",
+              "uuid": "ef6e06bb-f23b-45dd-a7da-52332afe3423",
+              "parentUUID": "5e705069-fc85-4820-9895-f9d5addc7f59",
               "isHook": true,
               "skipped": false
             }
@@ -844,46 +613,46 @@
           "tests": [
             {
               "title": "superadmin menambahkan data ruangan valid",
-              "fullTitle": "RMG-01 - superadmin menambahkan data ruangan valid superadmin menambahkan data ruangan valid",
+              "fullTitle": "RMG-01 [role: SUPERADMIN] - superadmin menambahkan data ruangan valid superadmin menambahkan data ruangan valid",
               "timedOut": false,
-              "duration": 2324,
+              "duration": 2305,
               "state": "passed",
               "speed": "slow",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
               "err": {},
-              "uuid": "7c5de4ea-0355-4764-a88f-d64ff0af97ad",
-              "parentUUID": "73627359-f018-4c3f-85f0-817a8da23277",
+              "uuid": "5c42245c-a641-4da6-89a6-e28eaf4703e3",
+              "parentUUID": "5e705069-fc85-4820-9895-f9d5addc7f59",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "7c5de4ea-0355-4764-a88f-d64ff0af97ad"
+            "5c42245c-a641-4da6-89a6-e28eaf4703e3"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 2324,
+          "duration": 2305,
           "root": false,
           "rootEmpty": false,
           "_timeout": 90000
         },
         {
-          "uuid": "518cde0f-71a9-4921-95b2-a6717a51d838",
-          "title": "RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\RMG-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\RMG-02.spec.js",
+          "uuid": "457de19c-9b16-4b11-8a50-0739fa7f4163",
+          "title": "RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\superadmin.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\superadmin.spec.js",
           "beforeHooks": [
             {
-              "title": "\"before all\" hook in \"RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
-              "fullTitle": "RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus \"before all\" hook in \"RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
+              "title": "\"before all\" hook in \"RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
+              "fullTitle": "RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus \"before all\" hook in \"RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
               "timedOut": false,
-              "duration": 1133,
+              "duration": 887,
               "state": null,
               "speed": null,
               "pass": false,
@@ -892,247 +661,16 @@
               "context": null,
               "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
               "err": {},
-              "uuid": "d6f06eef-96e7-4d7b-bc1e-d09400e7320f",
-              "parentUUID": "518cde0f-71a9-4921-95b2-a6717a51d838",
+              "uuid": "001b0fcb-668f-4245-b2d3-305fb2bcfc45",
+              "parentUUID": "457de19c-9b16-4b11-8a50-0739fa7f4163",
               "isHook": true,
               "skipped": false
             }
           ],
           "afterHooks": [
             {
-              "title": "\"after all\" hook in \"RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
-              "fullTitle": "RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus \"after all\" hook in \"RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
-              "timedOut": false,
-              "duration": 51,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "0eb3731d-a475-4502-95e8-8c33cbe6406e",
-              "parentUUID": "518cde0f-71a9-4921-95b2-a6717a51d838",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "ruangan dengan riwayat reservasi tidak dapat dihapus",
-              "fullTitle": "RMG-02 - ruangan dengan riwayat reservasi tidak dapat dihapus ruangan dengan riwayat reservasi tidak dapat dihapus",
-              "timedOut": false,
-              "duration": 3402,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "22f5a3b7-57ae-496b-bf90-56728d8b1548",
-              "parentUUID": "518cde0f-71a9-4921-95b2-a6717a51d838",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "22f5a3b7-57ae-496b-bf90-56728d8b1548"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 3402,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "fcdced87-06d2-4471-b340-0f744406e8cc",
-          "title": "SCH-01 - jadwal overlap membuat ruangan tidak tersedia",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\SCH-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\SCH-01.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"SCH-01 - jadwal overlap membuat ruangan tidak tersedia\"",
-              "fullTitle": "SCH-01 - jadwal overlap membuat ruangan tidak tersedia \"before all\" hook in \"SCH-01 - jadwal overlap membuat ruangan tidak tersedia\"",
-              "timedOut": false,
-              "duration": 1292,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "f6c38682-6638-49cf-9c9f-5ce6e65e2b82",
-              "parentUUID": "fcdced87-06d2-4471-b340-0f744406e8cc",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"SCH-01 - jadwal overlap membuat ruangan tidak tersedia\"",
-              "fullTitle": "SCH-01 - jadwal overlap membuat ruangan tidak tersedia \"after all\" hook in \"SCH-01 - jadwal overlap membuat ruangan tidak tersedia\"",
-              "timedOut": false,
-              "duration": 85,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "ded701ab-c2a1-42f0-b4b1-33f5048676ef",
-              "parentUUID": "fcdced87-06d2-4471-b340-0f744406e8cc",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "jadwal overlap membuat ruangan tidak tersedia",
-              "fullTitle": "SCH-01 - jadwal overlap membuat ruangan tidak tersedia jadwal overlap membuat ruangan tidak tersedia",
-              "timedOut": false,
-              "duration": 16994,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "6ab7dd97-847e-46b8-85f8-b7e6cdd4ee33",
-              "parentUUID": "fcdced87-06d2-4471-b340-0f744406e8cc",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "6ab7dd97-847e-46b8-85f8-b7e6cdd4ee33"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 16994,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "80078436-bbd0-4c16-896b-ccafa03df06c",
-          "title": "PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\PWA-01.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\PWA-01.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
-              "fullTitle": "PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi \"before all\" hook in \"PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
-              "timedOut": false,
-              "duration": 1077,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "00cad482-4e95-43e1-9381-4cded23a7edc",
-              "parentUUID": "80078436-bbd0-4c16-896b-ccafa03df06c",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
-              "fullTitle": "PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi \"after all\" hook in \"PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi\"",
-              "timedOut": false,
-              "duration": 91,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
-              "err": {},
-              "uuid": "aa150394-9547-4ad9-8ccf-8d9dd0443559",
-              "parentUUID": "80078436-bbd0-4c16-896b-ccafa03df06c",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "tests": [
-            {
-              "title": "aplikasi memiliki manifest dan service worker untuk opsi instalasi",
-              "fullTitle": "PWA-01 - aplikasi memiliki manifest dan service worker untuk opsi instalasi aplikasi memiliki manifest dan service worker untuk opsi instalasi",
-              "timedOut": false,
-              "duration": 15495,
-              "state": "passed",
-              "speed": "slow",
-              "pass": true,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
-              "err": {},
-              "uuid": "96c12152-524d-427d-911a-42521661c998",
-              "parentUUID": "80078436-bbd0-4c16-896b-ccafa03df06c",
-              "isHook": false,
-              "skipped": false
-            }
-          ],
-          "suites": [],
-          "passes": [
-            "96c12152-524d-427d-911a-42521661c998"
-          ],
-          "failures": [],
-          "pending": [],
-          "skipped": [],
-          "duration": 15495,
-          "root": false,
-          "rootEmpty": false,
-          "_timeout": 90000
-        },
-        {
-          "uuid": "fbd57bde-0e37-4005-b01b-4e24955f10b8",
-          "title": "PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\PWA-02.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\PWA-02.spec.js",
-          "beforeHooks": [
-            {
-              "title": "\"before all\" hook in \"PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online\"",
-              "fullTitle": "PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online \"before all\" hook in \"PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online\"",
-              "timedOut": false,
-              "duration": 1089,
-              "state": null,
-              "speed": null,
-              "pass": false,
-              "fail": false,
-              "pending": false,
-              "context": null,
-              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
-              "err": {},
-              "uuid": "dc1977a3-22d4-4c87-9b20-f1051fc7e9e5",
-              "parentUUID": "fbd57bde-0e37-4005-b01b-4e24955f10b8",
-              "isHook": true,
-              "skipped": false
-            }
-          ],
-          "afterHooks": [
-            {
-              "title": "\"after all\" hook in \"PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online\"",
-              "fullTitle": "PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online \"after all\" hook in \"PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online\"",
+              "title": "\"after all\" hook in \"RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
+              "fullTitle": "RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus \"after all\" hook in \"RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus\"",
               "timedOut": false,
               "duration": 88,
               "state": null,
@@ -1143,55 +681,55 @@
               "context": null,
               "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
               "err": {},
-              "uuid": "7f365586-db79-4b00-9931-53b59e73995a",
-              "parentUUID": "fbd57bde-0e37-4005-b01b-4e24955f10b8",
+              "uuid": "2f7ecde7-7fc0-4455-af5e-91ea9dd53bf7",
+              "parentUUID": "457de19c-9b16-4b11-8a50-0739fa7f4163",
               "isHook": true,
               "skipped": false
             }
           ],
           "tests": [
             {
-              "title": "offline fallback tersedia saat halaman tidak bisa diakses online",
-              "fullTitle": "PWA-02 - offline fallback tersedia saat halaman tidak bisa diakses online offline fallback tersedia saat halaman tidak bisa diakses online",
+              "title": "ruangan dengan riwayat reservasi tidak dapat dihapus",
+              "fullTitle": "RMG-02 [role: SUPERADMIN] - ruangan dengan riwayat reservasi tidak dapat dihapus ruangan dengan riwayat reservasi tidak dapat dihapus",
               "timedOut": false,
-              "duration": 15524,
+              "duration": 2830,
               "state": "passed",
               "speed": "slow",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
               "err": {},
-              "uuid": "a832052c-f39a-4dc8-95c4-b130040189ca",
-              "parentUUID": "fbd57bde-0e37-4005-b01b-4e24955f10b8",
+              "uuid": "95688bee-3c46-4a16-a846-c7a31fb8b793",
+              "parentUUID": "457de19c-9b16-4b11-8a50-0739fa7f4163",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "a832052c-f39a-4dc8-95c4-b130040189ca"
+            "95688bee-3c46-4a16-a846-c7a31fb8b793"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 15524,
+          "duration": 2830,
           "root": false,
           "rootEmpty": false,
           "_timeout": 90000
         },
         {
-          "uuid": "30ef1bd6-f647-4b81-8bf8-df30b7b6f932",
-          "title": "PWA-03 - indikator offline berubah menjadi koneksi dipulihkan",
-          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\PWA-03.spec.js",
-          "file": "\\tests\\e2e\\test-cases\\PWA-03.spec.js",
+          "uuid": "72c552e4-6d36-4221-a168-b06d6f24419a",
+          "title": "CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\user.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\user.spec.js",
           "beforeHooks": [
             {
-              "title": "\"before all\" hook in \"PWA-03 - indikator offline berubah menjadi koneksi dipulihkan\"",
-              "fullTitle": "PWA-03 - indikator offline berubah menjadi koneksi dipulihkan \"before all\" hook in \"PWA-03 - indikator offline berubah menjadi koneksi dipulihkan\"",
+              "title": "\"before all\" hook in \"CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia\"",
+              "fullTitle": "CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia \"before all\" hook in \"CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia\"",
               "timedOut": false,
-              "duration": 1096,
+              "duration": 863,
               "state": null,
               "speed": null,
               "pass": false,
@@ -1200,18 +738,18 @@
               "context": null,
               "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
               "err": {},
-              "uuid": "c79d1f71-6cdd-4bd8-a13d-867374dfa22f",
-              "parentUUID": "30ef1bd6-f647-4b81-8bf8-df30b7b6f932",
+              "uuid": "2336b3dd-1af3-4668-842a-ed20117a534d",
+              "parentUUID": "72c552e4-6d36-4221-a168-b06d6f24419a",
               "isHook": true,
               "skipped": false
             }
           ],
           "afterHooks": [
             {
-              "title": "\"after all\" hook in \"PWA-03 - indikator offline berubah menjadi koneksi dipulihkan\"",
-              "fullTitle": "PWA-03 - indikator offline berubah menjadi koneksi dipulihkan \"after all\" hook in \"PWA-03 - indikator offline berubah menjadi koneksi dipulihkan\"",
+              "title": "\"after all\" hook in \"CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia\"",
+              "fullTitle": "CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia \"after all\" hook in \"CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia\"",
               "timedOut": false,
-              "duration": 87,
+              "duration": 59,
               "state": null,
               "speed": null,
               "pass": false,
@@ -1220,40 +758,502 @@
               "context": null,
               "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
               "err": {},
-              "uuid": "d1c6e256-313c-4c26-940b-08914c415c1a",
-              "parentUUID": "30ef1bd6-f647-4b81-8bf8-df30b7b6f932",
+              "uuid": "0c15f403-26cd-41be-9731-b50a86b915ee",
+              "parentUUID": "72c552e4-6d36-4221-a168-b06d6f24419a",
               "isHook": true,
               "skipped": false
             }
           ],
           "tests": [
             {
-              "title": "indikator offline berubah menjadi koneksi dipulihkan",
-              "fullTitle": "PWA-03 - indikator offline berubah menjadi koneksi dipulihkan indikator offline berubah menjadi koneksi dipulihkan",
+              "title": "pencarian jadwal menampilkan daftar ruangan tersedia",
+              "fullTitle": "CEK-01 [role: USER] - pencarian jadwal menampilkan daftar ruangan tersedia pencarian jadwal menampilkan daftar ruangan tersedia",
               "timedOut": false,
-              "duration": 15713,
+              "duration": 3311,
               "state": "passed",
               "speed": "slow",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
-              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
               "err": {},
-              "uuid": "edc4c8b0-ddcb-42f3-bd80-8225f9e7e99c",
-              "parentUUID": "30ef1bd6-f647-4b81-8bf8-df30b7b6f932",
+              "uuid": "a44d58c2-d920-4308-8e1c-ee78bf0354bb",
+              "parentUUID": "72c552e4-6d36-4221-a168-b06d6f24419a",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "edc4c8b0-ddcb-42f3-bd80-8225f9e7e99c"
+            "a44d58c2-d920-4308-8e1c-ee78bf0354bb"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 15713,
+          "duration": 3311,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "918ca835-cc13-4397-ae52-96f047d8fe27",
+          "title": "CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\user.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\user.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
+              "fullTitle": "CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil \"before all\" hook in \"CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
+              "timedOut": false,
+              "duration": 810,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "c3a5c171-48de-48d1-bd32-3f5a6206c80e",
+              "parentUUID": "918ca835-cc13-4397-ae52-96f047d8fe27",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
+              "fullTitle": "CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil \"after all\" hook in \"CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil\"",
+              "timedOut": false,
+              "duration": 64,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "4d31b1b5-a750-45b8-bcfa-b14b75cd00c1",
+              "parentUUID": "918ca835-cc13-4397-ae52-96f047d8fe27",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "ruangan dengan reservasi PENDING pada jadwal sama tidak tampil",
+              "fullTitle": "CEK-02 [role: USER] - ruangan dengan reservasi PENDING pada jadwal sama tidak tampil ruangan dengan reservasi PENDING pada jadwal sama tidak tampil",
+              "timedOut": false,
+              "duration": 2957,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "cb105b1e-eace-446f-9e05-462b20a736fc",
+              "parentUUID": "918ca835-cc13-4397-ae52-96f047d8fe27",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "cb105b1e-eace-446f-9e05-462b20a736fc"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 2957,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "dd043138-30a1-484a-ab47-65c2eece2cce",
+          "title": "RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\user.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\user.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING\"",
+              "fullTitle": "RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING \"before all\" hook in \"RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING\"",
+              "timedOut": false,
+              "duration": 844,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "b1f155c6-c783-40cd-9127-c1ab8d5fbeb6",
+              "parentUUID": "dd043138-30a1-484a-ab47-65c2eece2cce",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING\"",
+              "fullTitle": "RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING \"after all\" hook in \"RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING\"",
+              "timedOut": false,
+              "duration": 96,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "7f5bbf8c-c376-4933-84bc-deea7b654c80",
+              "parentUUID": "dd043138-30a1-484a-ab47-65c2eece2cce",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "form reservasi lengkap membuat pengajuan PENDING",
+              "fullTitle": "RES-01 [role: USER] - form reservasi lengkap membuat pengajuan PENDING form reservasi lengkap membuat pengajuan PENDING",
+              "timedOut": false,
+              "duration": 2050,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "5bcab885-90db-4471-9189-9355bcddc4d6",
+              "parentUUID": "dd043138-30a1-484a-ab47-65c2eece2cce",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "5bcab885-90db-4471-9189-9355bcddc4d6"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 2050,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "c5801aa2-db8b-440a-9e39-f51f4f27d95f",
+          "title": "RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\user.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\user.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi\"",
+              "fullTitle": "RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi \"before all\" hook in \"RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi\"",
+              "timedOut": false,
+              "duration": 828,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "ba562b79-ddd4-4255-9b69-17fc1164f7ae",
+              "parentUUID": "c5801aa2-db8b-440a-9e39-f51f4f27d95f",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi\"",
+              "fullTitle": "RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi \"after all\" hook in \"RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi\"",
+              "timedOut": false,
+              "duration": 84,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "143c9a7c-9416-4f90-9ac3-afd583033a76",
+              "parentUUID": "c5801aa2-db8b-440a-9e39-f51f4f27d95f",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "jadwal bentrok menampilkan conflict reservasi",
+              "fullTitle": "RES-02 [role: USER] - jadwal bentrok menampilkan conflict reservasi jadwal bentrok menampilkan conflict reservasi",
+              "timedOut": false,
+              "duration": 1216,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "c9f95db9-1f79-4407-813d-28e0f66965ee",
+              "parentUUID": "c5801aa2-db8b-440a-9e39-f51f4f27d95f",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "c9f95db9-1f79-4407-813d-28e0f66965ee"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1216,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "12f34378-130e-41e6-9e12-7eced29e3117",
+          "title": "SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\user.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\user.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia\"",
+              "fullTitle": "SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia \"before all\" hook in \"SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia\"",
+              "timedOut": false,
+              "duration": 811,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "23ce611d-cc07-44a1-927b-97b688846cf9",
+              "parentUUID": "12f34378-130e-41e6-9e12-7eced29e3117",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia\"",
+              "fullTitle": "SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia \"after all\" hook in \"SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia\"",
+              "timedOut": false,
+              "duration": 73,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "4e2c4e5e-b66b-4cf3-8b9f-243b824f404d",
+              "parentUUID": "12f34378-130e-41e6-9e12-7eced29e3117",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "jadwal overlap membuat ruangan tidak tersedia",
+              "fullTitle": "SCH-01 [role: USER] - jadwal overlap membuat ruangan tidak tersedia jadwal overlap membuat ruangan tidak tersedia",
+              "timedOut": false,
+              "duration": 2217,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "a02b43bc-2a40-46a8-8be1-55179ea41e94",
+              "parentUUID": "12f34378-130e-41e6-9e12-7eced29e3117",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "a02b43bc-2a40-46a8-8be1-55179ea41e94"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 2217,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "f66ceb59-4a0d-4080-838c-8c8608ed1592",
+          "title": "APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\admin.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\admin.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
+              "fullTitle": "APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya \"before all\" hook in \"APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
+              "timedOut": false,
+              "duration": 882,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "6ac6e2dc-a3a9-4f02-bb40-31bd8ef45608",
+              "parentUUID": "f66ceb59-4a0d-4080-838c-8c8608ed1592",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
+              "fullTitle": "APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya \"after all\" hook in \"APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya\"",
+              "timedOut": false,
+              "duration": 62,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "d081d55f-dc50-4325-b0c9-9813ad1acaf0",
+              "parentUUID": "f66ceb59-4a0d-4080-838c-8c8608ed1592",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "admin menyetujui PENDING menjadi tahap approval berikutnya",
+              "fullTitle": "APR-01 [role: ADMIN] - admin menyetujui PENDING menjadi tahap approval berikutnya admin menyetujui PENDING menjadi tahap approval berikutnya",
+              "timedOut": false,
+              "duration": 1268,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "176d7731-68f6-41a4-9392-415eac675294",
+              "parentUUID": "f66ceb59-4a0d-4080-838c-8c8608ed1592",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "176d7731-68f6-41a4-9392-415eac675294"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1268,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 90000
+        },
+        {
+          "uuid": "da63ee3c-54b1-4930-9d87-1eea9ec654db",
+          "title": "APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali",
+          "fullFile": "C:\\skripsi-sistem-reservasi-fatek\\tests\\e2e\\test-cases\\admin-dekan.spec.js",
+          "file": "\\tests\\e2e\\test-cases\\admin-dekan.spec.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali\"",
+              "fullTitle": "APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali \"before all\" hook in \"APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali\"",
+              "timedOut": false,
+              "duration": 855,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await cleanupE2EData();\ncontext.users = await createDefaultUsers();\ncontext.driver = await buildDriver();",
+              "err": {},
+              "uuid": "2950ed0f-bcb4-47d5-a557-909b5883cae4",
+              "parentUUID": "da63ee3c-54b1-4930-9d87-1eea9ec654db",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali\"",
+              "fullTitle": "APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali \"after all\" hook in \"APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali\"",
+              "timedOut": false,
+              "duration": 88,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "if (context.driver) {\n  await context.driver.quit();\n}\nawait cleanupE2EData();",
+              "err": {},
+              "uuid": "c0f5b6f4-b7fe-4660-951f-4eed39d93ebf",
+              "parentUUID": "da63ee3c-54b1-4930-9d87-1eea9ec654db",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "admin menolak pengajuan dan slot tersedia kembali",
+              "fullTitle": "APR-02 [role: ADMIN_DEKAN] - admin menolak pengajuan dan slot tersedia kembali admin menolak pengajuan dan slot tersedia kembali",
+              "timedOut": false,
+              "duration": 1240,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await runCase({\n  ...context,\n  assert,\n  By,\n  until,\n  BASE_URL,\n  E2E_PREFIX,\n  PASSWORD,\n  TEST_DATE,\n  START_TIME,\n  END_TIME,\n  PDF_DATA_URL,\n  caseMeta: options,\n  browserFetch,\n  createRoom,\n  createReservation,\n  dateTime,\n  login,\n  prisma,\n  searchRooms,\n  waitForText,\n});",
+              "err": {},
+              "uuid": "55b0b1aa-d464-4e01-b3ac-d56f3d7c9017",
+              "parentUUID": "da63ee3c-54b1-4930-9d87-1eea9ec654db",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "55b0b1aa-d464-4e01-b3ac-d56f3d7c9017"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1240,
           "root": false,
           "rootEmpty": false,
           "_timeout": 90000

@@ -22,7 +22,7 @@ type PageProps = {
 export default async function RiwayatPeminjamanPage({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.userType === "STAFF" || !session.user.id) {
-    redirect("/?tab=login");
+    redirect("/auth?tab=login");
   }
 
   const resolvedSearchParams = await searchParams;

@@ -68,7 +68,7 @@ export default function NavbarMobileMenu({
             Keluar
           </button>
         ) : (
-          <Link href="/" onClick={onNavigate} className={`${mobileItemBase} ${mobileItemInactive}`}>
+          <Link href="/auth?tab=login" onClick={onNavigate} className={`${mobileItemBase} ${mobileItemInactive}`}>
             Masuk
           </Link>
         )}
