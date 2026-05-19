@@ -32,7 +32,7 @@ export default async function SuperadminDashboardPage() {
 		redirect("/auth");
 	}
 
-	const [reservations, minDaysAheadExclusive] = await Promise.all([
+	const [reservations, minDaysAheadExclusive, buildings] = await Promise.all([
 		prisma.reservation.findMany({
 		include: {
 			user: {
@@ -56,6 +56,14 @@ export default async function SuperadminDashboardPage() {
 		},
 		}),
 		getReservationMinDaysAheadExclusive(),
+		prisma.building.findMany({
+			select: {
+				building_name: true,
+			},
+			orderBy: {
+				building_name: "asc",
+			},
+		}),
 	]);
 
 	// Fetch additional data for cards
@@ -66,7 +74,8 @@ export default async function SuperadminDashboardPage() {
 	});
 
 	const totalRooms = allRooms.length;
-	const totalBuildings = new Set(allRooms.map((room: { room_building: any; }) => room.room_building)).size;
+	const totalBuildings = buildings.length;
+	const buildingOptions = buildings.map((building: { building_name: string }) => building.building_name);
 
 	const totalUsers = await prisma.user.count();
 
@@ -121,6 +130,7 @@ export default async function SuperadminDashboardPage() {
 						totalRooms={totalRooms}
 						totalBuildings={totalBuildings}
 						totalUsers={totalUsers}
+						buildingOptions={buildingOptions}
 						lastSync={lastSync}
 						initialMinDaysAheadExclusive={minDaysAheadExclusive}
 					/>
