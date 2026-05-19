@@ -6,6 +6,13 @@ mkdir -p /app/uploads/templates
 mkdir -p /app/public/uploads/signatures
 
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+  if [ -n "${RESOLVE_FAILED_MIGRATION_ROLLED_BACK:-}" ]; then
+    echo "[entrypoint] Marking failed migration as rolled back: ${RESOLVE_FAILED_MIGRATION_ROLLED_BACK}"
+    if ! /app/node_modules/.bin/prisma migrate resolve --rolled-back "${RESOLVE_FAILED_MIGRATION_ROLLED_BACK}"; then
+      echo "[entrypoint] migrate resolve failed or migration is no longer in a failed state, continuing to migrate deploy"
+    fi
+  fi
+
   echo "[entrypoint] Running prisma migrate deploy"
   if ! /app/node_modules/.bin/prisma migrate deploy; then
     echo "[entrypoint] prisma migrate deploy failed, but continuing to start the app to avoid a restart loop"
