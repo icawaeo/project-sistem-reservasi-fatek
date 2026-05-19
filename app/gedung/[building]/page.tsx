@@ -348,7 +348,7 @@ export default function BuildingPage() {
         }
 
         if (sessionStatus !== "authenticated" || isPrivilegedStaff) {
-            router.push("/?tab=login");
+            router.push("/auth?tab=login");
             return;
         }
 

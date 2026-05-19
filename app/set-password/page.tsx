@@ -91,7 +91,7 @@ function SetPasswordContent() {
         throw new Error(payload.error || "Gagal menyimpan kata sandi");
       }
 
-      router.push("/?tab=login");
+      router.push("/auth?tab=login");
       router.refresh();
     } catch (err) {
       pushToast({
@@ -121,7 +121,7 @@ function SetPasswordContent() {
           <p className="mt-2 text-sm lg:text-base text-slate-600">
             Link set kata sandi sudah kedaluwarsa atau sudah pernah digunakan. Hubungi superadmin untuk meminta tautan baru.
           </p>
-          <Link href="/?tab=login" className="mt-4 inline-block text-sm lg:text-base font-semibold text-slate-900 hover:underline">
+          <Link href="/auth?tab=login" className="mt-4 inline-block text-sm lg:text-base font-semibold text-slate-900 hover:underline">
             Kembali ke Login
           </Link>
         </div>
