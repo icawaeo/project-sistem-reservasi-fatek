@@ -22,12 +22,20 @@ async function buildDriver() {
 
   options.addArguments("--window-size=1366,768");
   options.addArguments("--disable-gpu");
+  options.addArguments("--disable-gpu-sandbox");
+  options.addArguments("--disable-webgl");
+  options.addArguments("--disable-webgl2");
   options.addArguments("--disable-3d-apis");
   options.addArguments("--disable-accelerated-2d-canvas");
   options.addArguments("--disable-accelerated-video-decode");
   options.addArguments("--disable-dev-shm-usage");
   options.addArguments("--disable-gpu-compositing");
   options.addArguments("--disable-software-rasterizer");
+  options.addArguments("--disable-features=VizDisplayCompositor,UseSkiaRenderer,CanvasOopRasterization");
+  options.addArguments("--use-angle=swiftshader");
+  options.addArguments("--log-level=3");
+  options.addArguments("--remote-debugging-pipe");
+  options.addArguments("--silent");
   options.addArguments("--no-sandbox");
   
   options.addArguments("--log-level=3");

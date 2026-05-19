@@ -272,6 +272,19 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "ID ruangan tidak valid" }, { status: 400 });
     }
 
+    const reservationCount = await prisma.reservation.count({
+      where: {
+        room_id: id,
+      },
+    });
+
+    if (reservationCount > 0) {
+      return NextResponse.json(
+        { error: "Ruangan tidak dapat dihapus karena sudah memiliki riwayat reservasi" },
+        { status: 409 }
+      );
+    }
+
     await prisma.room.delete({
       where: {
         room_id: id,

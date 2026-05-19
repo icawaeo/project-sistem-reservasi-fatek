@@ -91,6 +91,7 @@ function defineBlackboxCase(testId, title, optionsOrRunCase, maybeRunCase) {
 
     before(async function () {
       await cleanupE2EData();
+      context.didSetupData = true;
       context.users = await createDefaultUsers();
       context.driver = await buildDriver();
     });
@@ -99,7 +100,9 @@ function defineBlackboxCase(testId, title, optionsOrRunCase, maybeRunCase) {
       if (context.driver) {
         await context.driver.quit();
       }
-      await cleanupE2EData();
+      if (context.didSetupData) {
+        await cleanupE2EData();
+      }
     });
 
     it(title, async function () {
