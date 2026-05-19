@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
+    "predb:seed": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "e2e:server": "node tests/e2e/start-next-e2e.js",
     "test:e2e:server": "node tests/e2e/start-next-e2e.js",

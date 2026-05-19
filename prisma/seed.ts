@@ -2,9 +2,9 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-import { USER_ROLES, type UserRoleValue } from "@/lib/user-enums";
-import { type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
-import { getBuildingDefaultImage } from "@/app/utils/building";
+import { USER_ROLES, type UserRoleValue } from "../lib/user-enums";
+import { type LabDepartmentValue, type LabProgramValue } from "../lib/lab-enums";
+import { getBuildingDefaultImage } from "../app/utils/building";
 
 const { PrismaClient } = require("@prisma/client");
 
@@ -435,6 +435,7 @@ async function seedRooms() {
         },
       },
     });
+    createdCount += 1;
   }
 
   console.log(`Room seed complete. Created: ${createdCount}, Updated: ${updatedCount}`);
