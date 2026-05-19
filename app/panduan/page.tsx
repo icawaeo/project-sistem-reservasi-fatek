@@ -2,6 +2,9 @@ import Navbar from "@/app/components/layout/Navbar";
 import PanduanPeminjamanContent from "@/app/components/user/PanduanPeminjamanContent";
 import { getReservationMinDaysAheadExclusive } from "@/lib/reservation-settings";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function PanduanPage() {
 	const minDaysAheadExclusive = await getReservationMinDaysAheadExclusive();
 

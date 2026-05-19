@@ -2,9 +2,8 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-import { USER_ROLES, type UserRoleValue } from "@/lib/user-enums";
-import { type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
-import { getBuildingDefaultImage } from "@/app/utils/building";
+import { USER_ROLES, type UserRoleValue } from "../lib/user-enums";
+import { type LabDepartmentValue, type LabProgramValue } from "../lib/lab-enums";
 
 const { PrismaClient } = require("@prisma/client");
 
@@ -185,6 +184,20 @@ const userSeeds: SeedUser[] = [
 ];
 
 const LAB_BUILDING_NAME = "Gedung Laboratorium Fakultas Teknik";
+
+const buildingDefaultImageMap: Record<string, string> = {
+  "Gedung Dekanat Fakultas Teknik": "/images/dekanat.jpeg",
+  "Gedung Jurusan Teknik Sipil": "/images/sipil.jpeg",
+  "Gedung Jurusan Teknik Arsitektur": "/images/jte.jpeg",
+  "Gedung Jurusan Teknik Elektro": "/images/jte.jpeg",
+  "Gedung Jurusan Teknik Mesin": "/images/dekanat.jpeg",
+  "Gedung Laboratorium Fakultas Teknik": "/images/lab.jpeg",
+};
+
+function getBuildingDefaultImage(buildingName: string): string | null {
+  if (!buildingName) return null;
+  return buildingDefaultImageMap[buildingName] ?? null;
+}
 
 const programToDepartment = (program: LabProgramValue): LabDepartmentValue => {
   if (program === "IT" || program === "ELEKTRO") return "ELEKTRO";
@@ -435,6 +448,7 @@ async function seedRooms() {
         },
       },
     });
+    createdCount += 1;
   }
 
   console.log(`Room seed complete. Created: ${createdCount}, Updated: ${updatedCount}`);

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
 import IdleLogoutProvider from "@/app/components/providers/IdleLogoutProvider";
@@ -8,16 +7,6 @@ import PWAProvider from "@/app/components/providers/PWAProvider";
 import InstallPrompt from "@/app/components/pwa/InstallPrompt";
 import OfflineIndicator from "@/app/components/pwa/OfflineIndicator";
 import UpdateNotification from "@/app/components/pwa/UpdateNotification";
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -80,7 +69,7 @@ export default function RootLayout({
         <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
       </head>
       <body
-        className={`${manrope.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
       >
         <NextAuthProvider>
           <ToastProvider>
