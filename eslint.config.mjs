@@ -15,7 +15,14 @@ const eslintConfig = defineConfig([
 
     // Generated artifacts (do not lint)
     "app/generated/prisma/**",
+    "tests/e2e/reports/**",
   ]),
+  {
+    files: ["*.js", "tests/e2e/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

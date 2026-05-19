@@ -18,7 +18,7 @@ const e2eEnv = {
   SMTP_PASS: "",
 };
 
-function waitForServer(url, timeoutMs = 90000) {
+function waitForServer(url, timeoutMs = 15000) {
   const startedAt = Date.now();
 
   return new Promise((resolve, reject) => {
@@ -41,7 +41,7 @@ function waitForServer(url, timeoutMs = 90000) {
 
     const retry = () => {
       if (Date.now() - startedAt > timeoutMs) {
-        reject(new Error(`Dev server did not become ready at ${url}`));
+        reject(new Error(`E2E server is not ready at ${url}. Jalankan dulu: npm run test:e2e:server`));
         return;
       }
       setTimeout(check, 1000);

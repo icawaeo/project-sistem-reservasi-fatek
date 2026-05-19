@@ -6,7 +6,7 @@ const port = process.env.E2E_PORT || "3100";
 const baseUrl = process.env.E2E_BASE_URL || `http://localhost:${port}`;
 const args = process.argv.slice(2);
 const roleIndex = args.findIndex((arg) => arg === "--role" || arg === "-r");
-const selectedRole = roleIndex >= 0 ? args[roleIndex + 1] : null;
+const selectedRole = roleIndex >= 0 ? args[roleIndex + 1] : process.env.E2E_ROLE;
 const runAll = args.length === 0 || args.includes("--all");
 const explicitFiles = args.filter((arg, index) => (
   arg !== "--all" &&
@@ -16,6 +16,9 @@ const explicitFiles = args.filter((arg, index) => (
 const files = selectedRole ? getTestCaseFilesByRole(selectedRole) : runAll ? TEST_CASE_FILES : explicitFiles;
 
 if (files.length === 0) {
+  if (selectedRole) {
+    console.error(`No E2E test cases found for role: ${selectedRole}`);
+  }
   console.error("Usage: npm run test:e2e --");
   console.error("   or: npm run test:e2e:case -- tests/e2e/test-cases/admin.spec.js");
   console.error("   or: npm run test:e2e:role -- ADMIN");
@@ -32,7 +35,7 @@ const e2eEnv = {
   SMTP_PASS: "",
 };
 
-function waitForServer(url, timeoutMs = 90000) {
+function waitForServer(url, timeoutMs = 15000) {
   const startedAt = Date.now();
 
   return new Promise((resolve, reject) => {
@@ -55,7 +58,7 @@ function waitForServer(url, timeoutMs = 90000) {
 
     const retry = () => {
       if (Date.now() - startedAt > timeoutMs) {
-        reject(new Error(`Dev server did not become ready at ${url}`));
+        reject(new Error(`E2E server is not ready at ${url}. Jalankan dulu: npm run test:e2e:server`));
         return;
       }
       setTimeout(check, 1000);
