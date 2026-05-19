@@ -14,9 +14,9 @@ import RiwayatHero from "../components/user/riwayat/RiwayatHero";
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     sort?: string | string[];
-  };
+  }>;
 };
 
 export default async function RiwayatPeminjamanPage({ searchParams }: PageProps) {
@@ -25,7 +25,8 @@ export default async function RiwayatPeminjamanPage({ searchParams }: PageProps)
     redirect("/?tab=login");
   }
 
-  const sortOrder = normalizeSortOrder(searchParams?.sort);
+  const resolvedSearchParams = await searchParams;
+  const sortOrder = normalizeSortOrder(resolvedSearchParams?.sort);
 
   let reservations: ReservationRecord[] = [];
   try {

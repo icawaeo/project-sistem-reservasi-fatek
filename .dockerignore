@@ -31,3 +31,5 @@ tsconfig.tsbuildinfo
 # Runtime uploads / generated files
 uploads
 public/uploads
+
+/tmp

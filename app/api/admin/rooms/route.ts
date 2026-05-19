@@ -221,6 +221,11 @@ export async function POST(request: Request) {
       data: {
         room_name: name,
         room_building: building,
+        building: {
+          connect: {
+            building_id: buildingExists.building_id,
+          },
+        },
         room_capacity: Math.floor(capacity),
         room_locDetail: buildRoomLocDetail(floor, facilities),
         room_imageUrl: imageUrl,

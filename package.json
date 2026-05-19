@@ -7,7 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "e2e:server": "node tests/e2e/start-next-e2e.js",
+    "test:e2e:server": "node tests/e2e/start-next-e2e.js",
+    "e2e:run": "node tests/e2e/run-case.js --all",
+    "test:e2e": "node tests/e2e/run-case.js --all",
+    "test:e2e:case": "node tests/e2e/run-case.js",
+    "e2e:report": "node tests/e2e/run-report.js",
+    "test:e2e:report": "node tests/e2e/run-report.js",
+    "test:e2e:role": "node tests/e2e/run-case.js --role",
+    "test:e2e:report:role": "node tests/e2e/run-report.js --role"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -35,9 +44,14 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "chromedriver": "^148.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "mocha": "^11.7.5",
+    "mochawesome": "^7.1.4",
     "prisma": "^7.4.2",
+    "selenium-webdriver": "^4.44.0",
+    "start-server-and-test": "^3.0.5",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "typescript": "^5"
