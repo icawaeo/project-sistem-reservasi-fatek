@@ -11,7 +11,7 @@ defineBlackboxCase("REG-01", "registrasi data valid mengarahkan ke verifikasi OT
   PASSWORD,
   waitForText,
 }) => {
-  await driver.get(`${BASE_URL}/auth?tab=register`);
+  await driver.get(`${BASE_URL}/?tab=register`);
 
   const uniqueEmail = `e2e-reg-${Date.now()}@student.unsrat.ac.id`;
   await driver.findElement(By.name("name")).sendKeys(`${E2E_PREFIX} Registrasi Valid`);
@@ -36,7 +36,7 @@ defineBlackboxCase("REG-02", "registrasi email luar UNSRAT ditolak", {
   PASSWORD,
   waitForText,
 }) => {
-  await driver.get(`${BASE_URL}/auth?tab=register`);
+  await driver.get(`${BASE_URL}/?tab=register`);
 
   await driver.findElement(By.name("name")).sendKeys(`${E2E_PREFIX} Registrasi Invalid`);
   await driver.findElement(By.name("identifier")).sendKeys("202601098");
