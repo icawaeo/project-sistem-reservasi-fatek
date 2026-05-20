@@ -9,17 +9,13 @@ import {
   Clock,
   FileText,
   Home,
-  MapPin,
   User,
   Users,
-  Mail,
-  Phone,
   File as FileIcon,
   ChevronRight,
   ArrowLeft,
   Building2,
   Eye,
-  Download,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Navbar from "@/app/components/layout/NavbarClient";
@@ -43,7 +39,7 @@ type ReservationDraft = {
   endTime: string;
   name: string;
   identifier: string;
-  identifierLabel: "NIM" | "NIP";
+  identifierLabel: "NIM" | "NIP" | "NIM/NIP";
   email: string;
   phone: string;
   purpose: string;
@@ -231,6 +227,7 @@ export default function KonfirmasiReservasiPage() {
         res_purpose: reservation.reason && reservation.reason !== "-" ? `${reservation.purpose} - ${reservation.reason}` : reservation.purpose,
         res_flow: reservation.res_flow ?? "GENERAL",
         res_documentUrl: null as string | null,
+        borrower_identifier: reservation.identifier,
       };
 
       const isLab = isLabBuilding(reservation.room_building);
