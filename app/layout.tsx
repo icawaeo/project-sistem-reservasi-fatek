@@ -4,7 +4,6 @@ import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
 import IdleLogoutProvider from "@/app/components/providers/IdleLogoutProvider";
 import { ToastProvider } from "@/app/components/ui/toast";
 import ServiceWorkerCleanup from "@/app/components/providers/ServiceWorkerCleanup";
-import FcmInit from "@/app/FcmInit";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -36,7 +35,6 @@ export default function RootLayout({
           <ToastProvider>
             <IdleLogoutProvider>
               <ServiceWorkerCleanup />
-              <FcmInit />
               {children}
             </IdleLogoutProvider>
           </ToastProvider>

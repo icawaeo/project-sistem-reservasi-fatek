@@ -62,10 +62,6 @@ async function cleanupE2EData() {
     where: { userId: { in: e2eUsers.map((user) => user.user_id) } },
   });
 
-  await prisma.fcmToken.deleteMany({
-    where: { userId: { in: e2eUsers.map((user) => user.user_id) } },
-  });
-
   await prisma.room.deleteMany({
     where: { room_name: { startsWith: E2E_PREFIX } },
   });

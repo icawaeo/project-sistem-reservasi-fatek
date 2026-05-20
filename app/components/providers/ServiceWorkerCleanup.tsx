@@ -20,7 +20,7 @@ export default function ServiceWorkerCleanup() {
 
             return scriptUrls.some((scriptUrl) => {
               try {
-                return new URL(scriptUrl as string).pathname === "/sw.js";
+                return new URL(scriptUrl as string).origin === window.location.origin;
               } catch {
                 return false;
               }
@@ -29,7 +29,7 @@ export default function ServiceWorkerCleanup() {
           .map((registration) => registration.unregister())
       ))
       .catch(() => {
-        // Best-effort cleanup for browsers that previously loaded the PWA worker.
+        // Best-effort cleanup for browsers that previously loaded a worker.
       });
 
     if ("caches" in window) {
@@ -46,7 +46,7 @@ export default function ServiceWorkerCleanup() {
             .map((key) => caches.delete(key))
         ))
         .catch(() => {
-          // Ignore PWA cache cleanup failures.
+          // Ignore cache cleanup failures.
         });
     }
   }, []);

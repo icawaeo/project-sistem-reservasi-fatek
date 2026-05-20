@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { getMessagingAdmin } from '@/lib/firebase';
 
 export type NotificationType =
   | 'RESERVATION_NEW'
@@ -8,12 +7,8 @@ export type NotificationType =
   | 'RESERVATION_COMPLETED'
   | 'RESERVATION_CANCELLED';
 
-type FcmTokenRecord = {
-  token: string;
-};
-
 /**
- * Create a notification record and send FCM to user's devices
+ * Create a notification record for the in-app notification center.
  */
 export async function sendNotification(
   userId: string,
@@ -22,8 +17,7 @@ export async function sendNotification(
   body: string,
   data: Record<string, any> = {}
 ) {
-  // 1. Save notification to DB
-  const notification = await prisma.notification.create({
+  return prisma.notification.create({
     data: {
       userId,
       title,
@@ -31,39 +25,6 @@ export async function sendNotification(
       data,
     },
   });
-
-  // 2. Get active FCM tokens for user
-  const tokens = await prisma.fcmToken.findMany({
-    where: { userId, isActive: true },
-    select: { token: true },
-  });
-
-  const activeTokens: FcmTokenRecord[] = tokens;
-
-  // 3. Send FCM message if tokens exist
-  if (activeTokens.length > 0) {
-    const fcmTokens = activeTokens.map((t: FcmTokenRecord) => t.token);
-    try {
-      const messaging = getMessagingAdmin();
-      await messaging.sendEachForMulticast({
-        tokens: fcmTokens,
-        notification: {
-          title,
-          body,
-        },
-        data: {
-          type,
-          ...data,
-          notificationId: notification.id,
-        },
-      });
-    } catch (error) {
-      console.error('Error sending FCM multicast:', error);
-      // Optionally, you might want to mark tokens as invalid if error is registration-token-not-registered
-    }
-  }
-
-  return notification;
 }
 
 /**

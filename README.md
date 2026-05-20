@@ -38,16 +38,6 @@ Build image dilakukan di GitHub Actions, lalu Dokploy hanya menjalankan image ya
 
 Workflow ada di `.github/workflows/docker-image.yml`.
 
-Tambahkan **Repository Variables** berikut di GitHub bila fitur Firebase client dipakai:
-
-- `NEXT_PUBLIC_FIREBASE_API_KEY`
-- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
-- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
-- `NEXT_PUBLIC_FIREBASE_SENDER_ID`
-- `NEXT_PUBLIC_FIREBASE_APP_ID`
-- `NEXT_PUBLIC_FIREBASE_VAPID_KEY`
-
 Saat ada push ke branch `main`, workflow akan:
 
 1. build Docker image,
@@ -88,7 +78,6 @@ ghcr.io/<owner>/<repo>:latest
 
 - Email via MailerSend SMTP relay (reset/verification): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SENDER_EMAIL`, `SMTP_SENDER_NAME`
 - Firebase Storage (jika dipakai di fitur upload tertentu): `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_STORAGE_BUCKET`
-- Firebase client / FCM web: `NEXT_PUBLIC_FIREBASE_*` diset sebagai **Repository Variables** GitHub karena nilainya ikut ditanam saat image dibuild.
 - LibreOffice path (umumnya tidak perlu di Linux container karena `soffice` sudah ada di PATH): `LIBREOFFICE_PATH` / `SOFFICE_PATH`
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

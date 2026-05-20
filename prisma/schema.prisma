@@ -71,7 +71,6 @@ model User {
   reservations        Reservation[]
   passwordSetupTokens PasswordSetupToken[]
   emailChangeTokens   EmailChangeToken[]
-  fcmTokens           FcmToken[]
   notifications       Notification[]
 }
 
@@ -213,19 +212,7 @@ model ReservationItem {
   resItem_qty Int
 }
 
-// NEW MODELS FOR FCM AND NOTIFICATIONS
-
-model FcmToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  isActive  Boolean  @default(true)
-  user      User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-}
+// Models for in-app notifications.
 
 model Notification {
   id        String   @id @default(cuid())
