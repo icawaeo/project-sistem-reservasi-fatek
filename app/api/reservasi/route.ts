@@ -101,6 +101,29 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    const manualIdentifier = typeof body.borrower_identifier === "string" ? body.borrower_identifier.trim() : "";
+
+    const currentUser = await prisma.user.findUnique({
+      where: { user_id: session.user.id },
+      select: { identifier: true },
+    });
+
+    if (!currentUser) {
+      return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 });
+    }
+
+    const currentIdentifier = currentUser.identifier?.trim() ?? "";
+    const shouldSaveManualIdentifier = !currentIdentifier;
+
+    if (shouldSaveManualIdentifier) {
+      if (!manualIdentifier) {
+        return NextResponse.json({ error: "NIM/NIP wajib diisi." }, { status: 400 });
+      }
+
+      if (!/^\d+$/.test(manualIdentifier)) {
+        return NextResponse.json({ error: "NIM/NIP hanya boleh berisi angka." }, { status: 400 });
+      }
+    }
 
     // Cek apakah user masih memiliki reservasi aktif (PENDING atau APPROVED belum selesai)
     const activeReservation = await prisma.reservation.findFirst({
@@ -305,6 +328,13 @@ export async function POST(request: Request) {
         },
         { status: 409 },
       );
+    }
+
+    if (shouldSaveManualIdentifier) {
+      await prisma.user.update({
+        where: { user_id: session.user.id },
+        data: { identifier: manualIdentifier },
+      });
     }
 
     const firstReservation = await prisma.reservation.create({

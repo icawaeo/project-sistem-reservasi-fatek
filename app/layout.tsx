@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   description:
     "Sistem reservasi ruangan Fakultas Teknik Universitas Sam Ratulangi Manado. Lakukan pemesanan ruangan, cek ketersediaan jadwal, dan kelola penggunaan ruangan secara online.",
   applicationName: "Reservasi Fatek",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png", sizes: "512x512" }],
+    shortcut: "/icon.png",
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
+  },
   formatDetection: {
     telephone: false,
   },
