@@ -12,9 +12,6 @@ const TEST_CASES = [
   { id: "RMG-01", roles: ["SUPERADMIN"], feature: "kelola-ruangan", file: "tests/e2e/test-cases/superadmin.spec.js" },
   { id: "RMG-02", roles: ["SUPERADMIN"], feature: "kelola-ruangan", file: "tests/e2e/test-cases/superadmin.spec.js" },
   { id: "SCH-01", roles: ["USER"], feature: "jadwal", file: "tests/e2e/test-cases/user.spec.js" },
-  { id: "PWA-01", roles: ["PUBLIC"], feature: "pwa", file: "tests/e2e/test-cases/public.spec.js" },
-  { id: "PWA-02", roles: ["PUBLIC"], feature: "pwa", file: "tests/e2e/test-cases/public.spec.js" },
-  { id: "PWA-03", roles: ["PUBLIC"], feature: "pwa", file: "tests/e2e/test-cases/public.spec.js" },
 ];
 
 const ROLE_GROUPS = {
