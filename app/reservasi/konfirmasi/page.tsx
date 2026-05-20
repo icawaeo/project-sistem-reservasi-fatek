@@ -26,6 +26,7 @@ import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
 import { isLabBuilding, getBuildingGradient } from "@/app/utils/building";
+import { isPrivilegedStaffUser } from "@/lib/role-access";
 
 type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -88,7 +89,7 @@ const fallbackReservation: ReservationDraft = {
 export default function KonfirmasiReservasiPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const isPrivilegedStaff = session?.user?.userType === "STAFF";
+  const isPrivilegedStaff = isPrivilegedStaffUser(session?.user);
   const { pushToast } = useToast();
   const [reservation, setReservation] = useState<ReservationDraft | null>(null);
   const [submitted, setSubmitted] = useState<SubmittedReservation | null>(null);

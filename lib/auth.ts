@@ -4,6 +4,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { logServerError, logServerWarn } from "@/lib/server-logger";
 
+const normalizeSessionUserType = (userType: string | null | undefined, role: string | null | undefined) =>
+  role === "USER" ? "USER" : userType ?? "";
+
 export const authOptions: NextAuthOptions = {
   logger: {
     error(code, ...message) {
@@ -54,7 +57,7 @@ export const authOptions: NextAuthOptions = {
           id: user.user_id,
           email: user.email,
           name: user.name,
-          userType: user.userType,
+          userType: normalizeSessionUserType(user.userType, user.role),
           role: user.role,
           identifier: user.identifier || "",
         };
@@ -84,14 +87,14 @@ export const authOptions: NextAuthOptions = {
             });
             if (dbUser) {
               token.id = dbUser.user_id;
-              token.userType = dbUser.userType;
+              token.userType = normalizeSessionUserType(dbUser.userType, dbUser.role);
               token.role = dbUser.role;
               token.identifier = dbUser.identifier;
 
               session.user.id = dbUser.user_id;
               session.user.name = dbUser.name;
               session.user.email = dbUser.email;
-              session.user.userType = dbUser.userType;
+              session.user.userType = normalizeSessionUserType(dbUser.userType, dbUser.role);
               session.user.role = dbUser.role;
               session.user.identifier = dbUser.identifier ?? "";
             }

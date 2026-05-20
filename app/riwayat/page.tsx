@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import Navbar from "@/app/components/layout/NavbarClient";
 import { authOptions } from "@/lib/auth";
+import { isPrivilegedStaffUser } from "@/lib/role-access";
 
 import type { ReservationRecord, SortOrder } from "../components/user/riwayat/_types";
 import { getUserReservations, normalizeSortOrder } from "../components/user/utils/getUserReservations";
@@ -21,7 +22,7 @@ type PageProps = {
 
 export default async function RiwayatPeminjamanPage({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.userType === "STAFF" || !session.user.id) {
+  if (!session?.user || isPrivilegedStaffUser(session.user) || !session.user.id) {
     redirect("/auth?tab=login");
   }
 
