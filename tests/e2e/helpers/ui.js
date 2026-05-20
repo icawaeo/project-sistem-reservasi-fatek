@@ -3,7 +3,8 @@ const { BASE_URL } = require("./driver");
 const { PASSWORD } = require("./db");
 
 async function login(driver, email, password = PASSWORD) {
-  await driver.get(BASE_URL);
+  await driver.get(`${BASE_URL}/auth?tab=login`);
+  await driver.wait(until.elementLocated(By.css('input[type="email"]')), 15000);
   await driver.findElement(By.css('input[type="email"]')).sendKeys(email);
   await driver.findElement(By.css('input[type="password"]')).sendKeys(password);
   await driver.findElement(By.css('button[type="submit"]')).click();
