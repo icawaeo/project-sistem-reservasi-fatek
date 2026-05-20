@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/components/ui/toast";
+import { signIn } from "next-auth/react";
 
 const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -85,10 +86,24 @@ function SetPasswordContent() {
         }),
       });
 
-      const payload = (await response.json()) as { error?: string };
+      const payload = (await response.json()) as { error?: string; email?: string; redirectTo?: string };
 
       if (!response.ok) {
         throw new Error(payload.error || "Gagal menyimpan kata sandi");
+      }
+
+      const email = payload.email ?? emailHint;
+      if (email) {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (!result?.error) {
+          window.location.href = payload.redirectTo ?? "/landingpage";
+          return;
+        }
       }
 
       router.push("/auth?tab=login");

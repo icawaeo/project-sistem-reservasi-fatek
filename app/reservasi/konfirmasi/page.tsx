@@ -217,9 +217,9 @@ export default function KonfirmasiReservasiPage() {
       }
 
       const now = new Date();
-      const startDateTime = new Date(`${reservation.startDate}T${reservation.startTime}:00`);
+      const startDateTime = new Date(`${reservation.startDate}T${reservation.startTime}:00+08:00`);
       const endDateSource = reservation.endDate || reservation.startDate;
-      const endDateTime = new Date(`${endDateSource}T${reservation.endTime}:00`);
+      const endDateTime = new Date(`${endDateSource}T${reservation.endTime}:00+08:00`);
 
       const payload = {
         room_id: reservation.room_id,

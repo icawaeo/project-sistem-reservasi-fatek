@@ -49,8 +49,7 @@ export default function LoginView() {
         pushToast({ type: "error", message: "Email atau password salah" });
       } else {
         const redirectTo = await getPostLoginRedirectPath();
-        router.push(redirectTo);
-        router.refresh();
+        window.location.href = redirectTo;
       }
     } catch {
       pushToast({ type: "error", message: "Terjadi kesalahan sistem" });

@@ -161,7 +161,11 @@ async function networkFirst(request, cacheName, maxAgeSeconds) {
   } catch (err) {
     const cached = await caches.match(request);
     if (cached) return cached;
-    throw err;
+    return new Response(JSON.stringify({ error: 'Offline' }), {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
@@ -187,7 +191,9 @@ async function networkFirstWithOfflineFallback(request) {
 // ─── Stale While Revalidate Strategy ────────────────────────
 async function staleWhileRevalidate(request, cacheName) {
   const cached = await caches.match(request);
-  const fetchPromise = fetchAndCache(request, cacheName);
+  const fetchPromise = fetchAndCache(request, cacheName).catch(() => {
+    return cached || new Response('', { status: 503, statusText: 'Service Unavailable' });
+  });
   return cached || fetchPromise;
 }
 
@@ -212,7 +218,11 @@ async function fetchAndCache(request, cacheName) {
   } catch (err) {
     const cached = await caches.match(request);
     if (cached) return cached;
-    throw err;
+    return new Response(JSON.stringify({ error: 'Offline' }), {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
