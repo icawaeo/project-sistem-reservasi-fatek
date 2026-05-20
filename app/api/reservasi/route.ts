@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { validateReservationLeadTimeDate } from "@/lib/reservation-policy";
+import { validateReservationLeadTimeYMD } from "@/lib/reservation-policy";
 import { getReservationMinDaysAheadExclusive } from "@/lib/reservation-settings";
 import { validateBuildingOperationalWindow } from "@/lib/building-operational-policy";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/lib/reservation-slots";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 import { sendNotification } from "@/lib/notificationService";
+import { formatWitaDateYMD, getWitaDateTimeParts } from "@/lib/timezone";
 
 import { isLabBuilding } from "@/app/utils/building";
 
@@ -43,19 +44,17 @@ const INACTIVE_STATUSES = [
 /**
  * Generate array of date strings (YYYY-MM-DD) from start to end (inclusive).
  */
-const getDateRange = (start: Date, end: Date): string[] => {
+const getDateRange = (startDateYmd: string, endDateYmd: string): string[] => {
   const dates: string[] = [];
-  const current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  const endDate = new Date(end);
-  endDate.setHours(0, 0, 0, 0);
+  const current = new Date(`${startDateYmd}T00:00:00Z`);
+  const endDate = new Date(`${endDateYmd}T00:00:00Z`);
 
   while (current <= endDate) {
-    const yyyy = current.getFullYear();
-    const mm = String(current.getMonth() + 1).padStart(2, "0");
-    const dd = String(current.getDate()).padStart(2, "0");
+    const yyyy = current.getUTCFullYear();
+    const mm = String(current.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(current.getUTCDate()).padStart(2, "0");
     dates.push(`${yyyy}-${mm}-${dd}`);
-    current.setDate(current.getDate() + 1);
+    current.setUTCDate(current.getUTCDate() + 1);
   }
 
   return dates;
@@ -153,8 +152,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Jam selesai tidak boleh lebih awal dari jam mulai." }, { status: 400 });
     }
 
+    const startWita = getWitaDateTimeParts(resStart);
+    const endWita = getWitaDateTimeParts(resEnd);
+
     const minDaysAheadExclusive = await getReservationMinDaysAheadExclusive();
-    const leadTimeCheck = validateReservationLeadTimeDate(resStart, { minDaysAheadExclusive });
+    const leadTimeCheck = validateReservationLeadTimeYMD(startWita.date, {
+      minDaysAheadExclusive,
+      now: new Date(`${formatWitaDateYMD(new Date())}T00:00:00`),
+    });
     if (!leadTimeCheck.ok) {
       return NextResponse.json(
         {
@@ -194,9 +199,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Gedung tidak ditemukan atau tidak aktif" }, { status: 404 });
     }
 
-    const reservationDates = getDateRange(resStart, resEnd);
-    const startTime = `${String(resStart.getHours()).padStart(2, "0")}:${String(resStart.getMinutes()).padStart(2, "0")}`;
-    const endTime = `${String(resEnd.getHours()).padStart(2, "0")}:${String(resEnd.getMinutes()).padStart(2, "0")}`;
+    const reservationDates = getDateRange(startWita.date, endWita.date);
+    const startTime = startWita.time;
+    const endTime = endWita.time;
     const operationalCheck = validateBuildingOperationalWindow({
       startDate: reservationDates[0],
       endDate: reservationDates[reservationDates.length - 1],

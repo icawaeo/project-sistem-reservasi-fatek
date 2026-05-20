@@ -6,6 +6,7 @@ import {
   type BuildingOperationalSchedule,
 } from "@/lib/building-operational-policy";
 import { resolveRoomDisplayImage } from "@/app/utils/building";
+import { parseWitaDateTime } from "@/lib/timezone";
 import {
   getDailyReservationSlots,
   isDateInsideDailyReservationSlot,
@@ -17,8 +18,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const parseDateTime = (date: string, time: string) => {
-  const parsed = new Date(`${date}T${time}:00`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return parseWitaDateTime(date, time);
 };
 
 type CandidateBuilding = BuildingOperationalSchedule & {

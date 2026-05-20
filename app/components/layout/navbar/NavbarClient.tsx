@@ -12,6 +12,7 @@ export default function NavbarClient() {
     ? {
         name: session.user.name ?? null,
         userType: session.user.userType ?? null,
+        role: session.user.role ?? null,
       }
     : null;
 

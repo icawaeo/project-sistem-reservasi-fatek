@@ -22,6 +22,7 @@ import {
     validateReservationLeadTimeYMD,
 } from "@/lib/reservation-policy";
 import { validateBuildingOperationalWindow } from "@/lib/building-operational-policy";
+import { isPrivilegedStaffUser } from "@/lib/role-access";
 import type { LabDepartmentValue, LabProgramValue } from "@/app/components/administrator/kelola-ruangan/room-types";
 
 type RoomWithStatus = {
@@ -92,7 +93,7 @@ export default function BuildingPage() {
     const router = useRouter();
     const buildingName = decodeURIComponent(params.building as string);
     const { data: session, status: sessionStatus } = useSession();
-    const isPrivilegedStaff = sessionStatus === "authenticated" && session?.user?.userType === "STAFF";
+    const isPrivilegedStaff = sessionStatus === "authenticated" && isPrivilegedStaffUser(session?.user);
     const { pushToast } = useToast();
 
     const [rooms, setRooms] = useState<RoomWithStatus[]>([]);

@@ -20,10 +20,11 @@ import {
   DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE,
   validateReservationLeadTimeYMD,
 } from "@/lib/reservation-policy";
+import { isPrivilegedStaffUser } from "@/lib/role-access";
 
 export default function LandingAvailabilitySearch() {
   const { data: session, status: sessionStatus } = useSession();
-  const isPrivilegedStaff = session?.user?.userType === "STAFF";
+  const isPrivilegedStaff = isPrivilegedStaffUser(session?.user);
   const router = useRouter();
   const { pushToast } = useToast();
 

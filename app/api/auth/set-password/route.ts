@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { hashPasswordSetupToken } from "@/lib/password-setup";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
+import { getPostLoginRedirectPath } from "@/lib/admin-access";
 
 const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -82,6 +83,13 @@ export async function POST(request: Request) {
         userId: true,
         usedAt: true,
         expiresAt: true,
+        user: {
+          select: {
+            email: true,
+            userType: true,
+            role: true,
+          },
+        },
       },
     });
 
@@ -110,7 +118,11 @@ export async function POST(request: Request) {
       }),
     ]);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      email: existing.user.email,
+      redirectTo: getPostLoginRedirectPath(existing.user),
+    });
   } catch (error) {
     logServerError("[api/auth/set-password] Failed to set password", error, getRequestLogMeta(request));
     return NextResponse.json({ error: "Gagal menyimpan password" }, { status: 500 });

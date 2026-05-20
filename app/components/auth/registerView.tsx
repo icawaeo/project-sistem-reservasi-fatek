@@ -34,6 +34,7 @@ export default function RegisterView() {
   // — OTP state —
   const [pendingId, setPendingId] = useState("");
   const [maskedEmail, setMaskedEmail] = useState("");
+  const [manualOtpCode, setManualOtpCode] = useState<string | null>(null);
   const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -82,9 +83,16 @@ export default function RegisterView() {
 
       setPendingId(data.pendingId);
       setMaskedEmail(data.maskedEmail);
+      setManualOtpCode(typeof data.otpCode === "string" ? data.otpCode : null);
       setStep("otp");
       startCountdown();
-      pushToast({ type: "success", message: "Kode verifikasi telah dikirim ke email Anda" });
+      pushToast({
+        type: data.otpEmailSent === false ? "warning" : "success",
+        message:
+          data.otpEmailSent === false
+            ? "SMTP belum aktif. Gunakan kode verifikasi manual yang tampil di halaman."
+            : "Kode verifikasi telah dikirim ke email Anda",
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar.";
       pushToast({ type: "error", message });
@@ -176,8 +184,7 @@ export default function RegisterView() {
         pushToast({ type: "warning", message: "Akun berhasil dibuat. Silakan login secara manual." });
         router.push("/auth?tab=login");
       } else {
-        router.push("/landingpage");
-        router.refresh();
+        window.location.href = "/landingpage";
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan saat verifikasi.";
@@ -252,6 +259,12 @@ export default function RegisterView() {
           Kode verifikasi 6 digit telah dikirim ke{" "}
           <span className="font-semibold text-slate-800">{maskedEmail}</span>
         </p>
+
+        {manualOtpCode ? (
+          <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            SMTP belum aktif. Kode verifikasi manual: <span className="font-bold tracking-widest">{manualOtpCode}</span>
+          </div>
+        ) : null}
 
         <div className="mt-4 rounded-3xl bg-white/40 p-4 lg:p-5 ring-1 ring-white/30">
           {/* OTP Illustration */}

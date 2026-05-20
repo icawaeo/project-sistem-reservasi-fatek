@@ -35,9 +35,19 @@ export async function requestForToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
 
   try {
-    const permission = await Notification.requestPermission();
+    if (!('Notification' in window)) {
+      return null;
+    }
+
+    if (Notification.permission === 'denied') {
+      return null;
+    }
+
+    const permission = Notification.permission === 'granted'
+      ? 'granted'
+      : await Notification.requestPermission();
+
     if (permission !== 'granted') {
-      console.warn('Notification permission not granted');
       return null;
     }
 
