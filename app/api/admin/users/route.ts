@@ -17,9 +17,12 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 const parseRole = (value: unknown): UserRoleValue => {
   if (
+    value === USER_ROLES.USER ||
     value === USER_ROLES.ADMIN ||
     value === USER_ROLES.ADMIN_DEKAN ||
     value === USER_ROLES.ADMIN_WD2 ||
+    value === USER_ROLES.KAJUR ||
+    value === USER_ROLES.KEPALA_LAB ||
     value === USER_ROLES.SUPERADMIN
   ) {
     return value;
@@ -131,8 +134,8 @@ export async function POST(request: Request) {
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
-    const userType = USER_TYPES.STAFF;
     const role = parseRole(body?.role);
+    const userType = role === USER_ROLES.USER ? USER_TYPES.USER : USER_TYPES.STAFF;
     const { token, tokenHash, expiresAt } = generatePasswordSetupToken();
 
     if (!name || !email || !EMAIL_PATTERN.test(email)) {

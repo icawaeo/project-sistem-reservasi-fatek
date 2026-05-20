@@ -22,6 +22,7 @@ import Navbar from "@/app/components/layout/NavbarClient";
 import { useToast } from "@/app/components/ui/toast";
 
 import { isLabBuilding as isLabBuildingUtil, getBuildingGradient } from "@/app/utils/building";
+import { isPublicReservationUser } from "@/lib/role-access";
 
 type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
@@ -71,7 +72,7 @@ function useSessionStorageItem(key: string) {
 
 function ReservasiContent() {
     const { data: session } = useSession();
-    const publicSessionUser = session?.user?.userType === "STAFF" ? null : session?.user;
+    const publicSessionUser = isPublicReservationUser(session?.user) ? session?.user : null;
     const router = useRouter();
     const searchParams = useSearchParams();
     const { pushToast } = useToast();
@@ -98,7 +99,7 @@ function ReservasiContent() {
     const startTime = searchParams.get("startTime") ?? storedDraft?.startTime ?? "";
     const endTime = searchParams.get("endTime") ?? storedDraft?.endTime ?? "";
 
-    const isCivitas = publicSessionUser?.userType === "USER";
+    const isCivitas = Boolean(publicSessionUser);
     const isLabBuilding = isLabBuildingUtil(roomBuilding);
 
     const [borrowerName, setBorrowerName] = useState<string | null>(null);

@@ -1,21 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/app/components/providers/NextAuthProvider";
 import IdleLogoutProvider from "@/app/components/providers/IdleLogoutProvider";
 import { ToastProvider } from "@/app/components/ui/toast";
 import ServiceWorkerCleanup from "@/app/components/providers/ServiceWorkerCleanup";
 import FcmInit from "@/app/FcmInit";
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -41,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body
-        className={`${manrope.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
       >
         <NextAuthProvider>
           <ToastProvider>

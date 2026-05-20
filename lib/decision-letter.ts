@@ -187,7 +187,24 @@ const getSignersForReservation = async (params: {
 		return [dekan, wd2];
 	}
 
-	if (params.flow === "LAB_LAINNYA" || params.flow === "LAB_SKRIPSI") {
+	if (params.flow === "LAB_SKRIPSI") {
+		const kepalaLab = await prisma.user.findFirst({
+			where: {
+				role: "KEPALA_LAB",
+				...(params.labProgram ? { programScope: params.labProgram } : {}),
+			},
+			select: { user_id: true, name: true, identifier: true, rank: true, position: true, signatureUrl: true },
+		});
+
+		if (!kepalaLab) {
+			throw new Error("Akun Kepala Lab yang sesuai belum tersedia.");
+		}
+
+		assertSignerComplete(kepalaLab, "Kepala Lab");
+		return [kepalaLab];
+	}
+
+	if (params.flow === "LAB_LAINNYA") {
 		const [kajur, kepalaLab] = await Promise.all([
 			prisma.user.findFirst({
 				where: {
@@ -260,8 +277,8 @@ export const generateDecisionLetterForReservation = async (reservationId: string
 	});
 
 	const officialSequence =
-		reservation.res_flow === "GENERAL"
-			? [signers[0], signers[0], signers[1]]
+		reservation.res_flow === "LAB_SKRIPSI"
+			? [signers[0]]
 			: [signers[0], signers[0], signers[1]];
 
 	const docxAbsolutePath = path.join(process.cwd(), template.storedPath);

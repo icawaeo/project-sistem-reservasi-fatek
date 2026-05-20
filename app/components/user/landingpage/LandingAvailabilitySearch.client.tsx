@@ -20,10 +20,11 @@ import {
   DEFAULT_MIN_DAYS_AHEAD_EXCLUSIVE,
   validateReservationLeadTimeYMD,
 } from "@/lib/reservation-policy";
+import { isPrivilegedStaffUser } from "@/lib/role-access";
 
 export default function LandingAvailabilitySearch() {
-  const { data: session } = useSession();
-  const isPrivilegedStaff = session?.user?.userType === "STAFF";
+  const { data: session, status: sessionStatus } = useSession();
+  const isPrivilegedStaff = isPrivilegedStaffUser(session?.user);
   const router = useRouter();
   const { pushToast } = useToast();
 
@@ -66,8 +67,12 @@ export default function LandingAvailabilitySearch() {
 
   const handleRoomSelect = useCallback(
     async (room: RoomAvailability) => {
-      if (!session?.user || isPrivilegedStaff) {
-        router.push("/?tab=login");
+      if (sessionStatus === "loading") {
+        return;
+      }
+
+      if (sessionStatus !== "authenticated" || isPrivilegedStaff) {
+        router.push("/auth?tab=login");
         return;
       }
 
@@ -120,7 +125,7 @@ export default function LandingAvailabilitySearch() {
       setIsModalOpen(false);
       router.push(`/reservasi?${qp.toString()}`);
     },
-    [endDate, isPrivilegedStaff, reservationMode, router, session?.user, endTime, startDate, startTime],
+    [endDate, isPrivilegedStaff, reservationMode, router, sessionStatus, endTime, startDate, startTime],
   );
 
   const handleSearch = useCallback(async () => {

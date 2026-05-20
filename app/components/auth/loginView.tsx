@@ -49,8 +49,7 @@ export default function LoginView() {
         pushToast({ type: "error", message: "Email atau password salah" });
       } else {
         const redirectTo = await getPostLoginRedirectPath();
-        router.push(redirectTo);
-        router.refresh();
+        window.location.href = redirectTo;
       }
     } catch {
       pushToast({ type: "error", message: "Terjadi kesalahan sistem" });
@@ -127,7 +126,7 @@ export default function LoginView() {
 
       <p className="mt-4 text-center text-sm text-slate-700">
         Belum punya akun?{" "}
-        <Link className="font-semibold hover:underline" href="/?tab=register">
+        <Link className="font-semibold hover:underline" href="/auth?tab=register">
           Daftar
         </Link>
       </p>

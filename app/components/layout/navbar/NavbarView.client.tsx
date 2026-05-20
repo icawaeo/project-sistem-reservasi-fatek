@@ -17,6 +17,7 @@ import NavbarHamburgerButton from "./NavbarHamburgerButton";
 import NavbarMobileMenu from "./NavbarMobileMenu";
 import { getHeaderClassName, getHeaderTopOffset, getSurfaceClassName, SCROLL_PIN_THRESHOLD } from "./styles";
 import type { NavbarUser } from "./types";
+import { isPrivilegedStaffUser } from "@/lib/role-access";
 
 type NavbarViewProps = {
   user: NavbarUser;
@@ -34,7 +35,7 @@ export default function NavbarView({ user }: NavbarViewProps) {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
-  const isPrivilegedStaff = user?.userType === "STAFF";
+  const isPrivilegedStaff = isPrivilegedStaffUser(user);
   const showUserMenu = Boolean(user) && !isPrivilegedStaff;
 
   useEffect(() => {

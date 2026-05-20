@@ -4,6 +4,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { logServerError, logServerWarn } from "@/lib/server-logger";
 
+const normalizeSessionUserType = (userType: string | null | undefined, role: string | null | undefined) =>
+  role === "USER" ? "USER" : userType ?? "";
+
 export const authOptions: NextAuthOptions = {
   logger: {
     error(code, ...message) {
@@ -54,7 +57,7 @@ export const authOptions: NextAuthOptions = {
           id: user.user_id,
           email: user.email,
           name: user.name,
-          userType: user.userType,
+          userType: normalizeSessionUserType(user.userType, user.role),
           role: user.role,
           identifier: user.identifier || "",
         };
@@ -73,23 +76,27 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.userType = token.userType;
-        session.user.role = token.role;
-        if (token.identifier) {
-          session.user.identifier = token.identifier;
-        }
-
-
         try {
-          if (typeof token.id === "string" && token.id) {
+          const tokenUserId = typeof token.id === "string" && token.id ? token.id : null;
+          const tokenEmail = typeof token.email === "string" && token.email ? token.email : null;
+
+          if (tokenUserId || tokenEmail) {
             const dbUser = await prisma.user.findUnique({
-              where: { user_id: token.id },
-              select: { name: true, email: true },
+              where: tokenUserId ? { user_id: tokenUserId } : { email: tokenEmail as string },
+              select: { user_id: true, name: true, email: true, userType: true, role: true, identifier: true },
             });
             if (dbUser) {
+              token.id = dbUser.user_id;
+              token.userType = normalizeSessionUserType(dbUser.userType, dbUser.role);
+              token.role = dbUser.role;
+              token.identifier = dbUser.identifier;
+
+              session.user.id = dbUser.user_id;
               session.user.name = dbUser.name;
               session.user.email = dbUser.email;
+              session.user.userType = normalizeSessionUserType(dbUser.userType, dbUser.role);
+              session.user.role = dbUser.role;
+              session.user.identifier = dbUser.identifier ?? "";
             }
           }
         } catch (error) {
@@ -97,6 +104,11 @@ export const authOptions: NextAuthOptions = {
             tokenUserId: typeof token.id === "string" ? token.id : null,
           });
         }
+
+        session.user.id = typeof token.id === "string" ? token.id : session.user.id;
+        session.user.userType = typeof token.userType === "string" ? token.userType : session.user.userType;
+        session.user.role = typeof token.role === "string" ? token.role : session.user.role;
+        session.user.identifier = typeof token.identifier === "string" ? token.identifier : session.user.identifier;
       }
       return session;
     },

@@ -109,12 +109,19 @@ export async function POST(request: NextRequest) {
     });
 
     // Kirim OTP via email
-    const mailResult = await sendRegistrationOtpMail({
-      to: normalizedEmail,
-      userName: name.trim(),
-      otpCode,
-      expiresInMinutes: OTP_EXPIRY_MINUTES,
-    });
+    let mailResult: { delivered: boolean } = { delivered: false };
+
+    try {
+      mailResult = await sendRegistrationOtpMail({
+        to: normalizedEmail,
+        userName: name.trim(),
+        otpCode,
+        expiresInMinutes: OTP_EXPIRY_MINUTES,
+      });
+    } catch (mailError) {
+      console.error("Register mail error:", mailError);
+      mailResult = { delivered: false };
+    }
 
     if (!mailResult.delivered) {
       console.warn("REGISTER_DEBUG: Email OTP tidak terkirim. OTP:", otpCode);
@@ -125,6 +132,8 @@ export async function POST(request: NextRequest) {
         message: "Kode verifikasi telah dikirim ke email Anda",
         pendingId: pending.id,
         maskedEmail: maskEmail(normalizedEmail),
+        otpCode: mailResult.delivered ? null : otpCode,
+        otpEmailSent: mailResult.delivered,
       },
       { status: 200 }
     );

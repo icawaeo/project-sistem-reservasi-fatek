@@ -23,7 +23,7 @@ export default function NavbarAuthDesktop({
 }: NavbarAuthDesktopProps) {
   if (!showUserMenu) {
     return (
-      <Link href="/" className={loginButtonClassName}>
+      <Link href="/auth?tab=login" className={loginButtonClassName}>
         Masuk
       </Link>
     );

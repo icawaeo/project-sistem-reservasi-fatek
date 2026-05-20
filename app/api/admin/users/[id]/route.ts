@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { isPrismaKnownRequestError } from "@/lib/prisma-errors";
-import { USER_ROLES, type UserRoleValue, type UserTypeValue } from "@/lib/user-enums";
+import { USER_ROLES, USER_TYPES, type UserRoleValue, type UserTypeValue } from "@/lib/user-enums";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -19,9 +19,12 @@ type RouteParams = {
 
 const parseRole = (value: unknown): UserRoleValue => {
   if (
+    value === USER_ROLES.USER ||
     value === USER_ROLES.ADMIN ||
     value === USER_ROLES.ADMIN_DEKAN ||
     value === USER_ROLES.ADMIN_WD2 ||
+    value === USER_ROLES.KAJUR ||
+    value === USER_ROLES.KEPALA_LAB ||
     value === USER_ROLES.SUPERADMIN
   ) {
     return value;
@@ -109,6 +112,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       data: {
         name,
         role,
+        userType: role === USER_ROLES.USER ? USER_TYPES.USER : USER_TYPES.STAFF,
       },
       select: {
         user_id: true,
