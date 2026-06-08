@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
-import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Sidebar from "@/app/components/administrator/ui/SidebarClientOnly";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import ProfileForm from "@/app/components/administrator/ui/ProfileForm";
 

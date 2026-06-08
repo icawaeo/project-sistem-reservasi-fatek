@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
 import type { UserItem, UserPayload } from "./user-types";
-import { USER_ROLE_OPTIONS } from "./user-types";
+import { LAB_DEPARTMENT_OPTIONS, LAB_PROGRAM_OPTIONS, USER_ROLE_OPTIONS } from "./user-types";
 
 type UserFormModalProps = {
   isOpen: boolean;
@@ -18,12 +18,16 @@ type FormState = {
   name: string;
   email: string;
   role: UserPayload["role"];
+  departmentScope: UserPayload["departmentScope"] | "";
+  programScope: UserPayload["programScope"] | "";
 };
 
 const initialState: FormState = {
   name: "",
   email: "",
   role: "USER",
+  departmentScope: "",
+  programScope: "",
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,6 +47,8 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
         name: user.name,
         email: user.email,
         role: user.role,
+        departmentScope: user.departmentScope ?? "",
+        programScope: user.programScope ?? "",
       });
       return;
     }
@@ -73,6 +79,8 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
         name,
         email,
         role: form.role,
+        departmentScope: form.role === "KAJUR" ? form.departmentScope || null : null,
+        programScope: form.role === "KAPRODI" || form.role === "KEPALA_LAB" ? form.programScope || null : null,
       });
 
       onClose();
@@ -145,7 +153,9 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
               onChange={(event) =>
                 setForm((prev) => ({
                   ...prev,
-                  role: event.target.value as "USER" | "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2",
+                  role: event.target.value as UserPayload["role"],
+                  departmentScope: "",
+                  programScope: "",
                 }))
               }
               className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
@@ -157,6 +167,48 @@ export default function UserFormModal({ isOpen, mode, user, onClose, onSubmit }:
               ))}
             </select>
           </label>
+
+          {form.role === "KAJUR" ? (
+            <label className="space-y-1.5">
+              <span className="text-sm font-semibold text-slate-700">Scope Jurusan</span>
+              <select
+                value={form.departmentScope ?? ""}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, departmentScope: event.target.value as FormState["departmentScope"] }))
+                }
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                required
+              >
+                <option value="">Pilih jurusan</option>
+                {LAB_DEPARTMENT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          {form.role === "KAPRODI" || form.role === "KEPALA_LAB" ? (
+            <label className="space-y-1.5">
+              <span className="text-sm font-semibold text-slate-700">Scope Program Studi</span>
+              <select
+                value={form.programScope ?? ""}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, programScope: event.target.value as FormState["programScope"] }))
+                }
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                required
+              >
+                <option value="">Pilih program studi</option>
+                {LAB_PROGRAM_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
 
           {mode === "create" ? (
             <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-700">

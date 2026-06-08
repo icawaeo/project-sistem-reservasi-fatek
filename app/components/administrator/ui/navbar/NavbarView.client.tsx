@@ -13,7 +13,7 @@ import NavbarTitles from "./NavbarTitles";
 import NotificationDropdown from "@/app/components/administrator/ui/notification/NotificationDropdown";
 import type { AdminNavbarRole, AdminNavbarViewProps } from "./types";
 
-export default function NavbarView({ pageTitle, pageSubtitle, userName, role }: AdminNavbarViewProps) {
+export default function NavbarView({ pageTitle, pageSubtitle, userName, role, showSidebar }: AdminNavbarViewProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -83,7 +83,7 @@ export default function NavbarView({ pageTitle, pageSubtitle, userName, role }: 
     };
   }, []);
 
-  const hasSidebar = detectedRole !== "admin";
+  const hasSidebar = showSidebar ?? detectedRole !== "admin";
 
   return (
     <NavbarShell>

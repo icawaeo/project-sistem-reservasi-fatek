@@ -49,6 +49,7 @@ const LAB_PROGRAM_OPTIONS: Array<{ value: LabProgramValue; label: string }> = [
   { value: "SIPIL", label: "Teknik Sipil" },
   { value: "LINGKUNGAN", label: "Teknik Lingkungan" },
   { value: "MESIN", label: "Teknik Mesin" },
+  { value: "INDUSTRI", label: "Teknik Industri" },
 ];
 
 export default function RoomFormModal({

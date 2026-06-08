@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { isPrismaKnownRequestError } from "@/lib/prisma-errors";
 import { USER_ROLES, USER_TYPES, type UserRoleValue, type UserTypeValue } from "@/lib/user-enums";
+import { LAB_PROGRAM_VALUES, type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
 import { generatePasswordSetupToken, PASSWORD_SETUP_TOKEN_TTL_MS } from "@/lib/password-setup";
 import { sendPasswordSetupMail } from "@/lib/mail";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
@@ -22,6 +23,7 @@ const parseRole = (value: unknown): UserRoleValue => {
     value === USER_ROLES.ADMIN_DEKAN ||
     value === USER_ROLES.ADMIN_WD2 ||
     value === USER_ROLES.KAJUR ||
+    value === USER_ROLES.KAPRODI ||
     value === USER_ROLES.KEPALA_LAB ||
     value === USER_ROLES.SUPERADMIN
   ) {
@@ -30,6 +32,18 @@ const parseRole = (value: unknown): UserRoleValue => {
 
   return USER_ROLES.USER;
 };
+
+const LAB_DEPARTMENT_VALUES = ["ELEKTRO", "ARSITEKTUR", "SIPIL", "MESIN"] as const;
+
+const parseDepartmentScope = (value: unknown): LabDepartmentValue | null =>
+  typeof value === "string" && LAB_DEPARTMENT_VALUES.includes(value as LabDepartmentValue)
+    ? (value as LabDepartmentValue)
+    : null;
+
+const parseProgramScope = (value: unknown): LabProgramValue | null =>
+  typeof value === "string" && LAB_PROGRAM_VALUES.includes(value as LabProgramValue)
+    ? (value as LabProgramValue)
+    : null;
 
 const buildBaseUrl = (request: Request) => {
   const envUrl = process.env.NEXTAUTH_URL?.trim();
@@ -61,6 +75,8 @@ const mapUser = (user: {
   email: string;
   userType: UserTypeValue;
   role: UserRoleValue;
+  departmentScope: LabDepartmentValue | null;
+  programScope: LabProgramValue | null;
   createdAt: Date;
   passwordSetupTokens?: Array<{ createdAt: Date; usedAt: Date | null }>;
 }) => ({
@@ -69,6 +85,8 @@ const mapUser = (user: {
   email: user.email,
 
   role: user.role,
+  departmentScope: user.departmentScope,
+  programScope: user.programScope,
   createdAt: user.createdAt.toISOString(),
   isVerified: (user.passwordSetupTokens ?? []).every((token) => token.usedAt !== null),
   resendCooldownSeconds: getResendCooldownSeconds(user.passwordSetupTokens ?? []),
@@ -102,6 +120,8 @@ export async function GET() {
         email: true,
         userType: true,
         role: true,
+        departmentScope: true,
+        programScope: true,
         createdAt: true,
         passwordSetupTokens: {
           select: {
@@ -135,11 +155,22 @@ export async function POST(request: Request) {
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
     const role = parseRole(body?.role);
+    const departmentScope = role === USER_ROLES.KAJUR ? parseDepartmentScope(body?.departmentScope) : null;
+    const programScope =
+      role === USER_ROLES.KAPRODI || role === USER_ROLES.KEPALA_LAB ? parseProgramScope(body?.programScope) : null;
     const userType = role === USER_ROLES.USER ? USER_TYPES.USER : USER_TYPES.STAFF;
     const { token, tokenHash, expiresAt } = generatePasswordSetupToken();
 
     if (!name || !email || !EMAIL_PATTERN.test(email)) {
       return NextResponse.json({ error: "Data user belum valid" }, { status: 400 });
+    }
+
+    if (role === USER_ROLES.KAJUR && !departmentScope) {
+      return NextResponse.json({ error: "Scope jurusan wajib dipilih untuk Kajur." }, { status: 400 });
+    }
+
+    if ((role === USER_ROLES.KAPRODI || role === USER_ROLES.KEPALA_LAB) && !programScope) {
+      return NextResponse.json({ error: "Scope program studi wajib dipilih untuk role ini." }, { status: 400 });
     }
 
     const placeholderPasswordHash = await bcrypt.hash(`pending-${Date.now()}-${email}`, 10);
@@ -150,6 +181,8 @@ export async function POST(request: Request) {
         email,
         userType,
         role,
+        departmentScope,
+        programScope,
         passwordHash: placeholderPasswordHash,
         identifier: null,
       },
@@ -159,6 +192,8 @@ export async function POST(request: Request) {
         email: true,
         userType: true,
         role: true,
+        departmentScope: true,
+        programScope: true,
         createdAt: true,
         passwordSetupTokens: {
           select: {

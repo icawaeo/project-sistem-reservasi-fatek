@@ -6,6 +6,7 @@ export const LAB_PROGRAM_VALUES = [
 	"SIPIL",
 	"LINGKUNGAN",
 	"MESIN",
+	"INDUSTRI",
 ] as const;
 
 export type LabProgramValue = (typeof LAB_PROGRAM_VALUES)[number];

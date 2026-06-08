@@ -1,4 +1,4 @@
-const ADMIN_ROLES = new Set(["ADMIN", "ADMIN_DEKAN", "ADMIN_WD2", "KAJUR", "KEPALA_LAB", "SUPERADMIN"]);
+const ADMIN_ROLES = new Set(["ADMIN", "ADMIN_DEKAN", "ADMIN_WD2", "KAJUR", "KAPRODI", "KEPALA_LAB", "SUPERADMIN"]);
 
 export const isAdminRole = (role: string | null | undefined) => ADMIN_ROLES.has(role ?? "");
 

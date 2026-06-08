@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import Navbar from "@/app/components/administrator/ui/Navbar";
+import Sidebar from "@/app/components/administrator/ui/SidebarClientOnly";
 import AdminDashboardContent from "@/app/components/administrator/dashboard/AdminDashboardContent";
 import type { AdminReservationRecord, AdminRole } from "@/app/components/administrator/monitoring-pengajuan/reservation-types";
 import { shouldShowAdminReservation } from "@/lib/admin-access";
@@ -63,7 +64,8 @@ export default async function AdminDashboardPage() {
 
 	const role = (dbUser.role || session.user.role || "ADMIN").toUpperCase();
 	const adminRole: AdminRole =
-		role === "ADMIN_DEKAN" || role === "ADMIN_WD2" || role === "KAJUR" || role === "KEPALA_LAB" ? (role as AdminRole) : "ADMIN";
+		role === "ADMIN_DEKAN" || role === "ADMIN_WD2" || role === "KAJUR" || role === "KAPRODI" || role === "KEPALA_LAB" ? (role as AdminRole) : "ADMIN";
+	const hasScheduleSidebar = adminRole === "KAJUR" || adminRole === "KAPRODI";
 
 	const splitReservationPurpose = (value: string | null) => {
 		if (!value) {
@@ -114,6 +116,7 @@ export default async function AdminDashboardPage() {
 				status: item.res_status,
 				labDepartment: item.res_labDepartment,
 				labProgram: item.res_labProgram,
+				roomBuilding: item.room.room_building,
 			},
 		),
 	);
@@ -161,18 +164,23 @@ export default async function AdminDashboardPage() {
 
 	return (
 		<div className="min-h-screen bg-slate-100">
-			<div className="flex min-h-screen flex-col">
-				<Navbar
-					pageTitle="Dashboard Admin"
-					pageSubtitle="Monitoring pengajuan peminjaman ruangan"
-					role="admin"
-				/>
+			<div className={hasScheduleSidebar ? "flex min-h-screen" : "flex min-h-screen flex-col"}>
+				{hasScheduleSidebar ? <Sidebar role="admin" /> : null}
 
-				<AdminDashboardContent
-					adminData={tableData}
-					adminRole={adminRole}
-					lastSync={lastSync}
-				/>
+				<div className={hasScheduleSidebar ? "flex min-w-0 flex-1 flex-col" : "flex min-h-screen flex-col"}>
+					<Navbar
+						pageTitle="Dashboard Admin"
+						pageSubtitle="Monitoring pengajuan peminjaman ruangan"
+						role="admin"
+						showSidebar={hasScheduleSidebar}
+					/>
+
+					<AdminDashboardContent
+						adminData={tableData}
+						adminRole={adminRole}
+						lastSync={lastSync}
+					/>
+				</div>
 			</div>
 		</div>
 	);

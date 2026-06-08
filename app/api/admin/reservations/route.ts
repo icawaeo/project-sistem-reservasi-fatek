@@ -10,6 +10,7 @@ import {
   rangesConflictByDailySlots,
   RESERVATION_BUFFER_MS,
 } from "@/lib/reservation-slots";
+import { validateRoomScheduleAvailability } from "@/lib/room-schedule-conflicts";
 
 const parseDateTime = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}:00`);
@@ -179,6 +180,16 @@ export async function POST(request: Request) {
         { error: "Jadwal bentrok atau masih berada dalam jeda 2 jam pemakaian ruangan." },
         { status: 409 }
       );
+    }
+
+    const scheduleAvailability = await validateRoomScheduleAvailability({
+      roomId,
+      startTime: startDateTime,
+      endTime: endDateTime,
+    });
+
+    if (!scheduleAvailability.ok) {
+      return NextResponse.json({ error: scheduleAvailability.error }, { status: 409 });
     }
 
     const reservationPurpose = purposeDetail ? `${activityName} - ${purposeDetail}` : activityName;

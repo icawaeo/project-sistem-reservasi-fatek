@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -113,6 +113,8 @@ function ReservasiContent() {
     const [reservationFlow, setReservationFlow] = useState<ReservationFlow | null>(null);
     const [supportingFile, setSupportingFile] = useState<File | null>(null);
     const [supportingFileDataUrl, setSupportingFileDataUrl] = useState<string | null>(null);
+    const [availabilityError, setAvailabilityError] = useState("");
+    const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
 
     const borrowerNameValue = borrowerName ?? storedDraft?.name ?? publicSessionUser?.name ?? "";
     const identifierValue = identifier ?? (canEditIdentifier ? storedDraft?.identifier ?? "" : profileIdentifierValue);
@@ -161,6 +163,60 @@ function ReservasiContent() {
         return `${dateLabel} · ${startTime} - ${endTime} WITA`;
     }, [startDate, endDate, startTime, endTime]);
 
+    useEffect(() => {
+        if (!roomId || !roomBuilding || !startDate || !endDate || !startTime || !endTime) {
+            setAvailabilityError("");
+            return;
+        }
+
+        const abortController = new AbortController();
+
+        const checkAvailability = async () => {
+            setIsCheckingAvailability(true);
+            setAvailabilityError("");
+
+            try {
+                const params = new URLSearchParams({
+                    building: roomBuilding,
+                    startDate,
+                    endDate,
+                    startTime,
+                    endTime,
+                });
+
+                const response = await fetch(`/api/rooms?${params.toString()}`, {
+                    cache: "no-store",
+                    signal: abortController.signal,
+                });
+                const payload = await response.json().catch(() => null);
+
+                if (!response.ok) {
+                    setAvailabilityError(
+                        payload?.error ?? "Jadwal ruangan tidak tersedia. Silakan pilih ulang ruangan atau jadwal.",
+                    );
+                    return;
+                }
+
+                const rooms = Array.isArray(payload) ? payload : [];
+                const stillAvailable = rooms.some((room) => room?.room_id === roomId);
+                if (!stillAvailable) {
+                    setAvailabilityError(
+                        `Ruangan ${roomName} tidak tersedia pada tanggal dan waktu tersebut karena sudah digunakan untuk jadwal kuliah/praktikum/ujian atau reservasi lain.`,
+                    );
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === "AbortError") return;
+                setAvailabilityError("Gagal mengecek ulang ketersediaan ruangan.");
+            } finally {
+                setIsCheckingAvailability(false);
+            }
+        };
+
+        void checkAvailability();
+
+        return () => abortController.abort();
+    }, [roomId, roomName, roomBuilding, startDate, endDate, startTime, endTime]);
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -168,6 +224,14 @@ function ReservasiContent() {
             pushToast({
                 type: "error",
                 message: "Data jadwal tidak lengkap. Silakan pilih ulang ruangan dari halaman gedung.",
+            });
+            return;
+        }
+
+        if (availabilityError) {
+            pushToast({
+                type: "error",
+                message: availabilityError,
             });
             return;
         }
@@ -509,9 +573,19 @@ function ReservasiContent() {
                         </div>
 
                         <div className="border-t border-slate-100 pt-5">
+                            {availabilityError ? (
+                                <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+                                    {availabilityError}
+                                </div>
+                            ) : isCheckingAvailability ? (
+                                <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
+                                    Mengecek ulang ketersediaan ruangan...
+                                </div>
+                            ) : null}
                             <button
                                 type="submit"
-                                className="w-full rounded-lg bg-slate-900 px-5 py-3 text-sm lg:text-base font-bold uppercase tracking-widest text-white hover:bg-slate-700 transition-colors"
+                                disabled={Boolean(availabilityError) || isCheckingAvailability}
+                                className="w-full rounded-lg bg-slate-900 px-5 py-3 text-sm lg:text-base font-bold uppercase tracking-widest text-white hover:bg-slate-700 transition-colors disabled:cursor-not-allowed disabled:bg-slate-300"
                             >
                                 Konfirmasi Reservasi
                             </button>

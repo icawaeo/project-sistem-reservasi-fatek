@@ -13,6 +13,9 @@ import {
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 import { sendNotification } from "@/lib/notificationService";
 import { formatWitaDateYMD, getWitaDateTimeParts } from "@/lib/timezone";
+import { validateNotHolidayRange } from "@/lib/holiday-calendar";
+import { validateRoomScheduleAvailability } from "@/lib/room-schedule-conflicts";
+import { getManagedBuildingScope, isDekanatBuilding } from "@/lib/room-scope";
 
 import { isLabBuilding } from "@/app/utils/building";
 
@@ -225,6 +228,11 @@ export async function POST(request: Request) {
     const reservationDates = getDateRange(startWita.date, endWita.date);
     const startTime = startWita.time;
     const endTime = endWita.time;
+    const holidayCheck = await validateNotHolidayRange(reservationDates[0], reservationDates[reservationDates.length - 1]);
+    if (!holidayCheck.ok) {
+      return NextResponse.json({ error: holidayCheck.error, holidays: holidayCheck.holidays }, { status: 400 });
+    }
+
     const operationalCheck = validateBuildingOperationalWindow({
       startDate: reservationDates[0],
       endDate: reservationDates[reservationDates.length - 1],
@@ -330,6 +338,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const scheduleAvailability = await validateRoomScheduleAvailability({
+      roomId: room.room_id,
+      startTime: resStart,
+      endTime: resEnd,
+    });
+
+    if (!scheduleAvailability.ok) {
+      return NextResponse.json({ error: scheduleAvailability.error }, { status: 409 });
+    }
+
     if (shouldSaveManualIdentifier) {
       await prisma.user.update({
         where: { user_id: session.user.id },
@@ -379,6 +397,31 @@ export async function POST(request: Request) {
           `${firstReservation.user.name} meminjam ${firstReservation.room.room_name} — ${dateLabel}`,
           { reservationId: firstReservation.res_id }
         );
+      }
+
+      if (!isLabRoom && !isDekanatBuilding(room.room_building)) {
+        const managedScope = getManagedBuildingScope(room.room_building);
+        if (managedScope) {
+          const scopedObservers = await prisma.user.findMany({
+            where: {
+              OR: [
+                { role: "KAJUR", departmentScope: managedScope.department },
+                { role: "KAPRODI", programScope: { in: managedScope.programs } },
+              ],
+            },
+            select: { user_id: true },
+          });
+
+          for (const observer of scopedObservers) {
+            await sendNotification(
+              observer.user_id,
+              "RESERVATION_NEW",
+              "Pengajuan Ruangan Jurusan",
+              `${firstReservation.user.name} mengajukan peminjaman ${firstReservation.room.room_name} - ${dateLabel}`,
+              { reservationId: firstReservation.res_id },
+            );
+          }
+        }
       }
     } catch (error) {
       console.error('Error sending new reservation notification:', error);

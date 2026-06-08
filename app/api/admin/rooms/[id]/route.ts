@@ -34,6 +34,7 @@ const LAB_PROGRAM_VALUES = [
   "SIPIL",
   "LINGKUNGAN",
   "MESIN",
+  "INDUSTRI",
 ] as const;
 
 type LabProgramValue = (typeof LAB_PROGRAM_VALUES)[number];
@@ -48,6 +49,7 @@ const PROGRAM_TO_DEPARTMENT: Record<LabProgramValue, LabDepartmentValue> = {
   SIPIL: "SIPIL",
   LINGKUNGAN: "SIPIL",
   MESIN: "MESIN",
+  INDUSTRI: "MESIN",
 };
 
 const parseLabProgram = (value: unknown): LabProgramValue | null => {

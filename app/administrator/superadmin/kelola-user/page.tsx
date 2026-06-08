@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
-import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Sidebar from "@/app/components/administrator/ui/SidebarClientOnly";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import UserManagementContent from "@/app/components/administrator/kelola-user/UserManagementContent";
 import type { UserItem } from "@/app/components/administrator/kelola-user/user-types";
@@ -46,6 +46,8 @@ export default async function SuperadminKelolaUserPage() {
       email: true,
       userType: true,
       role: true,
+      departmentScope: true,
+      programScope: true,
       createdAt: true,
       passwordSetupTokens: {
         select: {
@@ -56,11 +58,13 @@ export default async function SuperadminKelolaUserPage() {
     },
   });
 
-  const initialUsers: UserItem[] = users.map((user: { user_id: any; name: any; email: any; userType: string; role: any; createdAt: { toISOString: () => any; }; passwordSetupTokens: any[]; }) => ({
+  const initialUsers: UserItem[] = users.map((user: { user_id: any; name: any; email: any; userType: string; role: any; departmentScope: any; programScope: any; createdAt: { toISOString: () => any; }; passwordSetupTokens: any[]; }) => ({
     id: user.user_id,
     name: user.name,
     email: user.email,
     role: user.role,
+    departmentScope: user.departmentScope,
+    programScope: user.programScope,
     createdAt: user.createdAt.toISOString(),
     isVerified: user.passwordSetupTokens.every((token: { usedAt: null; }) => token.usedAt !== null),
     resendCooldownSeconds: getResendCooldownSeconds(user.passwordSetupTokens),

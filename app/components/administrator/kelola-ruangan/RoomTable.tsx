@@ -20,6 +20,7 @@ const PROGRAM_LABEL: Record<LabProgramValue, string> = {
   SIPIL: "Teknik Sipil",
   LINGKUNGAN: "Teknik Lingkungan",
   MESIN: "Teknik Mesin",
+  INDUSTRI: "Teknik Industri",
 };
 
 const DEPARTMENT_LABEL: Record<LabDepartmentValue, string> = {

@@ -7,7 +7,8 @@ export type LabProgramValue =
   | "PWK"
   | "SIPIL"
   | "LINGKUNGAN"
-  | "MESIN";
+  | "MESIN"
+  | "INDUSTRI";
 
 export type LabDepartmentValue = "ELEKTRO" | "ARSITEKTUR" | "SIPIL" | "MESIN";
 

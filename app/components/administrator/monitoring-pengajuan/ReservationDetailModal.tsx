@@ -70,6 +70,7 @@ function resolveRoleLabel(role: AdminRole) {
 	if (role === "ADMIN_DEKAN") return "Admin Dekan";
 	if (role === "ADMIN_WD2") return "Admin Wakil Dekan 2";
 	if (role === "KAJUR") return "Kajur";
+	if (role === "KAPRODI") return "Kaprodi";
 	return "Kepala Lab";
 }
 

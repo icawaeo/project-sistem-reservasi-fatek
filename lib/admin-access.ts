@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { LabDepartmentValue, LabProgramValue } from "@/lib/lab-enums";
+import { getManagedBuildingScope, isDekanatBuilding } from "@/lib/room-scope";
 
 type SessionLikeUser = {
   email?: string | null;
@@ -8,7 +9,7 @@ type SessionLikeUser = {
   role?: string | null;
 };
 
-type AdminReservationRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "KEPALA_LAB";
+type AdminReservationRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "KAPRODI" | "KEPALA_LAB";
 
 type AdminReservationViewer = {
   role: AdminReservationRole;
@@ -21,6 +22,7 @@ type AdminReservationRecordLike = {
   status: string;
   labDepartment: LabDepartmentValue | null;
   labProgram: LabProgramValue | null;
+  roomBuilding?: string | null;
 };
 
 const normalizeReservationStatus = (status: string) => (status ?? "").toUpperCase();
@@ -74,6 +76,17 @@ const KAJUR_VISIBLE_STATUSES = new Set([
   ...COMMON_FINAL_STATUSES,
 ]);
 
+const OBSERVER_VISIBLE_STATUSES = new Set([
+  "PENDING",
+  "PENDING_KABAG",
+  "PENDING_DEKAN",
+  "REJECTED_DEKAN",
+  "PENDING_WD2",
+  "PENDING_WAKIL_DEKAN_2",
+  "REJECTED_WD2",
+  ...COMMON_FINAL_STATUSES,
+]);
+
 const KEPALA_LAB_VISIBLE_STATUSES = new Set([
   "PENDING_KEPALA_LAB",
   "REJECTED_KEPALA_LAB",
@@ -98,11 +111,39 @@ export function shouldShowAdminReservation(viewer: AdminReservationViewer, reser
   }
 
   if (viewer.role === "KAJUR") {
-    if (!viewer.departmentScope || reservation.flow !== "LAB_LAINNYA") {
+    if (!viewer.departmentScope) {
       return false;
     }
 
-    return reservation.labDepartment === viewer.departmentScope && KAJUR_VISIBLE_STATUSES.has(status);
+    if (reservation.flow === "LAB_LAINNYA") {
+      return reservation.labDepartment === viewer.departmentScope && KAJUR_VISIBLE_STATUSES.has(status);
+    }
+
+    if (reservation.flow === "GENERAL") {
+      const roomScope = getManagedBuildingScope(reservation.roomBuilding);
+      return Boolean(
+        roomScope &&
+          !isDekanatBuilding(reservation.roomBuilding) &&
+          roomScope.department === viewer.departmentScope &&
+          OBSERVER_VISIBLE_STATUSES.has(status),
+      );
+    }
+
+    return false;
+  }
+
+  if (viewer.role === "KAPRODI") {
+    if (!viewer.programScope || reservation.flow !== "GENERAL") {
+      return false;
+    }
+
+    const roomScope = getManagedBuildingScope(reservation.roomBuilding);
+    return Boolean(
+      roomScope &&
+        !isDekanatBuilding(reservation.roomBuilding) &&
+        roomScope.programs.includes(viewer.programScope) &&
+        OBSERVER_VISIBLE_STATUSES.has(status),
+    );
   }
 
   if (viewer.role === "KEPALA_LAB") {
@@ -155,7 +196,7 @@ export function getPostLoginRedirectPath(user: SessionLikeUser | null | undefine
     return SUPERADMIN_DASHBOARD_PATH;
   }
 
-  if (user.role === "ADMIN" || user.role === "ADMIN_DEKAN" || user.role === "ADMIN_WD2") {
+  if (user.role === "ADMIN" || user.role === "ADMIN_DEKAN" || user.role === "ADMIN_WD2" || user.role === "KAJUR" || user.role === "KAPRODI" || user.role === "KEPALA_LAB") {
     return ADMIN_DASHBOARD_PATH;
   }
 

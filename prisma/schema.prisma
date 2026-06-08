@@ -25,6 +25,7 @@ enum UserRole {
   ADMIN_DEKAN
   ADMIN_WD2
   KAJUR
+  KAPRODI
   KEPALA_LAB
   SUPERADMIN
 }
@@ -37,6 +38,7 @@ enum LabProgram {
   SIPIL
   LINGKUNGAN
   MESIN
+  INDUSTRI
 }
 
 enum LabDepartment {
@@ -69,6 +71,8 @@ model User {
   updatedAt       DateTime       @updatedAt
 
   reservations        Reservation[]
+  createdScheduleBlocks RoomScheduleBlock[] @relation("ScheduleBlockCreator")
+  updatedScheduleBlocks RoomScheduleBlock[] @relation("ScheduleBlockUpdater")
   passwordSetupTokens PasswordSetupToken[]
   emailChangeTokens   EmailChangeToken[]
   fcmTokens           FcmToken[]
@@ -136,6 +140,7 @@ model Room {
 
   // Relasi: Satu ruangan bisa ada di banyak reservasi
   reservations Reservation[]
+  scheduleBlocks RoomScheduleBlock[]
 
   @@index([building_id])
 }
@@ -211,6 +216,37 @@ model ReservationItem {
   facility Facility @relation(fields: [fac_id], references: [fac_id])
 
   resItem_qty Int
+}
+
+model RoomScheduleBlock {
+  id              String         @id @default(cuid())
+  title           String
+  type            String
+  scheduleDate    DateTime       @db.Date
+  startTime       String
+  endTime         String
+  buildingName    String
+  departmentScope LabDepartment?
+  programScope    LabProgram?
+  source          String         @default("INTERNAL")
+  googleEventId   String?
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [room_id], onDelete: Cascade)
+
+  createdById String?
+  createdBy   User?   @relation("ScheduleBlockCreator", fields: [createdById], references: [user_id], onDelete: SetNull)
+
+  updatedById String?
+  updatedBy   User?   @relation("ScheduleBlockUpdater", fields: [updatedById], references: [user_id], onDelete: SetNull)
+
+  @@index([roomId, scheduleDate, isActive])
+  @@index([departmentScope])
+  @@index([programScope])
+  @@index([buildingName])
 }
 
 // NEW MODELS FOR FCM AND NOTIFICATIONS

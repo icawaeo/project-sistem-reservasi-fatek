@@ -47,6 +47,7 @@ const LAB_PROGRAM_LABELS: Record<LabProgramValue, string> = {
     SIPIL: "Teknik Sipil",
     LINGKUNGAN: "Teknik Lingkungan",
     MESIN: "Teknik Mesin",
+    INDUSTRI: "Teknik Industri",
 };
 
 const LAB_DEPARTMENT_LABELS: Record<LabDepartmentValue, string> = {
@@ -57,7 +58,7 @@ const LAB_DEPARTMENT_LABELS: Record<LabDepartmentValue, string> = {
 };
 
 const LAB_DEPARTMENT_OPTIONS: LabDepartmentValue[] = ["ELEKTRO", "ARSITEKTUR", "SIPIL", "MESIN"];
-const LAB_PROGRAM_OPTIONS: LabProgramValue[] = ["IT", "ELEKTRO", "ARSITEKTUR", "PWK", "SIPIL", "LINGKUNGAN", "MESIN"];
+const LAB_PROGRAM_OPTIONS: LabProgramValue[] = ["IT", "ELEKTRO", "ARSITEKTUR", "PWK", "SIPIL", "LINGKUNGAN", "MESIN", "INDUSTRI"];
 
 const mapPoints: Record<string, { shortUrl: string; embedUrl: string }> = {
     "Gedung Jurusan Teknik Arsitektur": {

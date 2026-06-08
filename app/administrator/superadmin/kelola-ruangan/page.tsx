@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
-import Sidebar from "@/app/components/administrator/ui/Sidebar";
+import Sidebar from "@/app/components/administrator/ui/SidebarClientOnly";
 import Navbar from "@/app/components/administrator/ui/Navbar";
 import RoomManagementContent from "@/app/components/administrator/kelola-ruangan/RoomManagementContent";
 import type { RoomItem } from "@/app/components/administrator/kelola-ruangan/room-types";

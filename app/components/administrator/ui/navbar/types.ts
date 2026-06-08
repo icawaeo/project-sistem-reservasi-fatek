@@ -7,6 +7,7 @@ export type AdminNavbarProps = {
    * Optional explicit role. If omitted, the client view will infer from pathname.
    */
   role?: AdminNavbarRole;
+  showSidebar?: boolean;
   /**
    * Optional override (mainly for testing). Usually resolved from session in the server wrapper.
    */

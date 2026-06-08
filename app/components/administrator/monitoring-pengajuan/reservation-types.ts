@@ -1,4 +1,4 @@
-export type AdminRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "KEPALA_LAB";
+export type AdminRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "KAPRODI" | "KEPALA_LAB";
 
 export type AdminReservationRecord = {
 	id: string;

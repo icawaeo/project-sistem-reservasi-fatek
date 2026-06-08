@@ -7,12 +7,14 @@ import {
 } from "@/lib/building-operational-policy";
 import { resolveRoomDisplayImage } from "@/app/utils/building";
 import { parseWitaDateTime } from "@/lib/timezone";
+import { validateNotHolidayRange } from "@/lib/holiday-calendar";
 import {
   getDailyReservationSlots,
   isDateInsideDailyReservationSlot,
   rangesConflictByDailySlots,
   RESERVATION_BUFFER_MS,
 } from "@/lib/reservation-slots";
+import { validateRoomScheduleAvailability } from "@/lib/room-schedule-conflicts";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -79,6 +81,11 @@ export async function GET(request: Request) {
           { error: "Jam selesai tidak boleh lebih awal dari jam mulai." },
           { status: 400 },
         );
+      }
+
+      const holidayCheck = await validateNotHolidayRange(startDate as string, endDate as string);
+      if (!holidayCheck.ok) {
+        return NextResponse.json({ error: holidayCheck.error, holidays: holidayCheck.holidays }, { status: 400 });
       }
 
       const candidateBuildings = await prisma.building.findMany({
@@ -163,7 +170,7 @@ export async function GET(request: Request) {
         orderBy: [{ room_building: "asc" }, { room_name: "asc" }],
       });
 
-      const availableRooms = (rooms as RoomWithReservations[])
+      const roomsWithoutReservationConflict = (rooms as RoomWithReservations[])
         .filter((room) =>
           room.reservations.every(
             (reservation) =>
@@ -173,7 +180,26 @@ export async function GET(request: Request) {
               }),
           ),
         )
-        .map(({ reservations: _reservations, ...room }) => withResolvedRoomImage(room));
+        .map(({ reservations: _reservations, ...room }) => room);
+
+      const availabilityChecks = await Promise.all(
+        roomsWithoutReservationConflict.map(async (room) => {
+          const scheduleCheck = await validateRoomScheduleAvailability({
+            roomId: room.room_id as string,
+            startTime: requestStart,
+            endTime: requestEnd,
+          });
+
+          return {
+            room,
+            isAvailable: scheduleCheck.ok,
+          };
+        }),
+      );
+
+      const availableRooms = availabilityChecks
+        .filter((item) => item.isAvailable)
+        .map((item) => withResolvedRoomImage(item.room));
 
       return NextResponse.json(availableRooms, {
         headers: {

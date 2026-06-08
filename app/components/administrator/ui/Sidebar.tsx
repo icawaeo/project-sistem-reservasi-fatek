@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { signOut } from "next-auth/react";
 import {
@@ -13,6 +13,7 @@ import {
   Users,
   ClipboardList,
   FileText,
+  CalendarDays,
   LogOut,
   Menu,
 } from "lucide-react";
@@ -25,7 +26,7 @@ type NavItem = {
   icon: React.ReactNode;
 };
 
-type SidebarProps = {
+export type SidebarProps = {
   role: Role;
   isMobile?: boolean;
   onClose?: () => void;
@@ -49,6 +50,11 @@ const navByRole: Record<Role, NavItem[]> = {
       icon: <Building2 size={16} />,
     },
     {
+      href: "/administrator/superadmin/kelola-jadwal",
+      label: "Kelola Jadwal",
+      icon: <CalendarDays size={16} />,
+    },
+    {
       href: "/administrator/superadmin/kelola-user",
       label: "Kelola User",
       icon: <Users size={16} />,
@@ -70,17 +76,39 @@ const navByRole: Record<Role, NavItem[]> = {
       label: "Dashboard",
       icon: <LayoutGrid size={16} />,
     },
+    {
+      href: "/administrator/admin/kelola-jadwal",
+      label: "Kelola Jadwal",
+      icon: <CalendarDays size={16} />,
+    },
   ],
+};
+
+const isNavItemActive = (pathname: string, item: NavItem) => {
+  if (item.href === "/administrator/admin" || item.href === "/administrator/superadmin/dashboard") {
+    return pathname === item.href;
+  }
+
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
 };
 
 export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
   const pathname = usePathname();
   const navItems = navByRole[role];
+  const [isPortalReady, setIsPortalReady] = useState(false);
+  const [isPathReady, setIsPathReady] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const isExpanded = !isCollapsed;
 
+  useEffect(() => {
+    setIsPortalReady(true);
+    setIsPathReady(true);
+  }, []);
+
   // If rendering as mobile drawer, return an overlay panel
   if (isMobile) {
+    if (!isPortalReady) return null;
+
     return createPortal(
       <div className="fixed inset-0 z-50 flex">
         <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -112,7 +140,7 @@ export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
 
           <nav className="px-3 py-4">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = isPathReady && isNavItemActive(pathname, item);
 
               return (
                 <Link
@@ -197,7 +225,7 @@ export default function Sidebar({ role, isMobile, onClose }: SidebarProps) {
         }`}
       >
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isActive = isPathReady && isNavItemActive(pathname, item);
 
           return (
             <Link
