@@ -1,0 +1,201 @@
+<mxfile host="app.diagrams.net" modified="2026-06-09T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="flowchart-reservasi-approval" name="Flowchart Reservasi Approval">
+    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="2400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Flowchart Reservasi Ruangan Sampai Approval" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1600" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-user" value="User / Peminjam" style="swimlane;html=1;startSize=34;horizontal=0;container=0;collapsible=0;rounded=0;shadow=0;fillColor=#E8F1FF;strokeColor=#4F7DBF;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="390" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-system" value="Sistem" style="swimlane;html=1;startSize=34;horizontal=0;container=0;collapsible=0;rounded=0;shadow=0;fillColor=#EEF8F1;strokeColor=#5C9A69;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="430" y="90" width="410" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-admin" value="Admin" style="swimlane;html=1;startSize=34;horizontal=0;container=0;collapsible=0;rounded=0;shadow=0;fillColor=#FFF4E6;strokeColor=#C9862B;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="840" y="90" width="380" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-kepala" value="Kepala Unit / Lab" style="swimlane;html=1;startSize=34;horizontal=0;container=0;collapsible=0;rounded=0;shadow=0;fillColor=#F4EDFF;strokeColor=#7C5CBF;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="90" width="420" height="2180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="start" value="Mulai" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#374151;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="130" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="login" value="Login ke sistem" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="230" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="open-reservation" value="Membuka halaman reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="350" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="choose-room" value="Memilih ruangan / fasilitas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="470" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="show-detail" value="Menampilkan detail ruangan dan ketersediaan jadwal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="470" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="fill-form" value="Mengisi formulir reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="610" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="submit-request" value="Mengirim permohonan reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="730" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="validate" value="Validasi data dan cek bentrok jadwal" style="rhombus;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="700" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="failed-message" value="Menampilkan pesan gagal validasi / jadwal bentrok" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="890" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="revise-form" value="Memperbaiki data reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="890" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="save-admin-pending" value="Menyimpan reservasi dengan status&lt;br&gt;&lt;b&gt;Menunggu Verifikasi Admin&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1060" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-review" value="Meninjau permohonan reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEDD5;strokeColor=#EA580C;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1065" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-decision" value="Admin menyetujui permohonan?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFEDD5;strokeColor=#EA580C;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1225" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-rejected" value="Status menjadi&lt;br&gt;&lt;b&gt;Ditolak Admin&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1250" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="pending-head" value="Status menjadi&lt;br&gt;&lt;b&gt;Menunggu Persetujuan Kepala Unit / Lab&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1430" width="230" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="head-review" value="Meninjau permohonan reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="1435" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="head-decision" value="Kepala Unit / Lab menyetujui permohonan?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="1615" width="230" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="head-rejected" value="Status menjadi&lt;br&gt;&lt;b&gt;Ditolak Kepala Unit / Lab&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1645" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="approved-lock" value="Status menjadi&lt;br&gt;&lt;b&gt;Disetujui&lt;/b&gt;&lt;br&gt;dan jadwal reservasi dikunci" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1840" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="notify-rejected-admin" value="Mengirim notifikasi hasil penolakan admin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1350" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="notify-rejected-head" value="Mengirim notifikasi hasil penolakan Kepala Unit / Lab" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1745" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="notify-approved" value="Mengirim notifikasi hasil akhir reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1970" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="view-status-admin-rejected" value="Melihat status reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1355" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="view-status-head-rejected" value="Melihat status reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1755" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="view-status-approved" value="Melihat status reservasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1980" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="end-admin-rejected" value="Selesai" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#374151;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="1460" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="end-head-rejected" value="Selesai" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#374151;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="1865" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="end-approved" value="Selesai" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#374151;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="2100" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-start-login" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="start" target="login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-login-open" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="login" target="open-reservation">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-open-choose" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="open-reservation" target="choose-room">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-choose-detail" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="choose-room" target="show-detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-detail-fill" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="show-detail" target="fill-form">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-fill-submit" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="fill-form" target="submit-request">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-submit-validate" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="submit-request" target="validate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-validate-failed" value="Tidak valid / bentrok" style="endArrow=block;html=1;rounded=0;strokeColor=#DC2626;fontSize=12;fontColor=#991B1B;" edge="1" parent="1" source="validate" target="failed-message">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-failed-revise" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#DC2626;" edge="1" parent="1" source="failed-message" target="revise-form">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-revise-submit" value="Kirim ulang" style="endArrow=block;html=1;rounded=0;strokeColor=#2563EB;fontSize=12;fontColor=#1D4ED8;" edge="1" parent="1" source="revise-form" target="submit-request">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="235" y="1030" />
+              <mxPoint x="90" y="1030" />
+              <mxPoint x="90" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-validate-save" value="Valid dan tersedia" style="endArrow=block;html=1;rounded=0;strokeColor=#16A34A;fontSize=12;fontColor=#166534;" edge="1" parent="1" source="validate" target="save-admin-pending">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-save-admin-review" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="save-admin-pending" target="admin-review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-review-decision" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="admin-review" target="admin-decision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-reject" value="Tolak" style="endArrow=block;html=1;rounded=0;strokeColor=#DC2626;fontSize=12;fontColor=#991B1B;" edge="1" parent="1" source="admin-decision" target="admin-rejected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-rejected-notify" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#DC2626;" edge="1" parent="1" source="admin-rejected" target="notify-rejected-admin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-notify-admin-view" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="notify-rejected-admin" target="view-status-admin-rejected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-view-admin-end" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="view-status-admin-rejected" target="end-admin-rejected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-admin-approve" value="Setujui" style="endArrow=block;html=1;rounded=0;strokeColor=#16A34A;fontSize=12;fontColor=#166534;" edge="1" parent="1" source="admin-decision" target="pending-head">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-pending-head-review" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="pending-head" target="head-review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-head-review-decision" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="head-review" target="head-decision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-head-reject" value="Tolak" style="endArrow=block;html=1;rounded=0;strokeColor=#DC2626;fontSize=12;fontColor=#991B1B;" edge="1" parent="1" source="head-decision" target="head-rejected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-head-rejected-notify" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#DC2626;" edge="1" parent="1" source="head-rejected" target="notify-rejected-head">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-notify-head-view" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="notify-rejected-head" target="view-status-head-rejected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-view-head-end" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="view-status-head-rejected" target="end-head-rejected">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-head-approve" value="Setujui" style="endArrow=block;html=1;rounded=0;strokeColor=#16A34A;fontSize=12;fontColor=#166534;" edge="1" parent="1" source="head-decision" target="approved-lock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-approved-notify" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#16A34A;" edge="1" parent="1" source="approved-lock" target="notify-approved">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-notify-approved-view" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="notify-approved" target="view-status-approved">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-view-approved-end" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#374151;" edge="1" parent="1" source="view-status-approved" target="end-approved">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -61,7 +61,7 @@ const mapReservation = (item: {
     userType: "USER" | "STAFF";
     identifier: string | null;
     email: string;
-  };
+  } | null;
   room: {
     room_name: string;
     room_building: string;
@@ -77,10 +77,10 @@ const mapReservation = (item: {
   documentUrl: item.res_documentUrl,
   decisionDocumentUrl: item.res_decisionDocumentUrl,
   user: {
-    name: item.user.name,
-    userType: item.user.userType,
-    identifier: item.user.identifier,
-    email: item.user.email,
+    name: item.user?.name ?? "User terhapus",
+    userType: item.user?.userType ?? "USER",
+    identifier: item.user?.identifier ?? null,
+    email: item.user?.email ?? "-",
   },
   room: {
     name: item.room.room_name,

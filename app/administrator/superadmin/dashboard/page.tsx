@@ -25,6 +25,37 @@ const splitReservationPurpose = (value: string | null) => {
 	};
 };
 
+type ReservationUserSnapshot = {
+	name: string | null;
+	userType: string | null;
+	identifier: string | null;
+	email: string | null;
+} | null;
+
+type SuperadminDashboardReservation = {
+	res_purpose: string | null;
+	res_status: string;
+	res_endTime: Date;
+	res_id: string;
+	res_date: Date;
+	res_startTime: Date;
+	res_documentUrl: string | null;
+	res_decisionDocumentUrl: string | null;
+	user: ReservationUserSnapshot;
+	room: {
+		room_name: string;
+		room_building: string | null;
+		room_locDetail: string | null;
+	};
+};
+
+const mapReservationUser = (user: ReservationUserSnapshot) => ({
+	name: user?.name ?? "User terhapus",
+	userType: (user?.userType ?? "USER") as "USER" | "STAFF",
+	identifier: user?.identifier ?? null,
+	email: user?.email ?? "-",
+});
+
 export default async function SuperadminDashboardPage() {
 	const session = await getServerSession(authOptions);
 
@@ -32,7 +63,11 @@ export default async function SuperadminDashboardPage() {
 		redirect("/auth");
 	}
 
-	const [reservations, minDaysAheadExclusive, buildings] = await Promise.all([
+	const [reservations, minDaysAheadExclusive, buildings]: [
+		SuperadminDashboardReservation[],
+		number,
+		Array<{ building_name: string }>,
+	] = await Promise.all([
 		prisma.reservation.findMany({
 		include: {
 			user: {
@@ -79,7 +114,7 @@ export default async function SuperadminDashboardPage() {
 
 	const totalUsers = await prisma.user.count();
 
-	const tableData: MonitoringReservation[] = reservations.map((item: { res_purpose: string | null; res_status: string; res_endTime: string | Date; res_id: any; res_date: { toISOString: () => any; }; res_startTime: { toISOString: () => any; }; res_documentUrl: any; res_decisionDocumentUrl: any; user: { name: any; userType: any; identifier: any; email: any; }; room: { room_name: any; room_building: any; room_locDetail: any; }; }) => {
+	const tableData: MonitoringReservation[] = reservations.map((item) => {
 		const parsedPurpose = splitReservationPurpose(item.res_purpose);
 		const computedStatus = computeReservationStatus(item.res_status, item.res_endTime);
 
@@ -93,16 +128,11 @@ export default async function SuperadminDashboardPage() {
 		status: computedStatus,
 		documentUrl: item.res_documentUrl,
 		decisionDocumentUrl: item.res_decisionDocumentUrl,
-		user: {
-			name: item.user.name,
-			userType: item.user.userType,
-			identifier: item.user.identifier,
-			email: item.user.email,
-		},
+		user: mapReservationUser(item.user),
 		room: {
 			name: item.room.room_name,
-			building: item.room.room_building,
-			location: item.room.room_locDetail,
+			building: item.room.room_building ?? "-",
+			location: item.room.room_locDetail ?? "-",
 		},
 		};
 	});

@@ -195,8 +195,8 @@ model Reservation {
   res_decisionAt         DateTime?
 
   // Foreign Keys
-  user_id String
-  user    User   @relation(fields: [user_id], references: [user_id])
+  user_id String?
+  user    User?   @relation(fields: [user_id], references: [user_id], onDelete: SetNull)
 
   room_id String
   room    Room   @relation(fields: [room_id], references: [room_id])

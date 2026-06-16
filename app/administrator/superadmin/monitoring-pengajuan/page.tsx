@@ -25,7 +25,7 @@ type SuperadminReservation = {
 		userType: string | null;
 		identifier: string | null;
 		email: string | null;
-	};
+	} | null;
 	room: {
 		room_name: string;
 		room_building: string | null;
@@ -46,6 +46,13 @@ const splitReservationPurpose = (value: string | null) => {
 		purpose: purpose || "-",
 	};
 };
+
+const mapReservationUser = (user: SuperadminReservation["user"]) => ({
+	name: user?.name ?? "User terhapus",
+	userType: (user?.userType ?? "USER") as "USER" | "STAFF",
+	identifier: user?.identifier ?? null,
+	email: user?.email ?? "-",
+});
 
 export default async function SuperadminMonitoringPengajuanPage() {
 	const session = await getServerSession(authOptions);
@@ -95,12 +102,7 @@ export default async function SuperadminMonitoringPengajuanPage() {
 		status: computedStatus,
 		documentUrl: item.res_documentUrl,
 		decisionDocumentUrl: item.res_decisionDocumentUrl,
-		user: {
-			name: item.user.name ?? "-",
-			userType: (item.user.userType ?? "USER") as "USER" | "STAFF",
-			identifier: item.user.identifier,
-			email: item.user.email ?? "-",
-		},
+		user: mapReservationUser(item.user),
 		room: {
 			name: item.room.room_name,
 			building: item.room.room_building ?? "-",
