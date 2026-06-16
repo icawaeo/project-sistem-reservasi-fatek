@@ -122,3 +122,55 @@ defineBlackboxCase("RMG-02", "ruangan dengan riwayat reservasi tidak dapat dihap
   await driver.findElement(By.xpath("//button[normalize-space()='Hapus']")).click();
   await waitForText(driver, "tidak dapat dihapus karena sudah memiliki riwayat reservasi", 20000);
 });
+
+defineBlackboxCase("UMG-01", "superadmin dapat menghapus user dengan riwayat reservasi selesai", {
+  roles: ["SUPERADMIN"],
+  feature: "kelola-user",
+}, async ({
+  driver,
+  users,
+  until,
+  assert,
+  E2E_PREFIX,
+  PASSWORD,
+  BASE_URL,
+  createRoom,
+  createReservation,
+  dateTime,
+  login,
+  browserFetch,
+  prisma,
+}) => {
+  const room = await createRoom({
+    name: `${E2E_PREFIX} UMG-01 Room ${Date.now()}`,
+  });
+  const reservation = await createReservation({
+    userId: users.secondary.user_id,
+    roomId: room.room_id,
+    purpose: `${E2E_PREFIX} UMG-01 Completed History`,
+    start: dateTime("2026-01-10", "09:00"),
+    end: dateTime("2026-01-10", "11:00"),
+    status: "COMPLETED",
+  });
+
+  await login(driver, "superadmin@unsrat.ac.id", PASSWORD);
+  await driver.wait(until.urlContains("/administrator/superadmin/dashboard"), 20000);
+
+  const deleteResult = await browserFetch(driver, `${BASE_URL}/api/admin/users/${users.secondary.user_id}`, {
+    method: "DELETE",
+  });
+
+  assert.equal(deleteResult.status, 200);
+
+  const deletedUser = await prisma.user.findUnique({
+    where: { user_id: users.secondary.user_id },
+  });
+  assert.equal(deletedUser, null);
+
+  const retainedReservation = await prisma.reservation.findUnique({
+    where: { res_id: reservation.res_id },
+    select: { res_status: true },
+  });
+
+  assert.equal(retainedReservation?.res_status, "COMPLETED");
+});
