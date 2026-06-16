@@ -11,6 +11,7 @@ const TEST_CASES = [
   { id: "APR-02", roles: ["ADMIN_DEKAN"], feature: "approval", file: "tests/e2e/test-cases/admin-dekan.spec.js" },
   { id: "RMG-01", roles: ["SUPERADMIN"], feature: "kelola-ruangan", file: "tests/e2e/test-cases/superadmin.spec.js" },
   { id: "RMG-02", roles: ["SUPERADMIN"], feature: "kelola-ruangan", file: "tests/e2e/test-cases/superadmin.spec.js" },
+  { id: "UMG-01", roles: ["SUPERADMIN"], feature: "kelola-user", file: "tests/e2e/test-cases/superadmin.spec.js" },
   { id: "SCH-01", roles: ["USER"], feature: "jadwal", file: "tests/e2e/test-cases/user.spec.js" },
 ];
 
