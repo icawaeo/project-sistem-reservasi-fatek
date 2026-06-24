@@ -2,7 +2,7 @@
 // Service Worker — Sistem Reservasi Ruangan Fatek UNSRAT (PWA)
 // ============================================================
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE  = `static-cache-${CACHE_VERSION}`;
 const PAGES_CACHE   = `pages-cache-${CACHE_VERSION}`;
 const IMAGE_CACHE   = `image-cache-${CACHE_VERSION}`;

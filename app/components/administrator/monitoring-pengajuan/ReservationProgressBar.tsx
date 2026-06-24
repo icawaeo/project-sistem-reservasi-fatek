@@ -26,7 +26,7 @@ function resolveSteps(flow: AdminReservationRecord["flow"]): Step[] {
 	if (flow === "LAB_LAINNYA") {
 		return [
 			{ key: "SUBMITTED", label: "Diajukan", shortLabel: "Diajukan" },
-			{ key: "WAITING_KAJUR", label: "Menunggu Persetujuan Kepala Jurusan", shortLabel: "Kepala Jurusan" },
+			{ key: "WAITING_DEKAN", label: "Menunggu Persetujuan Dekan", shortLabel: "Dekan" },
 			{ key: "WAITING_KEPALA_LAB", label: "Menunggu Persetujuan Kepala Lab", shortLabel: "Kepala Lab" },
 			{ key: "DECISION", label: "Disetujui/Ditolak", shortLabel: "Disetujui/Ditolak" },
 			{ key: "COMPLETED", label: "Selesai", shortLabel: "Selesai" },
@@ -120,7 +120,7 @@ function resolveProgressState(statusRaw: string, flow: AdminReservationRecord["f
 			return { currentIndex: 2, isComplete: false, rejectedIndex: null };
 		}
 
-		if (status === "PENDING_KAJUR") {
+		if (status === "PENDING_DEKAN" || status === "PENDING_KAJUR") {
 			return { currentIndex: 1, isComplete: false, rejectedIndex: null };
 		}
 
@@ -168,9 +168,8 @@ function resolveSecondaryText(params: { stepIndex: number; state: StepState; dat
 		const step = params.steps[stepIndex];
 		if (!step) return null;
 		if (step.key === "SUBMITTED") return data.createdAt;
-		if (step.key === "WAITING_DEKAN") return data.waitingDekanAt;
+		if (step.key === "WAITING_DEKAN") return data.waitingDekanAt ?? data.waitingKajurAt;
 		if (step.key === "WAITING_WD2") return data.waitingWd2At;
-		if (step.key === "WAITING_KAJUR") return data.waitingKajurAt;
 		if (step.key === "WAITING_KEPALA_LAB") return data.waitingKepalaLabAt;
 		if (step.key === "DECISION") return data.decisionAt;
 		if (step.key === "COMPLETED") {

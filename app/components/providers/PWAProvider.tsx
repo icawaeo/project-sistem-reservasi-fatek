@@ -36,10 +36,35 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const isProduction = process.env.NODE_ENV === 'production';
 
   // ── Register Service Worker ──
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+
+    if (!isProduction) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((reg) => reg.unregister());
+      });
+
+      if ('caches' in window) {
+        caches.keys().then((keys) => {
+          keys.forEach((key) => {
+            if (
+              key.startsWith('static-cache-') ||
+              key.startsWith('pages-cache-') ||
+              key.startsWith('image-cache-') ||
+              key.startsWith('font-cache-') ||
+              key.startsWith('api-cache-')
+            ) {
+              caches.delete(key);
+            }
+          });
+        });
+      }
+
+      return;
+    }
 
     // Check installed state
     const isStandalone =

@@ -55,6 +55,8 @@ const KABAG_VISIBLE_STATUSES = new Set([
 const DEKAN_VISIBLE_STATUSES = new Set([
   "PENDING_DEKAN",
   "REJECTED_DEKAN",
+  "PENDING_KEPALA_LAB",
+  "REJECTED_KEPALA_LAB",
   "PENDING_WD2",
   "PENDING_WAKIL_DEKAN_2",
   "REJECTED_WD2",
@@ -101,7 +103,7 @@ export function shouldShowAdminReservation(viewer: AdminReservationViewer, reser
   }
 
   if (viewer.role === "ADMIN_DEKAN") {
-    if (reservation.flow !== "GENERAL") return false;
+    if (reservation.flow !== "GENERAL" && reservation.flow !== "LAB_LAINNYA") return false;
     return DEKAN_VISIBLE_STATUSES.has(status);
   }
 
@@ -113,10 +115,6 @@ export function shouldShowAdminReservation(viewer: AdminReservationViewer, reser
   if (viewer.role === "KAJUR") {
     if (!viewer.departmentScope) {
       return false;
-    }
-
-    if (reservation.flow === "LAB_LAINNYA") {
-      return reservation.labDepartment === viewer.departmentScope && KAJUR_VISIBLE_STATUSES.has(status);
     }
 
     if (reservation.flow === "GENERAL") {

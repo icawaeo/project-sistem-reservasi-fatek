@@ -205,11 +205,10 @@ const getSignersForReservation = async (params: {
 	}
 
 	if (params.flow === "LAB_LAINNYA") {
-		const [kajur, kepalaLab] = await Promise.all([
+		const [dekan, kepalaLab] = await Promise.all([
 			prisma.user.findFirst({
 				where: {
-					role: "KAJUR",
-					...(params.labDepartment ? { departmentScope: params.labDepartment } : {}),
+					role: "ADMIN_DEKAN",
 				},
 				select: { user_id: true, name: true, identifier: true, rank: true, position: true, signatureUrl: true },
 			}),
@@ -222,13 +221,13 @@ const getSignersForReservation = async (params: {
 			}),
 		]);
 
-		if (!kajur || !kepalaLab) {
-			throw new Error("Akun Kajur atau Kepala Lab yang sesuai belum tersedia.");
+		if (!dekan || !kepalaLab) {
+			throw new Error("Akun Admin Dekan atau Kepala Lab yang sesuai belum tersedia.");
 		}
 
-		assertSignerComplete(kajur, "Kajur");
+		assertSignerComplete(dekan, "Admin Dekan");
 		assertSignerComplete(kepalaLab, "Kepala Lab");
-		return [kajur, kepalaLab];
+		return [dekan, kepalaLab];
 	}
 
 	throw new Error("Alur peminjaman tidak dikenali.");

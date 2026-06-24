@@ -79,9 +79,6 @@ function canAdminAct(role: string, status: string) {
   if (normRole === "ADMIN_WD2") {
     return normStatus === "PENDING_WD2" || normStatus === "PENDING_WAKIL_DEKAN_2";
   }
-  if (normRole === "KAJUR") {
-    return normStatus === "PENDING_KAJUR";
-  }
   if (normRole === "KEPALA_LAB") {
     return normStatus === "PENDING_KEPALA_LAB";
   }

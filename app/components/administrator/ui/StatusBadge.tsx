@@ -15,7 +15,7 @@ const labelMap: Record<string, string> = {
   PENDING_WD2: "Menunggu TTD Wakil Dekan 2",
   PENDING_WAKIL_DEKAN_2: "Menunggu TTD Wakil Dekan 2",
   PENDING_KABAG: "Menunggu Konfirmasi Kabag",
-  PENDING_KAJUR: "Menunggu Persetujuan Kajur",
+  PENDING_KAJUR: "Menunggu Persetujuan Dekan",
   PENDING_KEPALA_LAB: "Menunggu Persetujuan Kepala Lab",
 
   // Fallback pending (jika belum ada granular step)
@@ -24,7 +24,7 @@ const labelMap: Record<string, string> = {
   REJECTED_KABAG: "Ditolak Kabag",
   REJECTED_DEKAN: "Ditolak Dekan",
   REJECTED_WD2: "Ditolak Wakil Dekan 2",
-  REJECTED_KAJUR: "Ditolak Kajur",
+  REJECTED_KAJUR: "Ditolak Dekan",
   REJECTED_KEPALA_LAB: "Ditolak Kepala Lab",
 
   APPROVED: "Disetujui",
@@ -37,7 +37,8 @@ const labelMap: Record<string, string> = {
   "MENUNGGU PERSETUJUAN DEKAN": "Menunggu Persetujuan Dekan",
   "MENUNGGU TTD WAKIL DEKAN 2": "Menunggu TTD Wakil Dekan 2",
   "MENUNGGU KONFIRMASI KABAG": "Menunggu Konfirmasi Kabag",
-  "MENUNGGU PERSETUJUAN KAJUR": "Menunggu Persetujuan Kajur",
+  "MENUNGGU PERSETUJUAN KAJUR": "Menunggu Persetujuan Dekan",
+  "MENUNGGU PERSETUJUAN KEPALA JURUSAN": "Menunggu Persetujuan Dekan",
   "MENUNGGU PERSETUJUAN KEPALA LAB": "Menunggu Persetujuan Kepala Lab",
   DISETUJUI: "Disetujui",
   SELESAI: "Selesai",
@@ -79,7 +80,10 @@ function resolveStatusLabelAndClass(status: string) {
       return { label: "Menunggu Konfirmasi Kabag", className: styleByGroup.pending };
     }
     if (normalized.includes("KAJUR")) {
-      return { label: "Menunggu Persetujuan Kajur", className: styleByGroup.pending };
+      return { label: "Menunggu Persetujuan Dekan", className: styleByGroup.pending };
+    }
+    if (normalized.includes("KEPALA JURUSAN")) {
+      return { label: "Menunggu Persetujuan Dekan", className: styleByGroup.pending };
     }
     if (normalized.includes("KEPALA") || normalized.includes("KALAB") || normalized.includes("LAB")) {
       return { label: "Menunggu Persetujuan Kepala Lab", className: styleByGroup.pending };

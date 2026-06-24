@@ -9,7 +9,7 @@ import { generateDecisionLetterForReservation } from "@/lib/decision-letter";
 
 type DecisionAction = "APPROVE" | "REJECT";
 
-type ApproverRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KAJUR" | "KEPALA_LAB";
+type ApproverRole = "ADMIN" | "ADMIN_DEKAN" | "ADMIN_WD2" | "KEPALA_LAB";
 type ReservationFlow = "GENERAL" | "LAB_SKRIPSI" | "LAB_LAINNYA";
 
 type SessionUser = {
@@ -34,24 +34,24 @@ const resolveNextStatus = (params: {
     if (role === "ADMIN") {
       if (current === "PENDING" || current === "PENDING_KABAG") {
         if (flow === "LAB_SKRIPSI") return "PENDING_KEPALA_LAB";
-        if (flow === "LAB_LAINNYA") return "PENDING_KAJUR";
+        if (flow === "LAB_LAINNYA") return "PENDING_DEKAN";
         return "PENDING_DEKAN";
       }
       return null;
     }
 
     if (role === "ADMIN_DEKAN") {
-      if (current === "PENDING_DEKAN") return "PENDING_WD2";
+      if (flow === "LAB_LAINNYA" && (current === "PENDING_DEKAN" || current === "PENDING_KAJUR")) {
+        return "PENDING_KEPALA_LAB";
+      }
+      if (flow === "GENERAL" && current === "PENDING_DEKAN") {
+        return "PENDING_WD2";
+      }
       return null;
     }
 
     if (role === "ADMIN_WD2") {
       if (current === "PENDING_WD2" || current === "PENDING_WAKIL_DEKAN_2") return "APPROVED";
-      return null;
-    }
-
-    if (role === "KAJUR") {
-      if (current === "PENDING_KAJUR") return "PENDING_KEPALA_LAB";
       return null;
     }
 
@@ -69,16 +69,16 @@ const resolveNextStatus = (params: {
     }
 
     if (role === "ADMIN_DEKAN") {
-      if (current === "PENDING_DEKAN") return "REJECTED_DEKAN";
+      if (flow === "LAB_LAINNYA" && (current === "PENDING_DEKAN" || current === "PENDING_KAJUR")) {
+        return "REJECTED_DEKAN";
+      }
+      if (flow === "GENERAL" && current === "PENDING_DEKAN") {
+        return "REJECTED_DEKAN";
+      }
       return null;
     }
 
     if (role === "ADMIN_WD2") {
-      return null;
-    }
-
-    if (role === "KAJUR") {
-      if (current === "PENDING_KAJUR") return "REJECTED_KAJUR";
       return null;
     }
 
@@ -99,7 +99,6 @@ const normalizeApproverRole = (role: string | null | undefined): ApproverRole | 
     normalized === "ADMIN" ||
     normalized === "ADMIN_DEKAN" ||
     normalized === "ADMIN_WD2" ||
-    normalized === "KAJUR" ||
     normalized === "KEPALA_LAB"
   ) {
     return normalized as ApproverRole;
@@ -183,15 +182,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
     if (!existing) {
       return NextResponse.json({ error: "Pengajuan tidak ditemukan" }, { status: 404 });
-    }
-
-    if (auth.user.role === "KAJUR") {
-      if (!auth.user.departmentScope) {
-        return NextResponse.json({ error: "Akun Kajur belum memiliki scope jurusan." }, { status: 403 });
-      }
-      if (!existing.res_labDepartment || existing.res_labDepartment !== auth.user.departmentScope) {
-        return NextResponse.json({ error: "Anda tidak berwenang memproses pengajuan jurusan ini." }, { status: 403 });
-      }
     }
 
     if (auth.user.role === "KEPALA_LAB") {
@@ -369,12 +359,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       } else if (normalizedStatus === 'PENDING_WD2' || normalizedStatus === 'PENDING_WAKIL_DEKAN_2') {
         nextAdminRole = 'ADMIN_WD2';
         nextAdminWhere = { role: 'ADMIN_WD2' };
-      } else if (normalizedStatus === 'PENDING_KAJUR') {
-        nextAdminRole = 'KAJUR';
-        nextAdminWhere = {
-          role: 'KAJUR',
-          ...(updated.res_labDepartment ? { departmentScope: updated.res_labDepartment } : {}),
-        };
       } else if (normalizedStatus === 'PENDING_KEPALA_LAB') {
         nextAdminRole = 'KEPALA_LAB';
         nextAdminWhere = {
