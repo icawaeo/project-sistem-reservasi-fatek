@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, Clock, Mail, Phone, User, X } from "lucide-react";
 import { useToast } from "@/app/components/ui/toast";
+import { parseWitaDateTime } from "@/lib/timezone";
 import type { MonitoringReservation } from "./monitoring-types";
 
 type RoomOption = {
@@ -56,6 +57,25 @@ export default function AddReservationModal({
   const hasCompleteSchedule =
     hasSelectedBuilding && !!form.startDate && !!form.endDate && !!form.startTime && !!form.endTime;
 
+  const scheduleValidationError = useMemo(() => {
+    if (!hasCompleteSchedule) {
+      return null;
+    }
+
+    const requestedStart = parseWitaDateTime(form.startDate, form.startTime);
+    const requestedEnd = parseWitaDateTime(form.endDate, form.endTime);
+
+    if (!requestedStart || !requestedEnd) {
+      return "Format tanggal atau waktu belum valid.";
+    }
+
+    if (requestedEnd <= requestedStart) {
+      return "Tanggal dan waktu selesai harus lebih besar dari tanggal dan waktu mulai.";
+    }
+
+    return null;
+  }, [form.endDate, form.endTime, form.startDate, form.startTime, hasCompleteSchedule]);
+
   useEffect(() => {
     if (!isOpen) {
       setForm(initialForm);
@@ -66,6 +86,11 @@ export default function AddReservationModal({
     }
 
     if (!hasSelectedBuilding) {
+      setRoomOptions([]);
+      return;
+    }
+
+    if (scheduleValidationError) {
       setRoomOptions([]);
       return;
     }
@@ -123,6 +148,7 @@ export default function AddReservationModal({
     isOpen,
     hasSelectedBuilding,
     hasCompleteSchedule,
+    scheduleValidationError,
     form.building,
     form.startDate,
     form.endDate,
@@ -334,7 +360,11 @@ export default function AddReservationModal({
               </p>
             ) : null}
 
-            {hasCompleteSchedule && !isCheckingRooms && roomOptions.length === 0 ? (
+            {scheduleValidationError ? (
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+                {scheduleValidationError}
+              </p>
+            ) : hasCompleteSchedule && !isCheckingRooms && roomOptions.length === 0 ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
                 Tidak ada ruangan kosong pada jadwal tersebut. Silakan ubah tanggal atau jam.
               </p>

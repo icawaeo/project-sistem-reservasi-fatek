@@ -33,6 +33,7 @@ export const prisma =
     log: ["query"],
   });
 
+// This client must stay aligned with the generated Prisma schema output.
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.pgPool = pgPool
   globalForPrisma.prisma = prisma;
