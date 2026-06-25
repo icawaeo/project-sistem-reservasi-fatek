@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { isSuperadminUser } from "@/lib/admin-access";
+import { activeReservationWhere } from "@/lib/reservation-lifecycle";
 import { getRequestLogMeta, logServerError } from "@/lib/server-logger";
 
 const authorize = async () => {
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
         user_id: {
           in: safeIds,
         },
+        ...activeReservationWhere(),
       },
       distinct: ["user_id"],
       select: {

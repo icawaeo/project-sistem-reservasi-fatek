@@ -7,6 +7,7 @@ import { isPrismaKnownRequestError } from "@/lib/prisma-errors";
 import { USER_ROLES, USER_TYPES, type UserRoleValue, type UserTypeValue } from "@/lib/user-enums";
 import { LAB_PROGRAM_VALUES, type LabDepartmentValue, type LabProgramValue } from "@/lib/lab-enums";
 import { getRequestLogMeta, logServerError, logServerWarn } from "@/lib/server-logger";
+import { activeReservationWhere } from "@/lib/reservation-lifecycle";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -196,15 +197,16 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Akun yang sedang dipakai tidak bisa dihapus" }, { status: 400 });
     }
 
-    const reservationsCount = await prisma.reservation.count({
+    const activeReservationsCount = await prisma.reservation.count({
       where: {
         user_id: id,
+        ...activeReservationWhere(),
       },
     });
 
-    if (reservationsCount > 0) {
+    if (activeReservationsCount > 0) {
       return NextResponse.json(
-        { error: "User tidak dapat dihapus karena memiliki riwayat reservasi" },
+        { error: "User tidak dapat dihapus karena memiliki reservasi aktif atau dalam proses approval" },
         { status: 409 }
       );
     }
