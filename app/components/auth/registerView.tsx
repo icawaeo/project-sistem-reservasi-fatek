@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/app/components/ui/toast";
 
 const RESEND_COOLDOWN_SECONDS = 60;
+const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 type RegistrationStep = "form" | "otp";
 
@@ -72,6 +73,22 @@ export default function RegisterView() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      pushToast({ type: "error", message: "Password dan konfirmasi password tidak sama." });
+      setLoading(false);
+      return;
+    }
+
+    if (!PASSWORD_RULES.test(formData.password)) {
+      pushToast({
+        type: "error",
+        message: "Kata sandi minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka.",
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -456,6 +473,9 @@ export default function RegisterView() {
               </div>
             </div>
           </div>
+          <p className="text-[10px] lg:text-[11px] text-slate-600/80 mt-1">
+            Kata sandi minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka.
+          </p>
 
           <button
             type="submit"

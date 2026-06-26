@@ -8,8 +8,8 @@ const testCivitas = async () => {
     name: 'Test Civitas',
     email: 'testcivitas@student.unsrat.ac.id',
     identifier: '22090999',
-    password: 'password123',
-    confirmPassword: 'password123'
+    password: 'Password123',
+    confirmPassword: 'Password123'
   };
 
   try {
@@ -33,8 +33,8 @@ const testUmum = async () => {
     name: 'Test Umum User',
     email: 'testumum@example.com',
     identifier: '',
-    password: 'password123',
-    confirmPassword: 'password123'
+    password: 'Password123',
+    confirmPassword: 'Password123'
   };
 
   try {

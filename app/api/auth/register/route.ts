@@ -48,10 +48,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validasi password minimal 8 karakter
-    if (password.length < 8) {
+    // Validasi password minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka
+    const PASSWORD_RULES = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!PASSWORD_RULES.test(password)) {
       return NextResponse.json(
-        { error: "Password minimal 8 karakter" },
+        { error: "Kata sandi minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka" },
         { status: 400 }
       );
     }
