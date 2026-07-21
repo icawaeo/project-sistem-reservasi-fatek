@@ -54,6 +54,11 @@ enum ReservationFlow {
   LAB_LAINNYA
 }
 
+enum ActivityType {
+  AKADEMIK
+  NON_AKADEMIK
+}
+
 model User {
   user_id         String         @id @default(uuid())
   email           String         @unique
@@ -176,6 +181,7 @@ model Reservation {
   res_endTime     DateTime
   res_purpose     String
   res_flow        ReservationFlow @default(GENERAL)
+  res_activityType ActivityType   @default(NON_AKADEMIK)
   res_status      String          @default("PENDING") // e.g., "PENDING", "APPROVED", "REJECTED"
   res_documentUrl String?
   res_decisionDocumentUrl String?

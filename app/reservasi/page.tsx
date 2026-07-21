@@ -44,6 +44,7 @@ type ReservationDraft = {
     purpose?: string;
     reason?: string;
     res_flow?: ReservationFlow;
+    activityType?: "AKADEMIK" | "NON_AKADEMIK";
     documentName?: string;
     documentSize?: number | null;
     documentType?: string | null;
@@ -111,6 +112,7 @@ function ReservasiContent() {
     const [purposeTitle, setPurposeTitle] = useState<string | null>(null);
     const [purposeDetail, setPurposeDetail] = useState<string | null>(null);
     const [reservationFlow, setReservationFlow] = useState<ReservationFlow | null>(null);
+    const [activityType, setActivityType] = useState<"AKADEMIK" | "NON_AKADEMIK" | null>(null);
     const [supportingFile, setSupportingFile] = useState<File | null>(null);
     const [supportingFileDataUrl, setSupportingFileDataUrl] = useState<string | null>(null);
     const [availabilityError, setAvailabilityError] = useState("");
@@ -126,6 +128,7 @@ function ReservasiContent() {
     const effectiveReservationFlow: ReservationFlow = isLabBuilding ? reservationFlowValue : "GENERAL";
     const supportingFileDataUrlValue = supportingFileDataUrl ?? storedDraft?.documentDataUrl ?? null;
     const supportingFileLabel = supportingFile?.name ?? storedDraft?.documentName ?? "Klik untuk unggah berkas";
+    const activityTypeValue = activityType ?? (searchParams.get("activityType") as "AKADEMIK" | "NON_AKADEMIK") ?? storedDraft?.activityType ?? "NON_AKADEMIK";
 
     const handleSupportingFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] ?? null;
@@ -182,6 +185,7 @@ function ReservasiContent() {
                     endDate,
                     startTime,
                     endTime,
+                    activityType: activityTypeValue,
                 });
 
                 const response = await fetch(`/api/rooms?${params.toString()}`, {
@@ -215,7 +219,7 @@ function ReservasiContent() {
         void checkAvailability();
 
         return () => abortController.abort();
-    }, [roomId, roomName, roomBuilding, startDate, endDate, startTime, endTime]);
+    }, [roomId, roomName, roomBuilding, startDate, endDate, startTime, endTime, activityTypeValue]);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -282,6 +286,7 @@ function ReservasiContent() {
             purpose: purposeTitleValue,
             reason: purposeDetailValue,
             res_flow: effectiveReservationFlow,
+            activityType: activityTypeValue,
             documentName: supportingFile?.name ?? storedDraft?.documentName ?? "Belum ada dokumen",
             documentSize: supportingFile?.size ?? storedDraft?.documentSize ?? null,
             documentType: supportingFile?.type ?? storedDraft?.documentType ?? null,
@@ -529,6 +534,20 @@ function ReservasiContent() {
                                         </select>
                                     </label>
                                 )}
+
+                                <label className="space-y-1.5 block">
+                                    <span className="text-[11px] lg:text-xs font-semibold text-slate-600">Jenis Kegiatan</span>
+                                    <select
+                                        value={activityTypeValue}
+                                        onChange={(e) => setActivityType(e.target.value as "AKADEMIK" | "NON_AKADEMIK")}
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm lg:text-base text-slate-700 outline-none cursor-not-allowed opacity-80"
+                                        required
+                                        disabled
+                                    >
+                                        <option value="NON_AKADEMIK">Non-Akademik (Kegiatan UKM, Rapat Organisasi, dll.)</option>
+                                        <option value="AKADEMIK">Akademik (Perkuliahan, Ujian, Seminar Akademik, dll.)</option>
+                                    </select>
+                                </label>
 
                                 <label className="space-y-1.5 block">
                                     <span className="text-[11px] lg:text-xs font-semibold text-slate-600">Alasan Peminjaman</span>

@@ -45,6 +45,7 @@ type ReservationDraft = {
   purpose: string;
   reason: string;
 	res_flow?: ReservationFlow;
+  activityType?: "AKADEMIK" | "NON_AKADEMIK";
   documentName: string;
   documentSize: number | null;
   documentType: string | null;
@@ -76,6 +77,7 @@ const fallbackReservation: ReservationDraft = {
   purpose: "-",
   reason: "-",
   res_flow: "GENERAL",
+  activityType: "NON_AKADEMIK",
   documentName: "Belum ada dokumen",
   documentSize: null,
   documentType: null,
@@ -226,6 +228,7 @@ export default function KonfirmasiReservasiPage() {
           : endDateTime.toISOString(),
         res_purpose: reservation.reason && reservation.reason !== "-" ? `${reservation.purpose} - ${reservation.reason}` : reservation.purpose,
         res_flow: reservation.res_flow ?? "GENERAL",
+        res_activityType: reservation.activityType ?? "NON_AKADEMIK",
         res_documentUrl: null as string | null,
         borrower_identifier: reservation.identifier,
       };
@@ -253,6 +256,7 @@ export default function KonfirmasiReservasiPage() {
           startTime: reservation.startTime,
           endTime: reservation.endTime,
           building: reservation.room_building,
+          activityType: reservation.activityType || "NON_AKADEMIK",
         });
         const availCheckRes = await fetch(`/api/rooms?${availParams.toString()}`);
         const availRooms = await availCheckRes.json();
@@ -436,6 +440,22 @@ export default function KonfirmasiReservasiPage() {
                 <div>
                   <div className="text-[11px] lg:text-xs text-slate-500">Nama Kegiatan</div>
                   <div className="font-semibold text-slate-900">{reservation.purpose}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] lg:text-xs text-slate-500">Jenis Kegiatan</div>
+                  <div className="font-semibold text-slate-900">
+                    {reservation.activityType === "AKADEMIK" ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+                        Akademik
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+                        Non-Akademik
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <div className="text-[11px] lg:text-xs text-slate-500">Alasan Peminjaman</div>

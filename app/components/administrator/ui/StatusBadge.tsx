@@ -26,6 +26,7 @@ const labelMap: Record<string, string> = {
   REJECTED_WD2: "Ditolak Wakil Dekan 2",
   REJECTED_KAJUR: "Ditolak Dekan",
   REJECTED_KEPALA_LAB: "Ditolak Kepala Lab",
+  REJECTED_PRIORITY: "Ditolak (Prioritas Akademik)",
 
   APPROVED: "Disetujui",
   COMPLETED: "Selesai",

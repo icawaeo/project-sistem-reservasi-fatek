@@ -8,6 +8,7 @@ import { formatDateRange, formatTimeRange } from "../utils/formatters";
 import {
   buildDecisionLetterUrl,
   extractActivityName,
+  extractActivityReason,
   getReservationDisplayStatus,
   isDecisionLetterReady,
 } from "../utils/reservation";
@@ -24,8 +25,14 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot, se
     return fromReservation ?? draftSnapshot?.purpose ?? "-";
   }, [reservation?.res_purpose, draftSnapshot?.purpose]);
 
-  const latestReason = draftSnapshot?.reason ?? "-";
-  const latestDocumentName = draftSnapshot?.documentName ?? "Belum ada surat pengantar";
+  const latestReason = useMemo(() => {
+    const fromReservation = reservation?.res_purpose ? extractActivityReason(reservation.res_purpose) : null;
+    return fromReservation && fromReservation !== "-" ? fromReservation : draftSnapshot?.reason ?? "-";
+  }, [reservation?.res_purpose, draftSnapshot?.reason]);
+
+  const latestDocumentName = reservation?.res_documentUrl
+    ? "Surat Pengantar.pdf"
+    : draftSnapshot?.documentName ?? "Belum ada surat pengantar";
 
   const decisionLetterUrl = useMemo(() => {
     if (!reservation) return null;
@@ -37,8 +44,12 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot, se
     () => (reservation ? getReservationDisplayStatus(reservation, serverNow) : null),
     [reservation, serverNow],
   );
-
   const handlePreviewDocument = useCallback(() => {
+    if (reservation?.res_documentUrl) {
+      window.open(reservation.res_documentUrl, "_blank");
+      return;
+    }
+
     if (!draftSnapshot?.documentDataUrl) return;
 
     sessionStorage.setItem(
@@ -50,7 +61,7 @@ export default function LatestSubmissionSection({ reservation, draftSnapshot, se
     );
 
     window.open("/reservasi/preview", "_blank");
-  }, [draftSnapshot]);
+  }, [reservation?.res_documentUrl, draftSnapshot]);
 
   return (
     <section className="mb-8">

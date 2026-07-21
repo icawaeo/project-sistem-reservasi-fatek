@@ -1,8 +1,9 @@
 "use client";
 
-import { Calendar, Clock, Search } from "lucide-react";
+import { Calendar, Clock, Search, GraduationCap } from "lucide-react";
 
 export type ReservationMode = "per-day" | "date-range";
+export type ActivityType = "AKADEMIK" | "NON_AKADEMIK";
 
 export type SelectedRoomSummary = {
   room_name: string;
@@ -13,6 +14,9 @@ export type SelectedRoomSummary = {
 type ReservationSearchWidgetProps = {
   reservationMode: ReservationMode;
   onReservationModeChange: (mode: ReservationMode) => void;
+
+  activityType?: ActivityType;
+  onActivityTypeChange?: (type: ActivityType) => void;
 
   startDate: string;
   onStartDateChange: (value: string) => void;
@@ -37,6 +41,8 @@ type ReservationSearchWidgetProps = {
 export default function ReservationSearchWidget({
   reservationMode,
   onReservationModeChange,
+  activityType = "NON_AKADEMIK",
+  onActivityTypeChange,
   startDate,
   onStartDateChange,
   endDate,
@@ -82,6 +88,42 @@ export default function ReservationSearchWidget({
           </label>
         </div>
       </div>
+
+      {/* Jenis Kegiatan */}
+      {onActivityTypeChange && (
+        <div className="mb-3 md:mb-4">
+          <span className="text-[10px] md:text-[11px] lg:text-xs font-bold tracking-widest text-slate-500 uppercase flex items-center gap-1.5">
+            <GraduationCap size={13} className="text-slate-400" />
+            Jenis Kegiatan
+          </span>
+          <div className="mt-1.5 md:mt-2 flex flex-wrap items-center gap-2 md:gap-3">
+            <button
+              type="button"
+              onClick={() => onActivityTypeChange("NON_AKADEMIK")}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs md:text-sm font-medium transition-all ${
+                activityType === "NON_AKADEMIK"
+                  ? "border-amber-300 bg-amber-50 text-amber-700 shadow-sm"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+              }`}
+            >
+              <span className={`inline-block h-2 w-2 rounded-full ${activityType === "NON_AKADEMIK" ? "bg-amber-500" : "bg-slate-300"}`} />
+              Non-Akademik
+            </button>
+            <button
+              type="button"
+              onClick={() => onActivityTypeChange("AKADEMIK")}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs md:text-sm font-medium transition-all ${
+                activityType === "AKADEMIK"
+                  ? "border-blue-300 bg-blue-50 text-blue-700 shadow-sm"
+                  : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+              }`}
+            >
+              <span className={`inline-block h-2 w-2 rounded-full ${activityType === "AKADEMIK" ? "bg-blue-500" : "bg-slate-300"}`} />
+              Akademik
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row md:items-end gap-3 md:gap-4">
         <div className="flex-1 min-w-0">

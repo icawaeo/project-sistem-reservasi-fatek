@@ -38,6 +38,7 @@ type RoomWithReservations = PublicRoom & {
     res_id: string;
     res_startTime: Date;
     res_endTime: Date;
+    res_activityType?: string;
   }>;
 };
 
@@ -53,6 +54,7 @@ const INACTIVE_RESERVATION_STATUSES = [
   "REJECTED_WD2",
   "REJECTED_KAJUR",
   "REJECTED_KEPALA_LAB",
+  "REJECTED_PRIORITY",
   "COMPLETED",
   "CANCELLED",
 ];
@@ -65,6 +67,7 @@ export async function GET(request: Request) {
     const startTime = searchParams.get("startTime");
     const endTime = searchParams.get("endTime");
     const building = searchParams.get("building");
+    const activityType = searchParams.get("activityType") || "NON_AKADEMIK";
 
     const hasScheduleParams = !!(startDate && endDate && startTime && endTime);
 
@@ -164,6 +167,7 @@ export async function GET(request: Request) {
               res_id: true,
               res_startTime: true,
               res_endTime: true,
+              res_activityType: true,
             },
           },
         },
@@ -171,15 +175,23 @@ export async function GET(request: Request) {
       });
 
       const roomsWithoutReservationConflict = (rooms as RoomWithReservations[])
-        .filter((room) =>
-          room.reservations.every(
-            (reservation) =>
-              !rangesConflictByDailySlots(requestedRange, {
-                startTime: reservation.res_startTime,
-                endTime: reservation.res_endTime,
-              }),
-          ),
-        )
+        .filter((room) => {
+          const conflicts = room.reservations.filter((reservation) =>
+            rangesConflictByDailySlots(requestedRange, {
+              startTime: reservation.res_startTime,
+              endTime: reservation.res_endTime,
+            })
+          );
+          
+          if (conflicts.length === 0) return true;
+          
+          if (activityType === "AKADEMIK") {
+            // Jika pencarian untuk Akademik, ruangan tetap tersedia JIKA semua conflict yang ada adalah NON-AKADEMIK
+            return conflicts.every(r => r.res_activityType === "NON_AKADEMIK");
+          }
+          
+          return false;
+        })
         .map(({ reservations: _reservations, ...room }) => room);
 
       const availabilityChecks = await Promise.all(

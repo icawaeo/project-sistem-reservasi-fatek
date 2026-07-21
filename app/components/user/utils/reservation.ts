@@ -9,6 +9,12 @@ export const extractActivityName = (value?: string | null) => {
   return value.split(" - ")[0]?.trim() || "-";
 };
 
+export const extractActivityReason = (value?: string | null) => {
+  if (!value) return "-";
+  const parts = value.split(" - ");
+  return parts.length > 1 ? parts.slice(1).join(" - ").trim() : "-";
+};
+
 export const isDecisionLetterReady = (status: string | null | undefined) => {
   const normalized = (status ?? "").toUpperCase();
   return (

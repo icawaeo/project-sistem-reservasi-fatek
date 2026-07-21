@@ -14,7 +14,7 @@ import {
     Home,
 } from "lucide-react";
 import Navbar from "@/app/components/layout/NavbarClient";
-import ReservationSearchWidget, { type ReservationMode } from "@/app/components/user/ReservationSearchWidget";
+import ReservationSearchWidget, { type ReservationMode, type ActivityType } from "@/app/components/user/ReservationSearchWidget";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/app/components/ui/toast";
 import {
@@ -113,6 +113,7 @@ export default function BuildingPage() {
 
     // Search form state
     const [reservationMode, setReservationMode] = useState<ReservationMode>("per-day");
+    const [activityType, setActivityType] = useState<ActivityType>("NON_AKADEMIK");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [startTime, setStartTime] = useState("");
@@ -311,6 +312,7 @@ export default function BuildingPage() {
                 startTime,
                 endTime,
                 building: buildingName,
+                activityType,
             });
 
             const response = await fetch(`/api/rooms?${searchParams.toString()}`);
@@ -390,6 +392,7 @@ export default function BuildingPage() {
                     endDate: effectiveEndDate,
                     startTime,
                     endTime,
+                    activityType,
                 }),
             );
         } catch {
@@ -407,6 +410,7 @@ export default function BuildingPage() {
             endDate: effectiveEndDate,
             startTime,
             endTime,
+            activityType,
         });
 
         router.push(`/reservasi?${qp.toString()}`);
@@ -462,6 +466,8 @@ export default function BuildingPage() {
                                 setEndDate("");
                             }
                         }}
+                        activityType={activityType}
+                        onActivityTypeChange={setActivityType}
                         startDate={startDate}
                         onStartDateChange={setStartDate}
                         endDate={endDate}

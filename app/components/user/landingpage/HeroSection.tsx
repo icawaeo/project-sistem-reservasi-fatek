@@ -4,14 +4,17 @@ import Image from "next/image";
 import type { RoomAvailability } from "./AvailabilityModal";
 import ReservationSearchWidget, {
   type ReservationMode,
+  type ActivityType,
   type SelectedRoomSummary,
 } from "@/app/components/user/ReservationSearchWidget";
 
-export type { ReservationMode } from "@/app/components/user/ReservationSearchWidget";
+export type { ReservationMode, ActivityType } from "@/app/components/user/ReservationSearchWidget";
 
 type HeroSectionProps = {
   reservationMode: ReservationMode;
   onReservationModeChange: (mode: ReservationMode) => void;
+  activityType: ActivityType;
+  onActivityTypeChange: (type: ActivityType) => void;
   startDate: string;
   onStartDateChange: (value: string) => void;
   endDate: string;
@@ -28,6 +31,8 @@ type HeroSectionProps = {
 export default function HeroSection({
   reservationMode,
   onReservationModeChange,
+  activityType,
+  onActivityTypeChange,
   startDate,
   onStartDateChange,
   endDate,
@@ -82,6 +87,8 @@ export default function HeroSection({
           <ReservationSearchWidget
             reservationMode={reservationMode}
             onReservationModeChange={onReservationModeChange}
+            activityType={activityType}
+            onActivityTypeChange={onActivityTypeChange}
             startDate={startDate}
             onStartDateChange={onStartDateChange}
             endDate={endDate}

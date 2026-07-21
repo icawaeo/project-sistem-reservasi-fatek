@@ -10,7 +10,7 @@ import {
   type BuildingGroup,
   type RoomAvailability,
 } from "@/app/components/user/landingpage/AvailabilityModal";
-import HeroSection, { type ReservationMode } from "@/app/components/user/landingpage/HeroSection";
+import HeroSection, { type ReservationMode, type ActivityType } from "@/app/components/user/landingpage/HeroSection";
 
 const AvailabilityModal = dynamic(
   () => import("@/app/components/user/landingpage/AvailabilityModal"),
@@ -29,6 +29,7 @@ export default function LandingAvailabilitySearch() {
   const { pushToast } = useToast();
 
   const [reservationMode, setReservationMode] = useState<ReservationMode>("per-day");
+  const [activityType, setActivityType] = useState<ActivityType>("NON_AKADEMIK");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -103,6 +104,7 @@ export default function LandingAvailabilitySearch() {
             endDate: effectiveEndDate,
             startTime,
             endTime,
+            activityType,
           }),
         );
       } catch {
@@ -120,12 +122,13 @@ export default function LandingAvailabilitySearch() {
         endDate: effectiveEndDate,
         startTime,
         endTime,
+        activityType,
       });
 
       setIsModalOpen(false);
       router.push(`/reservasi?${qp.toString()}`);
     },
-    [endDate, isPrivilegedStaff, reservationMode, router, sessionStatus, endTime, startDate, startTime],
+    [endDate, isPrivilegedStaff, reservationMode, router, sessionStatus, endTime, startDate, startTime, activityType],
   );
 
   const handleSearch = useCallback(async () => {
@@ -162,6 +165,7 @@ export default function LandingAvailabilitySearch() {
         endDate: effectiveEndDate,
         startTime,
         endTime,
+        activityType,
       });
 
       const response = await fetch(`/api/rooms?${params.toString()}`);
@@ -193,7 +197,7 @@ export default function LandingAvailabilitySearch() {
     } finally {
       setIsSearching(false);
     }
-  }, [endDate, endTime, minDaysAheadExclusive, pushToast, reservationMode, startDate, startTime]);
+  }, [endDate, endTime, minDaysAheadExclusive, pushToast, reservationMode, startDate, startTime, activityType]);
 
   return (
     <>
@@ -203,6 +207,8 @@ export default function LandingAvailabilitySearch() {
           setReservationMode(mode);
           if (mode === "per-day") setEndDate("");
         }}
+        activityType={activityType}
+        onActivityTypeChange={setActivityType}
         startDate={startDate}
         onStartDateChange={setStartDate}
         endDate={endDate}

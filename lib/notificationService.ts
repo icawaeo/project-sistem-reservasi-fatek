@@ -6,7 +6,8 @@ export type NotificationType =
   | 'RESERVATION_APPROVED'
   | 'RESERVATION_REJECTED'
   | 'RESERVATION_COMPLETED'
-  | 'RESERVATION_CANCELLED';
+  | 'RESERVATION_CANCELLED'
+  | 'RESERVATION_PRIORITY_REPLACED';
 
 type FcmTokenRecord = {
   token: string;

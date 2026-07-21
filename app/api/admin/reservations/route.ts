@@ -11,6 +11,7 @@ import {
   RESERVATION_BUFFER_MS,
 } from "@/lib/reservation-slots";
 import { validateRoomScheduleAvailability } from "@/lib/room-schedule-conflicts";
+import { sendNotification } from "@/lib/notificationService";
 
 const parseDateTime = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}:00`);
@@ -24,13 +25,29 @@ const INACTIVE_STATUSES = [
   "REJECTED_WD2",
   "REJECTED_KAJUR",
   "REJECTED_KEPALA_LAB",
+  "REJECTED_PRIORITY",
   "COMPLETED",
   "CANCELLED",
 ];
 
+type IncomingActivityType = "AKADEMIK" | "NON_AKADEMIK";
+
 type ReservationConflictCandidate = {
+  res_id: string;
   res_startTime: Date;
   res_endTime: Date;
+  res_activityType: string;
+  user_id: string | null;
+  room: { room_name: string };
+};
+
+const normalizeActivityType = (value: unknown): IncomingActivityType | null => {
+  if (typeof value !== "string") return null;
+  const normalized = value.toUpperCase();
+  if (normalized === "AKADEMIK" || normalized === "NON_AKADEMIK") {
+    return normalized as IncomingActivityType;
+  }
+  return null;
 };
 
 const splitReservationPurpose = (value: string | null) => {
@@ -108,6 +125,8 @@ export async function POST(request: Request) {
     const borrowerEmail = typeof body?.borrowerEmail === "string" ? body.borrowerEmail.trim().toLowerCase() : "";
     const activityName = typeof body?.activityName === "string" ? body.activityName.trim() : "";
     const purposeDetail = typeof body?.purposeDetail === "string" ? body.purposeDetail.trim() : "";
+    const incomingActivityType = normalizeActivityType(body?.res_activityType);
+    const resolvedActivityType: IncomingActivityType = incomingActivityType ?? "NON_AKADEMIK";
 
     if (!roomId || !startDate || !startTime || !endTime || !borrowerName || !borrowerEmail || !activityName) {
       return NextResponse.json({ error: "Data pengajuan belum lengkap" }, { status: 400 });
@@ -155,7 +174,7 @@ export async function POST(request: Request) {
     const firstRequestedSlot = requestedSlots[0];
     const lastRequestedSlot = requestedSlots[requestedSlots.length - 1];
 
-    const possibleConflicts = await prisma.reservation.findMany({
+    const possibleConflicts: ReservationConflictCandidate[] = await prisma.reservation.findMany({
       where: {
         room_id: roomId,
         res_status: { notIn: INACTIVE_STATUSES },
@@ -163,23 +182,60 @@ export async function POST(request: Request) {
         res_endTime: { gt: new Date(firstRequestedSlot.start.getTime() - RESERVATION_BUFFER_MS) },
       },
       select: {
+        res_id: true,
         res_startTime: true,
         res_endTime: true,
+        res_activityType: true,
+        user_id: true,
+        room: { select: { room_name: true } },
       },
     });
 
-    const overlappingReservation = (possibleConflicts as ReservationConflictCandidate[]).find((reservation) =>
+    const conflictingReservations = possibleConflicts.filter((reservation) =>
       rangesConflictByDailySlots(
         { startTime: startDateTime, endTime: endDateTime },
         { startTime: reservation.res_startTime, endTime: reservation.res_endTime },
       ),
     );
 
-    if (overlappingReservation) {
-      return NextResponse.json(
-        { error: "Jadwal bentrok atau masih berada dalam jeda 2 jam pemakaian ruangan." },
-        { status: 409 }
-      );
+    if (conflictingReservations.length > 0) {
+      const canDisplace =
+        resolvedActivityType === "AKADEMIK" &&
+        conflictingReservations.every((r) => r.res_activityType === "NON_AKADEMIK");
+
+      if (!canDisplace) {
+        return NextResponse.json(
+          { error: "Jadwal bentrok atau masih berada dalam jeda 2 jam pemakaian ruangan." },
+          { status: 409 }
+        );
+      }
+
+      // Reject reservasi non-akademik yang bentrok
+      for (const conflicting of conflictingReservations) {
+        await prisma.reservation.update({
+          where: { res_id: conflicting.res_id },
+          data: {
+            res_status: "REJECTED_PRIORITY",
+            res_processedBy: "SYSTEM_PRIORITY",
+            res_processedAt: new Date(),
+            res_decisionAt: new Date(),
+          },
+        });
+
+        if (conflicting.user_id) {
+          try {
+            await sendNotification(
+              conflicting.user_id,
+              "RESERVATION_PRIORITY_REPLACED",
+              "Reservasi Dibatalkan \u2014 Prioritas Akademik",
+              `Reservasi Anda untuk ${conflicting.room.room_name} telah dibatalkan karena ada kegiatan akademik yang diprioritaskan pada jadwal yang sama.`,
+              { reservationId: conflicting.res_id },
+            );
+          } catch (error) {
+            console.error("Error sending priority replacement notification:", error);
+          }
+        }
+      }
     }
 
     const scheduleAvailability = await validateRoomScheduleAvailability({
@@ -201,6 +257,7 @@ export async function POST(request: Request) {
         res_startTime: startDateTime,
         res_endTime: endDateTime,
         res_purpose: reservationPurpose,
+        res_activityType: resolvedActivityType,
         res_status: "PENDING",
         res_documentUrl: null,
         res_decisionDocumentUrl: null,
